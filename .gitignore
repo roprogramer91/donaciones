@@ -1,13 +1,18 @@
 # Node modules
 node_modules/
 
+# Front
+/front/
+
 # Variables de entorno
 .env
 
 # Archivos del sistema
 .DS_Store
 
+
 auth-service.zip
 back.zip
 front.zip
+
 
