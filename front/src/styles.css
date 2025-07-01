@@ -1,53 +1,86 @@
 body {
-  font-family: 'Poppins', sans-serif;
-  color: #1e1e1e; /* Gris oscuro legible */
-  background-color: #fff; /* Fondo blanco o el que estés usando */
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  color: #1e1e1e;
+  background-color: #fff;
   margin: 0;
   padding: 0;
 }
 
 h1 {
   color: #5a0000;
+  font-size: 2.3rem;
+  margin-top: 42px;
+  margin-bottom: 18px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  text-align: center;
 }
 
-.main {
+/* Bloque de bienvenida */
+.bienvenida {
+  background: #fff3f3;
+  border-radius: 16px;
+  padding: 30px;
+  margin: 28px auto 36px auto;
+  box-shadow: 0 4px 12px rgba(100,0,0,0.09);
+  max-width: 540px;
+  text-align: center;
+}
+.bienvenida h2 {
+  color: #8b0000;
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.bienvenida p {
+  color: #444;
+  font-size: 1.13rem;
+  margin-bottom: 0;
+}
+
+.login-btn-google {
+  margin: 26px auto 16px auto;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 20px;
-}
-
-.opciones {
-  display: flex;
-  gap: 20px;
   justify-content: center;
-  margin-bottom: 20px;
-}
-
-.boton {
-  display: inline-block;
-  text-decoration: none; /* quita subrayado */
-  color: white;
-  background-color: #8b0000;
-  padding: 10px 20px;
+  background-color: #fff;
+  color: #8b0000;
+  border: 2px solid #8b0000;
   border-radius: 8px;
-  font-weight: bold;
-  border: none;
-  font-family: inherit;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 12px 30px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background 0.2s, color 0.2s, box-shadow 0.15s;
+  gap: 14px;
+  text-decoration: none;
+  width: 340px;
+  max-width: 94vw;
+  box-shadow: 0 1px 6px rgba(139,0,0,0.04);
+}
+.login-btn-google:hover {
+  background-color: #8b0000;
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(139,0,0,0.13);
+}
+.login-btn-google img {
+  width: 24px;
+  height: 24px;
 }
 
-.boton:hover {
-  background-color: #a30000;
+.info-opciones {
+  margin-top: 6px;
+  color: #8b0000;
+  font-size: 0.97rem;
+  text-align: center;
 }
-
 
 .separador {
   width: 30%;
   border: none;
   height: 2px;
   background-color: #a52a2a;
+  margin: 32px auto 18px auto;
 }
 
 .educativa {
@@ -57,11 +90,12 @@ h1 {
   text-align: center;
   width: 100%;
   max-width: 400px;
+  margin: 0 auto 28px auto;
 }
 
 .educativa h2 {
   color: #5a0000;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   margin-bottom: 10px;
 }
 
@@ -94,23 +128,6 @@ h1 {
   padding: 10px;
 }
 
-.chart-container {
-  margin-bottom: 40px;
-  padding: 20px;
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-
-
-.graficos-container {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  margin-top: 30px;
-}
 .grid-estadisticas {
   display: flex;
   gap: 20px;
@@ -133,23 +150,39 @@ h1 {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   max-width: 400px;
-  min-width: 280px;
+  min-width: 260px;
 }
 
-/* Responsive  */
-@media screen and (max-width: 768px) {
+/* Responsive */
+@media screen and (max-width: 800px) {
+  .estadisticas {
+    padding: 14px 4vw;
+  }
   .grid-estadisticas {
     flex-direction: column;
     align-items: center;
   }
-
-  .columna-izquierda,
-  .columna-derecha {
+  .columna-izquierda, .columna-derecha {
     width: 100%;
     align-items: center;
   }
-
   .grafico-box {
-    max-width: 100%;
+    max-width: 98vw;
+    min-width: 0;
   }
+  .bienvenida {
+    max-width: 98vw;
+    padding: 16px;
+  }
+  .login-btn-google {
+    font-size: 1rem;
+    padding: 10px 2vw;
+    width: 94vw;
+  }
+}
+
+@media screen and (max-width: 430px) {
+  h1 { font-size: 1.3rem; }
+  .bienvenida h2 { font-size: 1.07rem; }
+  .estadisticas h2 { font-size: 1.1rem; }
 }

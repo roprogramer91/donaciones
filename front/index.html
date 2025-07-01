@@ -8,23 +8,36 @@
     <link rel="stylesheet" href="src/styles.css" />
   </head>
   <body>
- 
     <main class="main">
-      <h1>INICIO</h1>
 
-      <section class="opciones">
-        <a href="./src/registroDonante.html" class="boton donante">Soy donante</a>
-        <a href="./src/registroSolicitante.html" class="boton solicitante">Soy solicitante</a>
-      </section>
+      <h1>Banco de Sangre Comunitario</h1>
+
+      <div class="bienvenida">
+        <h2>Unite, Ayudá, Salvá vidas</h2>
+        <p>
+          Este sistema conecta donantes, pacientes y hospitales de manera segura y transparente.<br>
+          <strong>Registrate con Google</strong> para comenzar.<br>
+          Luego podrás elegir cómo participar: como <strong>Donante</strong>, <strong>Solicitante</strong> o ambos.
+        </p>
+      </div>
+
+      <a href="http://localhost:5000/auth/google?redirect_to=http://localhost:5500"
+         class="login-btn-google">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" />
+        Iniciar sesión con Google
+      </a>
+
+      <div class="info-opciones">
+        <span>¿Sos una institución? <a href="./instituciones/login.html" style="color:#5a0000;text-decoration:underline;">Ingresar aquí</a></span>
+      </div>
 
       <hr class="separador" />
 
       <section class="educativa">
         <a href="./src/educacion.html" class="boton educativo">Sección educativa</a>
-        <p>Sobre donación de sangre</p>
+        <p>Todo lo que necesitás saber sobre la donación de sangre</p>
       </section>
 
-      <!-- Canvas para los gráficos -->
       <section class="estadisticas">
         <h2>Estadísticas Generales</h2>
         <div class="grid-estadisticas">
@@ -38,13 +51,11 @@
         </div>
       </section>
 
-
     </main>
-
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="./src/estadisticas.js"></script>
-   
-
+    <script type="module" src="./src/auth.js"></script>
+    <script type="module" src="./src/config.js"></script>
   </body>
 </html>
