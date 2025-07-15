@@ -62,10 +62,33 @@ const findByUsuarioId = async (usuarioId) => {
   return rows.length > 0 ? rows[0] : null;
 };
 
+// Buscar donante por usuario_id y obtener donante completo con datos del usuario
+
+const getPerfilCompletoByUsuarioId = async (usuarioId) => {
+  const sql = `
+    SELECT d.*, u.nombre, u.apellido, u.email,
+      p.nombre AS provincia_nombre,
+      l.nombre AS localidad_nombre
+    FROM donantes d
+    JOIN usuarios u ON d.usuario_id = u.id
+    LEFT JOIN provincias p ON d.provincia_id = p.id
+    LEFT JOIN localidades l ON d.localidad_id = l.id
+    WHERE d.usuario_id = $1
+    LIMIT 1
+  `;
+  const { rows } = await db.query(sql, [usuarioId]);
+  return rows.length > 0 ? rows[0] : null;
+};
+
+
+
+
+
 module.exports = {
   obtenerTodos,
   guardar,
   findByDni,
   findByUsuarioId,
-  findByEmail
+  findByEmail,
+  getPerfilCompletoByUsuarioId
 };

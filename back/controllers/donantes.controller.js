@@ -1,5 +1,6 @@
 const Donante = require('../models/donantes.model');
 const { validarDNI, validarFechaNacimiento, validarGrupo } = require('../validations/donanteValidations');
+const { calcularAptoYRestante } = require('../utils/donanteUtils');
 
 // Crear donante (igual que antes)
 const crearDonante = async (req, res) => {
@@ -35,27 +36,7 @@ const crearDonante = async (req, res) => {
   }
 };
 
-// --------- LOGICA APTITUD CON DIFERENCIACION DE SEXO -----------
 
-/**
- * @param {string} fechaUltimaDonacion (puede ser null)
- * @param {'M'|'F'} sexo
- * @param {Date} hoy
- * @returns {{apto: boolean, dias_restantes: number}}
- */
-function calcularAptoYRestante(fechaUltimaDonacion, sexo, hoy = new Date()) {
-  // Reglas: Hombre: 60 días, Mujer: 90 días (modificalo según tu protocolo)
-  const espera = sexo === 'F' ? 90 : 60;
-  if (!fechaUltimaDonacion) return { apto: true, dias_restantes: 0 };
-
-  const fechaUltima = new Date(fechaUltimaDonacion);
-  const diffDias = Math.floor((hoy - fechaUltima) / (1000 * 60 * 60 * 24));
-  const faltan = espera - diffDias;
-  return {
-    apto: diffDias >= espera,
-    dias_restantes: diffDias >= espera ? 0 : faltan
-  };
-}
 
 // Obtener todos los donantes (con cálculo apto y días restantes)
 const obtenerDonantes = async (req, res) => {
@@ -84,7 +65,6 @@ const obtenerDonantes = async (req, res) => {
   }
 };
 
-// ------- EL RESTO IGUAL QUE TENÍAS -------
 
 async function getDonanteByUsuario(req, res) {
   const usuarioId = req.user.id;
@@ -122,9 +102,33 @@ async function getDonanteByEmail(req, res) {
   }
 }
 
+
+// Obtener perfil completo del donante autenticado
+// Incluye cálculo de aptitud y días restantes
+async function getPerfilDonanteCompleto(req, res) {
+  const usuarioId = req.user.id;
+  try {
+    const perfil = await Donante.getPerfilCompletoByUsuarioId(usuarioId);
+    if (!perfil) {
+      return res.status(404).json({ error: 'No sos donante registrado' });
+    }
+    // Calculá con el util
+    const { apto, dias_restantes } = calcularAptoYRestante(
+      perfil.fecha_ultima_donacion, perfil.sexo
+    );
+    perfil.dias_restantes = dias_restantes;
+    perfil.apto_para_donar = apto;
+    res.json(perfil);
+  } catch (err) {
+    console.error('Error al traer perfil completo:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+}
+
 module.exports = {
   crearDonante,
   obtenerDonantes,
   getDonanteByUsuario,
-  getDonanteByEmail
+  getDonanteByEmail,
+  getPerfilDonanteCompleto
 };

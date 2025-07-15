@@ -18,10 +18,6 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(cors());
 
-// Test endpoint para verificar que el servidor está funcionando
-app.get('/back', (req, res) => {
-  res.send('Servidor funcionando 🚀');
-});
 
 //routes
 app.use('/api/donantes', donantesRoutes);
@@ -34,6 +30,12 @@ app.use('/api/barrios', barriosRoutes);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
+});
+
+
+// Test endpoint para verificar que el servidor está funcionando
+app.get('/back', (req, res) => {
+  res.send('Servidor funcionando 🚀');
 });
 
 //TEST DE CONEXIÓN A LA BASE DE DATOS
