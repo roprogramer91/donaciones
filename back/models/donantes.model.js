@@ -1,8 +1,16 @@
+// back/models/donantes.model.js
+// Modelo para gestionar donantes
+
 const db = require('../data/config');
 
 // Obtener todos los donantes
 const obtenerTodos = async () => {
-  const result = await db.query('SELECT * FROM donantes ORDER BY id DESC');
+  const result = await db.query(`
+    SELECT d.*, u.nombre, u.apellido, u.email
+    FROM donantes d
+    JOIN usuarios u ON d.usuario_id = u.id
+    ORDER BY d.id DESC
+  `);
   return result.rows;
 };
 
@@ -25,45 +33,51 @@ const guardar = async (nuevo) => {
     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
     RETURNING *`,
     [
-      nuevo.usuario_id,                  // int, obligatorio
-      nuevo.grupo_sanguineo,             // string, obligatorio
-      nuevo.fecha_nacimiento || null,    // date, opcional
-      nuevo.telefono || null,            // string, opcional
-      nuevo.preferencias_notif || null,  // string, opcional
-      nuevo.fecha_ultima_donacion || null, // date, opcional
-      nuevo.estado || 'activo',          // string, default 'activo'
-      nuevo.provincia_id || null,        // int, opcional
-      nuevo.localidad_id || null,        // int, opcional
-      nuevo.barrio_id || null,           // int, opcional
+      nuevo.usuario_id,
+      nuevo.grupo_sanguineo,
+      nuevo.fecha_nacimiento || null,
+      nuevo.telefono || null,
+      nuevo.preferencias_notif || null,
+      nuevo.fecha_ultima_donacion || null,
+      nuevo.estado || 'activo',
+      nuevo.provincia_id || null,
+      nuevo.localidad_id || null,
+      nuevo.barrio_id || null,
       nuevo.dni,
-      nuevo.sexo                          // string, obligatorio
+      nuevo.sexo
     ]
   );
   return result.rows[0];
 };
 
-// Buscar donante por DNI (para evitar duplicados)
+// Buscar por DNI
 const findByDni = async (dni) => {
   const sql = 'SELECT * FROM donantes WHERE dni = $1 LIMIT 1';
   const { rows } = await db.query(sql, [dni]);
-  return rows.length > 0 ? rows[0] : null;
+  return rows[0] || null;
 };
 
-// Buscar donante por usuario_id (usado al loguear)
+// Buscar por usuario_id
 const findByUsuarioId = async (usuarioId) => {
   const sql = 'SELECT * FROM donantes WHERE usuario_id = $1 LIMIT 1';
   const { rows } = await db.query(sql, [usuarioId]);
-  return rows.length > 0 ? rows[0] : null;
+  return rows[0] || null;
 };
 
- const findByEmail = async (email) => {
-  const sql = 'SELECT * FROM donantes WHERE email = $1 LIMIT 1';
+// Buscar por email
+const findByEmail = async (email) => {
+  const sql = `
+    SELECT d.*, u.nombre, u.apellido, u.email
+    FROM donantes d
+    JOIN usuarios u ON d.usuario_id = u.id
+    WHERE u.email = $1
+    LIMIT 1
+  `;
   const { rows } = await db.query(sql, [email]);
-  return rows.length > 0 ? rows[0] : null;
+  return rows[0] || null;
 };
 
-// Buscar donante por usuario_id y obtener donante completo con datos del usuario
-
+// Perfil completo del donante
 const getPerfilCompletoByUsuarioId = async (usuarioId) => {
   const sql = `
     SELECT d.*, u.nombre, u.apellido, u.email,
@@ -77,12 +91,50 @@ const getPerfilCompletoByUsuarioId = async (usuarioId) => {
     LIMIT 1
   `;
   const { rows } = await db.query(sql, [usuarioId]);
-  return rows.length > 0 ? rows[0] : null;
+  return rows[0] || null;
 };
 
+//Filtrar donantes + JOIN (para Centro)
+const filtrar = async (filtros) => {
+  const condiciones = [];
+  const valores = [];
 
+  if (filtros.provincia) {
+    condiciones.push(`d.provincia_id = $${condiciones.length + 1}`);
+    valores.push(filtros.provincia);
+  }
+  if (filtros.localidad) {
+    condiciones.push(`d.localidad_id = $${condiciones.length + 1}`);
+    valores.push(filtros.localidad);
+  }
+  if (filtros.barrio) {
+    condiciones.push(`d.barrio_id = $${condiciones.length + 1}`);
+    valores.push(filtros.barrio);
+  }
+  if (filtros.grupo) {
+    condiciones.push(`d.grupo_sanguineo = $${condiciones.length + 1}`);
+    valores.push(filtros.grupo);
+  }
+  if (filtros.estado) {
+    condiciones.push(`d.estado = $${condiciones.length + 1}`);
+    valores.push(filtros.estado);
+  }
 
+  let sql = `
+    SELECT d.*, u.nombre, u.apellido, u.email
+    FROM donantes d
+    JOIN usuarios u ON d.usuario_id = u.id
+  `;
 
+  if (condiciones.length > 0) {
+    sql += ' WHERE ' + condiciones.join(' AND ');
+  }
+
+  sql += ' ORDER BY d.id DESC';
+
+  const { rows } = await db.query(sql, valores);
+  return rows;
+};
 
 module.exports = {
   obtenerTodos,
@@ -90,5 +142,6 @@ module.exports = {
   findByDni,
   findByUsuarioId,
   findByEmail,
-  getPerfilCompletoByUsuarioId
+  getPerfilCompletoByUsuarioId,
+  filtrar
 };
