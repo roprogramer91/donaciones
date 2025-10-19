@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Donante</title>
+  <link rel="stylesheet" href="dashboard-donante.css">
+</head>
+<body>
+  <div class="dashboard-wrapper">
+
+    <!-- Loader -->
+    <div id="loader">
+      <div class="spinner"></div>
+      <span>Cargando tu panel...</span>
+    </div>
+
+    <!-- Contenido principal -->
+    <div id="contenido-privado" style="display: none;">
+      <!-- HEADER -->
+      <header class="dashboard-header">
+        <div class="user-nombre" id="bienvenida">¡Hola, Donante!</div>
+        <div class="header-icons">
+          <button class="icon-btn" title="Notificaciones">
+            <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/bell.svg" alt="Notificaciones" />
+          </button>
+          <button class="icon-btn" id="btn-perfil" title="Mi perfil">
+            <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/user.svg" alt="Perfil" />
+          </button>
+          <button class="icon-btn" id="logoutBtn" title="Cerrar sesión">
+            <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/log-out.svg" alt="Salir" />
+          </button>
+        </div>
+      </header>
+
+      <!-- MAIN GRID -->
+      <main class="dashboard-main">
+        <!-- CAMPAÑAS -->
+        <section class="dashboard-campanias">
+          <h2>Campañas</h2>
+          <div class="campanias-list">
+            <!-- Estas campañas después se cargan dinámicamente -->
+            <div class="campania-card">
+              <img src="https://placehold.co/64x64/EEE/AAA?text=Img" alt="Campaña 1">
+              <div class="campania-info">
+                <strong>Campaña 1</strong>
+                <p>Descripción breve de la campaña solidaria.</p>
+              </div>
+            </div>
+            <div class="campania-card">
+              <img src="https://placehold.co/64x64/EEE/AAA?text=Img" alt="Campaña 2">
+              <div class="campania-info">
+                <strong>Campaña 2</strong>
+                <p>Texto campaña 2, breve descripción y llamado a la acción.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- DATOS PERSONALES -->
+        <aside class="dashboard-datos">
+          <h3>Tu estado como donante</h3>
+          <ul class="datos-lista">
+            <li><span id="estado-apto" class="estado-apto"></span></li>
+            <li><span>Grupo sanguíneo:</span> <b id="grupo-sangre">--</b></li>
+            <li><span>Última donación:</span> <b id="ultima-donacion">--/--/----</b></li>
+            <li><span>Podés volver a donar en:</span> <b id="dias-apto">-- días</b></li>
+          </ul>
+
+          <hr>
+          <div class="proximas-campanias">
+            <span>¿Querés enterarte de <b>nuevas campañas</b>?</span><br>
+            <button id="btn-campanias" class="btn-link" disabled>Muy pronto!</button>
+          </div>
+        </aside>
+      </main>
+    </div>
+  </div>
+  <script type="module" src="dashboard-donante.js"></script>
+</body>
+</html>

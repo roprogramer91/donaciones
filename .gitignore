@@ -1,8 +1,7 @@
 # Node modules
 node_modules/
 
-# Front
-/front/
+
 
 # Variables de entorno
 .env

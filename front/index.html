@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inicio - Donación de Sangre</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="src/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  </head>
+
+  <body>
+    <main class="main">
+      <h1>Banco de Sangre Comunitario</h1>
+
+      <div class="bienvenida">
+        <h2>Unite, Ayudá, Salvá vidas</h2>
+        <p>
+          Este sistema conecta donantes, pacientes y hospitales de manera segura y transparente.<br />
+          <strong>Registrate con Google</strong> o ingresá con tu DNI.
+        </p>
+      </div>
+
+      <!-- BOTÓN DE LOGIN CON GOOGLE -->
+      <a
+        href="http://localhost:5000/auth/google?redirect_to=http://localhost:5500"
+        class="login-btn-google"
+      >
+        <img
+          src="https://www.svgrepo.com/show/475656/google-color.svg"
+          alt="Google"
+        />
+        Iniciar sesión con Google
+      </a>
+
+      <!-- LOGIN CON DNI -->
+      <div class="login-dni-box">
+        <input
+          type="text"
+          id="dniInput"
+          placeholder="Ingresá tu DNI"
+          class="dni-input"
+        />
+        <button id="dniLoginBtn" class="login-btn-dni">
+          <i class="fa-solid fa-id-card"></i> Ingresar con DNI
+        </button>
+      </div>
+
+      <div class="info-opciones">
+        <span
+          >¿Sos una institución?
+          <a
+            href="./src/instituciones/login.html"
+            style="color: #5a0000; text-decoration: underline"
+            >Ingresar aquí</a
+          ></span
+        >
+      </div>
+
+      <hr class="separador" />
+
+      <section class="educativa">
+        <a href="./src/educacion.html" class="boton educativo">Sección educativa</a>
+        <p>Todo lo que necesitás saber sobre la donación de sangre</p>
+      </section>
+
+      <section class="estadisticas">
+        <h2>Estadísticas Generales</h2>
+        <div class="grid-estadisticas">
+          <div class="columna-izquierda">
+            <div class="grafico-box"><canvas id="graficoTotales"></canvas></div>
+            <div class="grafico-box"><canvas id="graficoEdades"></canvas></div>
+          </div>
+          <div class="columna-derecha">
+            <div class="grafico-box"><canvas id="graficoTipoSangre"></canvas></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="./src/estadisticas.js"></script>
+    <script type="module" src="./src/auth.js"></script>
+    <script type="module" src="./src/config.js"></script>
+
+
+  </body>
+</html>

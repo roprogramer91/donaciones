@@ -1,0 +1,235 @@
+body {
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  color: #1e1e1e;
+  background-color: #fff;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  color: #5a0000;
+  font-size: 2.3rem;
+  margin-top: 42px;
+  margin-bottom: 18px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  text-align: center;
+}
+
+/* Bloque de bienvenida */
+.bienvenida {
+  background: #fff3f3;
+  border-radius: 16px;
+  padding: 30px;
+  margin: 28px auto 36px auto;
+  box-shadow: 0 4px 12px rgba(100,0,0,0.09);
+  max-width: 540px;
+  text-align: center;
+}
+.bienvenida h2 {
+  color: #8b0000;
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.bienvenida p {
+  color: #444;
+  font-size: 1.13rem;
+  margin-bottom: 0;
+}
+
+.login-btn-google {
+  margin: 26px auto 16px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  color: #8b0000;
+  border: 2px solid #8b0000;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 12px 30px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.15s;
+  gap: 14px;
+  text-decoration: none;
+  width: 340px;
+  max-width: 94vw;
+  box-shadow: 0 1px 6px rgba(139,0,0,0.04);
+}
+.login-btn-google:hover {
+  background-color: #8b0000;
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(139,0,0,0.13);
+}
+.login-btn-google img {
+  width: 24px;
+  height: 24px;
+}
+
+.info-opciones {
+  margin-top: 6px;
+  color: #8b0000;
+  font-size: 0.97rem;
+  text-align: center;
+}
+
+.separador {
+  width: 30%;
+  border: none;
+  height: 2px;
+  background-color: #a52a2a;
+  margin: 32px auto 18px auto;
+}
+
+.educativa {
+  background-color: #fff3f3;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 28px auto;
+}
+
+.educativa h2 {
+  color: #5a0000;
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+}
+
+.educativa p {
+  color: #555;
+  font-size: 1rem;
+}
+
+.estadisticas {
+  background-color: #fafafa;
+  border-radius: 10px;
+  padding: 30px 40px;
+  margin: 40px auto;
+  max-width: 800px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.estadisticas h2 {
+  color: #5a0b0b;
+  margin-bottom: 25px;
+  font-size: 26px;
+}
+
+.estadisticas canvas {
+  margin: 30px auto;
+  max-width: 100%;
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.grid-estadisticas {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+
+.columna-izquierda,
+.columna-derecha {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.grafico-box {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  min-width: 260px;
+}
+
+
+/* ==== LOGIN POR DNI ==== */
+.login-dni-box {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.dni-input {
+  width: 250px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+.login-btn-dni {
+  background-color: #b50000;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.login-btn-dni:hover {
+  background-color: #8a0000;
+}
+
+@media screen and (max-width: 800px) {
+  .dni-input {
+    width: 80vw;
+  }
+  .login-btn-dni {
+    width: 80vw;
+  }
+}
+
+
+
+
+
+/* Responsive */
+@media screen and (max-width: 800px) {
+  .estadisticas {
+    padding: 14px 4vw;
+  }
+  .grid-estadisticas {
+    flex-direction: column;
+    align-items: center;
+  }
+  .columna-izquierda, .columna-derecha {
+    width: 100%;
+    align-items: center;
+  }
+  .grafico-box {
+    max-width: 98vw;
+    min-width: 0;
+  }
+  .bienvenida {
+    max-width: 98vw;
+    padding: 16px;
+  }
+  .login-btn-google {
+    font-size: 1rem;
+    padding: 10px 2vw;
+    width: 94vw;
+  }
+}
+
+@media screen and (max-width: 430px) {
+  h1 { font-size: 1.3rem; }
+  .bienvenida h2 { font-size: 1.07rem; }
+  .estadisticas h2 { font-size: 1.1rem; }
+}

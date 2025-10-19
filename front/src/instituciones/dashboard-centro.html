@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Centro de Hemoterapia</title>
+  <link rel="stylesheet" href="dashboard-centro.css">
+</head>
+<body>
+  <div class="dashboard-centro-wrapper">
+
+    <!-- Loader -->
+    <div id="loader-centro">
+      <div class="spinner"></div>
+      <span>Cargando el panel...</span>
+    </div>
+
+    <!-- Contenido principal -->
+    <div id="contenido-centro" style="display: none;">
+      <!-- HEADER -->
+      <header class="dashboard-centro-header">
+        <div class="centro-nombre" id="bienvenida-centro">¡Bienvenido, Centro de Hemoterapia!</div>
+        <div class="header-icons">
+          <button class="icon-btn" title="Perfil">
+            <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/user.svg" alt="Perfil" />
+          </button>
+          <button class="icon-btn" id="logoutBtn" title="Cerrar sesión">
+            <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/log-out.svg" alt="Salir" />
+          </button>
+        </div>
+      </header>
+
+      <!-- MAIN -->
+      <main class="dashboard-centro-main">
+        <!-- RESUMEN RÁPIDO -->
+        <section class="dashboard-centro-resumen">
+          <h2>Resumen</h2>
+          <div class="resumen-grid">
+            <div class="resumen-card">
+              <span class="resumen-label">Donantes activos</span>
+              <b id="donantes-activos">--</b>
+            </div>
+            <div class="resumen-card">
+              <span class="resumen-label">Solicitudes pendientes</span>
+              <b id="solicitudes-pendientes">--</b>
+            </div>
+            <div class="resumen-card">
+              <span class="resumen-label">Campañas activas</span>
+              <b id="campanias-activas">--</b>
+            </div>
+          </div>
+        </section>
+
+        <!-- ACCIONES PRINCIPALES -->
+        <section class="dashboard-centro-acciones">
+          <h3>Acciones rápidas</h3>
+          <div class="acciones-lista">
+            <button class="btn-accion-centro" id="btn-ver-donantes">Ver donantes</button>
+            <button class="btn-accion-centro" id="btn-ver-solicitudes">Ver solicitudes</button>
+            <button class="btn-accion-centro" id="btn-ver-campanias">Gestionar campañas</button>
+            <!-- Agregá más botones según avances -->
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script type="module" src="dashboard-centro.js"></script>
+</body>
+</html>

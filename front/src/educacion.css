@@ -1,0 +1,42 @@
+* {
+  box-sizing: border-box;
+}
+
+.educacion {
+  max-width: 960px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.educacion h1 {
+  text-align: center;
+  color: #800000;
+  margin-bottom: 40px;
+}
+
+.contenedor-educacion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.tarjeta-educativa {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  padding: 20px;
+  flex: 1 1 280px;
+  max-width: 320px;
+}
+
+.tarjeta-educativa h2 {
+  color: #5a0b0b;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.tarjeta-educativa p {
+  font-size: 15px;
+  color: #333;
+}
