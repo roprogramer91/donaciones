@@ -123,6 +123,7 @@ async function getPerfilDonanteCompleto(req, res) {
     console.error('Error al traer perfil completo:', err);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
+
 }
 
 module.exports = {

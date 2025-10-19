@@ -1,3 +1,5 @@
+//auth-service/config/database.js
+
 const { Pool } = require('pg');
 
 const pool = new Pool({
