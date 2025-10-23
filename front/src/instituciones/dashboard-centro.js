@@ -1,3 +1,5 @@
+// front/src/instituciones/dashboard-centro.js
+
 import { API_BASE_URL } from "../config.js";
 
 // ---- Elementos base ----
@@ -30,18 +32,15 @@ const tablaBody = document.querySelector("#tabla-donantes tbody");
 const filtroGrupo = document.getElementById("filtro-grupo");
 const btnFiltro = document.getElementById("btn-aplicar-filtro");
 
-// Mostrar la sección de donantes
 btnVerDonantes.addEventListener("click", async () => {
   toggleSeccion("donantes");
   await cargarDonantes();
 });
 
-// Aplicar filtro
 btnFiltro.addEventListener("click", async () => {
   await cargarDonantes();
 });
 
-// Cargar donantes desde backend
 async function cargarDonantes() {
   const grupo = filtroGrupo.value;
   const params = new URLSearchParams();
@@ -54,7 +53,6 @@ async function cargarDonantes() {
 
     if (!res.ok) throw new Error("Error al obtener donantes");
     const data = await res.json();
-
     renderDonantes(data);
   } catch (err) {
     console.error("Error al cargar donantes:", err);
@@ -62,10 +60,8 @@ async function cargarDonantes() {
   }
 }
 
-// Renderizar tabla
 function renderDonantes(donantes) {
   tablaBody.innerHTML = "";
-
   if (!donantes || !donantes.length) {
     tablaBody.innerHTML = `<tr><td colspan="7">No se encontraron donantes</td></tr>`;
     return;
@@ -87,14 +83,253 @@ function renderDonantes(donantes) {
 }
 
 // ------------------------------------------------------
-// 🔄 Utilidad: mostrar una sola sección a la vez
+// 🩸 SECCIÓN: GESTIONAR CAMPAÑAS (GET / POST / PUT / DELETE)
 // ------------------------------------------------------
-function toggleSeccion(nombre) {
-  // Ocultá todas las secciones extra
-  const secciones = document.querySelectorAll(".dashboard-centro-seccion");
-  secciones.forEach((sec) => (sec.style.display = "none"));
+const btnVerCampanias = document.getElementById('btn-ver-campanias');
+const seccionCampanias = document.getElementById('seccion-campanias');
 
-  if (nombre === "donantes") {
-    seccionDonantes.style.display = "block";
+btnVerCampanias.addEventListener('click', async () => {
+  seccionDonantes.style.display = 'none';
+  seccionCampanias.style.display = 'block';
+  await cargarCampanias();
+});
+
+async function cargarCampanias() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/campanias`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const campanias = await res.json();
+
+    const tbody = document.querySelector('#tabla-campanias tbody');
+    tbody.innerHTML = '';
+
+    campanias.forEach(c => {
+      const fechaInicio = c.fecha_inicio ? new Date(c.fecha_inicio).toLocaleDateString() : '--';
+      const fechaFin = c.fecha_fin ? new Date(c.fecha_fin).toLocaleDateString() : '--';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${c.nombre}</td>
+        <td>${fechaInicio} a ${fechaFin}</td>
+        <td>${c.localidad || c.localidad_nombre || '--'}</td>
+        <td>${c.estado}</td>
+        <td>
+          <button class="btn-editar" data-id="${c.id}" title="Editar campaña">✏️</button>
+          <button class="btn-eliminar" data-id="${c.id}" title="Eliminar campaña">🗑️</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.querySelectorAll('.btn-editar').forEach(btn =>
+      btn.addEventListener('click', (e) => editarCampania(e.target.dataset.id))
+    );
+    document.querySelectorAll('.btn-eliminar').forEach(btn =>
+      btn.addEventListener('click', (e) => eliminarCampania(e.target.dataset.id))
+    );
+
+  } catch (err) {
+    console.error('Error al cargar campañas:', err);
   }
 }
+
+// --- Eliminar campaña ---
+async function eliminarCampania(id) {
+  const primera = confirm("⚠️ ¿Seguro que deseas eliminar esta campaña?");
+  if (!primera) return;
+  const segunda = confirm("❌ Esta acción no se puede deshacer. ¿Confirmas la eliminación?");
+  if (!segunda) return;
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/campanias/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) throw new Error("Error al eliminar campaña");
+    alert("🗑️ Campaña eliminada correctamente.");
+    await cargarCampanias();
+  } catch (err) {
+    console.error(err);
+    alert("❌ No se pudo eliminar la campaña.");
+  }
+}
+
+// --- Editar campaña ---
+async function editarCampania(id) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/campanias/${id}`);
+    const campania = await res.json();
+
+    modal.style.display = 'flex';
+    await cargarUbicaciones();
+
+    document.getElementById('nombre').value = campania.nombre || '';
+    document.getElementById('descripcion').value = campania.descripcion || '';
+    document.getElementById('imagen_url').value = campania.imagen_url || '';
+    document.getElementById('provincia_id').value = campania.provincia_id || '';
+    document.getElementById('localidad_id').value = campania.localidad_id || '';
+    document.getElementById('barrio_id').value = campania.barrio_id || '';
+    document.getElementById('fecha_inicio').value = campania.fecha_inicio?.split('T')[0] || '';
+    document.getElementById('fecha_fin').value = campania.fecha_fin?.split('T')[0] || '';
+
+    formCampania.dataset.editId = id;
+
+  } catch (err) {
+    console.error('Error al cargar campaña para editar:', err);
+    alert('No se pudo cargar la campaña para editar.');
+  }
+}
+
+// ------------------------------------------------------
+// 🧩 MODAL NUEVA / EDITAR CAMPAÑA
+// ------------------------------------------------------
+const modal = document.getElementById('modal-campania');
+const cerrarModal = document.getElementById('cerrarModal');
+const formCampania = document.getElementById('form-campania');
+
+document.addEventListener('click', (e) => {
+  if (e.target && e.target.id === 'btn-nueva-campania') {
+    modal.style.display = 'flex';
+    cargarUbicaciones();
+    delete formCampania.dataset.editId;
+    formCampania.reset();
+  }
+});
+
+cerrarModal.addEventListener('click', () => {
+  modal.style.display = 'none';
+});
+
+async function cargarUbicaciones() {
+  try {
+    const [resProvincias, resBarrios] = await Promise.all([
+      fetch(`${API_BASE_URL}/api/provincias`),
+      fetch(`${API_BASE_URL}/api/barrios`)
+    ]);
+
+    const provincias = await resProvincias.json();
+    const barrios = await resBarrios.json();
+
+    const selectProvincia = document.getElementById('provincia_id');
+    const selectLocalidad = document.getElementById('localidad_id');
+    const selectBarrio = document.getElementById('barrio_id');
+
+    selectProvincia.innerHTML = '<option value="">Seleccionar provincia...</option>';
+    selectLocalidad.innerHTML = '<option value="">Seleccionar localidad...</option>';
+    selectBarrio.innerHTML = '<option value="">Seleccionar barrio...</option>';
+    selectLocalidad.disabled = true;
+
+    provincias.forEach(prov => {
+      const opt = document.createElement('option');
+      opt.value = prov.id;
+      opt.textContent = prov.nombre;
+      selectProvincia.appendChild(opt);
+    });
+
+    const barriosUnicos = [];
+    const nombresVistos = new Set();
+    barrios.forEach(barr => {
+      if (!nombresVistos.has(barr.nombre.toLowerCase())) {
+        nombresVistos.add(barr.nombre.toLowerCase());
+        barriosUnicos.push(barr);
+      }
+    });
+
+    barriosUnicos.forEach(barr => {
+      const opt = document.createElement('option');
+      opt.value = barr.id;
+      opt.textContent = barr.nombre;
+      selectBarrio.appendChild(opt);
+    });
+
+    selectProvincia.addEventListener('change', async () => {
+      const provinciaId = selectProvincia.value;
+      selectLocalidad.innerHTML = '<option value="">Seleccionar localidad...</option>';
+      selectLocalidad.disabled = true;
+      if (!provinciaId) return;
+
+      try {
+        const resLocalidades = await fetch(`${API_BASE_URL}/api/localidades?provincia_id=${provinciaId}`);
+        const localidades = await resLocalidades.json();
+        localidades.forEach(loc => {
+          const opt = document.createElement('option');
+          opt.value = loc.id;
+          opt.textContent = loc.nombre;
+          selectLocalidad.appendChild(opt);
+        });
+        selectLocalidad.disabled = false;
+      } catch (error) {
+        console.error('Error cargando localidades:', error);
+      }
+    });
+  } catch (error) {
+    console.error('Error cargando ubicaciones:', error);
+  }
+}
+
+// --- Crear o editar campaña ---
+formCampania.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const editId = formCampania.dataset.editId || null;
+  const nombre = document.getElementById('nombre').value.trim();
+  const descripcion = document.getElementById('descripcion').value.trim();
+  const imagen_url = document.getElementById('imagen_url').value.trim();
+  const provincia_id = parseInt(document.getElementById('provincia_id').value);
+  const localidad_id = parseInt(document.getElementById('localidad_id').value);
+  const barrio_id = parseInt(document.getElementById('barrio_id').value);
+  const fecha_inicio = document.getElementById('fecha_inicio').value;
+  const fecha_fin = document.getElementById('fecha_fin').value;
+
+  if (!nombre || !descripcion || !fecha_inicio || !fecha_fin || !provincia_id || !localidad_id || !barrio_id) {
+    alert('Por favor, completa todos los campos obligatorios.');
+    return;
+  }
+
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  if (new Date(fecha_inicio) < hoy) {
+    alert('La fecha de inicio no puede ser anterior a hoy.');
+    return;
+  }
+  if (new Date(fecha_fin) < new Date(fecha_inicio)) {
+    alert('La fecha de fin no puede ser anterior a la fecha de inicio.');
+    return;
+  }
+
+  const nuevaCampania = {
+    centro_id: 1,
+    nombre,
+    descripcion,
+    imagen_url,
+    provincia_id,
+    localidad_id,
+    barrio_id,
+    fecha_inicio,
+    fecha_fin
+  };
+
+  try {
+    const method = editId ? 'PUT' : 'POST';
+    const url = editId
+      ? `${API_BASE_URL}/api/campanias/${editId}`
+      : `${API_BASE_URL}/api/campanias`;
+
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(nuevaCampania)
+    });
+
+    if (!res.ok) throw new Error('Error al guardar la campaña');
+    alert(editId ? '✏️ Campaña actualizada correctamente' : '✅ Campaña creada con éxito');
+    modal.style.display = 'none';
+    formCampania.reset();
+    delete formCampania.dataset.editId;
+    await cargarCampanias();
+
+  } catch (error) {
+    console.error(error);
+    alert('❌ Error al guardar la campaña: ' + error.message);
+  }
+});

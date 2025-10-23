@@ -361,3 +361,71 @@ body {
     justify-content: center;
   }
 }
+
+
+/* ===============================
+   MODAL NUEVA CAMPAÑA
+================================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: #2560be;
+  text-align: center;
+}
+
+#form-campania {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+#form-campania input,
+#form-campania textarea {
+  padding: 0.6rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  font-family: inherit;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.btn-cancelar {
+  background: #ccc;
+  color: black;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+}
+
+.btn-cancelar:hover {
+  background: #b3b3b3;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}

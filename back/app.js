@@ -11,6 +11,7 @@ const userRoutes = require('./routes/user.routes');
 const provinciasRoutes = require('./routes/provinciasRoutes');
 const localidadesRoutes = require('./routes/localidadesRoutes');
 const barriosRoutes = require('./routes/barriosRoutes');
+const campaniasRoutes = require('./routes/campanias.routes');
 
 
 // Middlewares
@@ -25,6 +26,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/provincias', provinciasRoutes);
 app.use('/api/localidades', localidadesRoutes);
 app.use('/api/barrios', barriosRoutes);
+app.use('/api/campanias', campaniasRoutes);
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;

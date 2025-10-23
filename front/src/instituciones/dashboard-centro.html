@@ -63,7 +63,7 @@
           </div>
         </section>
 
-        <!-- 📋 SECCIÓN DONANTES -->
+        <!--  SECCIÓN DONANTES -->
         <section id="seccion-donantes" class="dashboard-centro-seccion" style="display: none;">
           <h3>Donantes registrados</h3>
 
@@ -99,7 +99,77 @@
             </table>
           </div>
         </section>
+
+                <!-- SECCIÓN CAMPAÑAS -->
+        <section id="seccion-campanias" class="dashboard-centro-seccion" style="display: none;">
+          <h3>Campañas de donación</h3>
+
+          <div class="acciones-campanias">
+            <button id="btn-nueva-campania" class="btn-accion-centro">+ Nueva campaña</button>
+          </div>
+
+          <div class="tabla-wrapper">
+            <table id="tabla-campanias">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Fecha</th>
+                  <th>Localidad</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
       </main>
+
+      <!-- MODAL NUEVA CAMPAÑA -->
+      <div id="modal-campania" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+          <h3>Nueva Campaña</h3>
+          <form id="form-campania">
+            <label>Nombre</label>
+            <input type="text" id="nombre" required>
+
+            <label>Descripción</label>
+            <textarea id="descripcion" rows="3" required></textarea>
+
+            <label>URL de Imagen</label>
+            <input type="url" id="imagen_url" placeholder="https://..." required>
+
+            <label for="provincia_id">Provincia</label>
+            <select id="provincia_id" required>
+              <option value="">Seleccionar provincia...</option>
+            </select>
+
+            <label for="localidad_id">Localidad</label>
+            <select id="localidad_id" required disabled>
+              <option value="">Seleccionar localidad...</option>
+            </select>
+
+            <label for="barrio_id">Barrio</label>
+            <select id="barrio_id" required>
+              <option value="">Seleccionar barrio...</option>
+            </select>
+
+            <label>Fecha de inicio</label>
+            <input type="date" id="fecha_inicio" required>
+
+            <label>Fecha de fin</label>
+            <input type="date" id="fecha_fin" required>
+
+            <div class="modal-buttons">
+              <button type="submit" class="btn-accion-centro">Guardar</button>
+              <button type="button" id="cerrarModal" class="btn-cancelar">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+
     </div>
   </div>
 
