@@ -8,10 +8,32 @@ const contenido = document.getElementById('contenido-centro');
 const bienvenida = document.getElementById('bienvenida-centro');
 const logoutBtn = document.getElementById('logoutBtn');
 
+// Helpers comunes
+const token = localStorage.getItem("token");
+function authHeaders(extra = {}) {
+  const headers = { ...extra };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return headers;
+}
+function getCentroId() {
+  const keys = ['centro_id', 'centroId', 'userCentroId'];
+  for (const k of keys) {
+    const v = localStorage.getItem(k);
+    if (v && !isNaN(parseInt(v))) return parseInt(v);
+  }
+  return 1; // TODO: guardar centroId durante el login y leerlo aquí
+}
+function toggleSeccion(seccion) {
+  const seccionDonantes = document.getElementById("seccion-donantes");
+  const seccionCampanias = document.getElementById("seccion-campanias");
+  seccionDonantes.style.display = seccion === 'donantes' ? 'block' : 'none';
+  seccionCampanias.style.display = seccion === 'campanias' ? 'block' : 'none';
+}
+
 // ---- Loader inicial ----
 setTimeout(() => {
   const centroNombre = localStorage.getItem("centroNombre") || "Centro de Hemoterapia";
-  bienvenida.textContent = `¡Bienvenido, ${centroNombre}!`;
+  bienvenida.textContent = `Bienvenido, ${centroNombre}!`;
   loader.style.display = "none";
   contenido.style.display = "block";
 }, 800);
@@ -23,9 +45,8 @@ logoutBtn.addEventListener('click', () => {
 });
 
 // ------------------------------------------------------
-// 🩸 SECCIÓN: VER DONANTES
+// SECCIÓN: VER DONANTES
 // ------------------------------------------------------
-const token = localStorage.getItem("token");
 const btnVerDonantes = document.getElementById("btn-ver-donantes");
 const seccionDonantes = document.getElementById("seccion-donantes");
 const tablaBody = document.querySelector("#tabla-donantes tbody");
@@ -48,7 +69,7 @@ async function cargarDonantes() {
 
   try {
     const res = await fetch(`${API_BASE_URL}/api/donantes/filtro?${params.toString()}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: authHeaders(),
     });
 
     if (!res.ok) throw new Error("Error al obtener donantes");
@@ -70,34 +91,33 @@ function renderDonantes(donantes) {
   donantes.forEach((d) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${d.nombre || "—"} ${d.apellido || ""}</td>
-      <td>${d.grupo_sanguineo || "—"}</td>
-      <td>${d.provincia_nombre || d.provincia_id || "—"}</td>
-      <td>${d.localidad_nombre || d.localidad_id || "—"}</td>
-      <td>${d.telefono || "—"}</td>
-      <td>${d.apto_para_donar ? "✅" : "❌"}</td>
-      <td>${d.dias_restantes ?? "—"}</td>
+      <td>${d.nombre || ""} ${d.apellido || ""}</td>
+      <td>${d.grupo_sanguineo || ""}</td>
+      <td>${d.provincia_nombre || d.provincia_id || ""}</td>
+      <td>${d.localidad_nombre || d.localidad_id || ""}</td>
+      <td>${d.telefono || ""}</td>
+      <td>${d.apto_para_donar ? "Sí" : "No"}</td>
+      <td>${d.dias_restantes ?? ""}</td>
     `;
     tablaBody.appendChild(tr);
   });
 }
 
 // ------------------------------------------------------
-// 🩸 SECCIÓN: GESTIONAR CAMPAÑAS (GET / POST / PUT / DELETE)
+// SECCIÓN: GESTIONAR CAMPAÑAS (GET / POST / PUT / DELETE)
 // ------------------------------------------------------
 const btnVerCampanias = document.getElementById('btn-ver-campanias');
 const seccionCampanias = document.getElementById('seccion-campanias');
 
 btnVerCampanias.addEventListener('click', async () => {
-  seccionDonantes.style.display = 'none';
-  seccionCampanias.style.display = 'block';
+  toggleSeccion('campanias');
   await cargarCampanias();
 });
 
 async function cargarCampanias() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/campanias`, {
-      headers: { 'Authorization': 'Bearer ' + token }
+      headers: authHeaders(),
     });
     const campanias = await res.json();
 
@@ -111,8 +131,8 @@ async function cargarCampanias() {
       tr.innerHTML = `
         <td>${c.nombre}</td>
         <td>${fechaInicio} a ${fechaFin}</td>
-        <td>${c.localidad || c.localidad_nombre || '--'}</td>
-        <td>${c.estado}</td>
+        <td>${c.localidad || c.localidad_nombre || c.localidad || '--'}</td>
+        <td>${c.estado ?? ''}</td>
         <td>
           <button class="btn-editar" data-id="${c.id}" title="Editar campaña">✏️</button>
           <button class="btn-eliminar" data-id="${c.id}" title="Eliminar campaña">🗑️</button>
@@ -135,29 +155,31 @@ async function cargarCampanias() {
 
 // --- Eliminar campaña ---
 async function eliminarCampania(id) {
-  const primera = confirm("⚠️ ¿Seguro que deseas eliminar esta campaña?");
+  const primera = confirm("¿Seguro que deseas eliminar esta campaña?");
   if (!primera) return;
-  const segunda = confirm("❌ Esta acción no se puede deshacer. ¿Confirmas la eliminación?");
+  const segunda = confirm("Esta acción no se puede deshacer. ¿Confirmas la eliminación?");
   if (!segunda) return;
 
   try {
     const res = await fetch(`${API_BASE_URL}/api/campanias/${id}`, {
       method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + token }
+      headers: authHeaders(),
     });
     if (!res.ok) throw new Error("Error al eliminar campaña");
-    alert("🗑️ Campaña eliminada correctamente.");
+    alert("Campaña eliminada correctamente.");
     await cargarCampanias();
   } catch (err) {
     console.error(err);
-    alert("❌ No se pudo eliminar la campaña.");
+    alert("No se pudo eliminar la campaña.");
   }
 }
 
 // --- Editar campaña ---
 async function editarCampania(id) {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/campanias/${id}`);
+    const res = await fetch(`${API_BASE_URL}/api/campanias/${id}`, {
+      headers: authHeaders(),
+    });
     const campania = await res.json();
 
     modal.style.display = 'flex';
@@ -169,8 +191,8 @@ async function editarCampania(id) {
     document.getElementById('provincia_id').value = campania.provincia_id || '';
     document.getElementById('localidad_id').value = campania.localidad_id || '';
     document.getElementById('barrio_id').value = campania.barrio_id || '';
-    document.getElementById('fecha_inicio').value = campania.fecha_inicio?.split('T')[0] || '';
-    document.getElementById('fecha_fin').value = campania.fecha_fin?.split('T')[0] || '';
+    document.getElementById('fecha_inicio').value = (campania.fecha_inicio || '').split('T')[0] || '';
+    document.getElementById('fecha_fin').value = (campania.fecha_fin || '').split('T')[0] || '';
 
     formCampania.dataset.editId = id;
 
@@ -181,7 +203,7 @@ async function editarCampania(id) {
 }
 
 // ------------------------------------------------------
-// 🧩 MODAL NUEVA / EDITAR CAMPAÑA
+// MODAL NUEVA / EDITAR CAMPAÑA
 // ------------------------------------------------------
 const modal = document.getElementById('modal-campania');
 const cerrarModal = document.getElementById('cerrarModal');
@@ -229,8 +251,9 @@ async function cargarUbicaciones() {
     const barriosUnicos = [];
     const nombresVistos = new Set();
     barrios.forEach(barr => {
-      if (!nombresVistos.has(barr.nombre.toLowerCase())) {
-        nombresVistos.add(barr.nombre.toLowerCase());
+      const nombre = (barr.nombre || '').toLowerCase();
+      if (!nombresVistos.has(nombre)) {
+        nombresVistos.add(nombre);
         barriosUnicos.push(barr);
       }
     });
@@ -298,7 +321,7 @@ formCampania.addEventListener('submit', async (e) => {
   }
 
   const nuevaCampania = {
-    centro_id: 1,
+    centro_id: getCentroId(),
     nombre,
     descripcion,
     imagen_url,
@@ -317,12 +340,12 @@ formCampania.addEventListener('submit', async (e) => {
 
     const res = await fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(nuevaCampania)
     });
 
     if (!res.ok) throw new Error('Error al guardar la campaña');
-    alert(editId ? '✏️ Campaña actualizada correctamente' : '✅ Campaña creada con éxito');
+    alert(editId ? 'Campaña actualizada correctamente' : 'Campaña creada con éxito');
     modal.style.display = 'none';
     formCampania.reset();
     delete formCampania.dataset.editId;
@@ -330,6 +353,7 @@ formCampania.addEventListener('submit', async (e) => {
 
   } catch (error) {
     console.error(error);
-    alert('❌ Error al guardar la campaña: ' + error.message);
+    alert('Error al guardar la campaña: ' + error.message);
   }
 });
+

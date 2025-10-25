@@ -3,7 +3,6 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const app = express();
-const pool = require('./data/config');
 
 // Importar rutas
 const donantesRoutes = require('./routes/donantes.routes');
@@ -13,14 +12,12 @@ const localidadesRoutes = require('./routes/localidadesRoutes');
 const barriosRoutes = require('./routes/barriosRoutes');
 const campaniasRoutes = require('./routes/campanias.routes');
 
-
 // Middlewares
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(cors());
 
-
-//routes
+// routes
 app.use('/api/donantes', donantesRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/provincias', provinciasRoutes);
@@ -34,15 +31,14 @@ app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
 });
 
-
 // Test endpoint para verificar que el servidor está funcionando
 app.get('/back', (req, res) => {
-  res.send('Servidor funcionando 🚀');
+  res.send('Servidor funcionando OK');
 });
 
-//TEST DE CONEXIÓN A LA BASE DE DATOS
+// TEST DE CONEXIÓN A LA BASE DE DATOS
 // Este endpoint es solo para verificar la conexión a la base de datos
 app.use('/api/test-db', require('./data/probarconexion'));
 
-
 module.exports = app;
+

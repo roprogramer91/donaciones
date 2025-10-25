@@ -11,9 +11,45 @@ const CampaniasController = {
     }
   },
 
+  async obtenerCampaniaPorId(req, res) {
+    try {
+      const { id } = req.params;
+      const campania = await CampaniasModel.obtenerPorId(id);
+      if (!campania) return res.status(404).json({ error: 'Campaña no encontrada' });
+      res.json(campania);
+    } catch (error) {
+      console.error('Error al obtener campaña por ID:', error);
+      res.status(500).json({ error: 'Error al obtener campaña' });
+    }
+  },
+
   async crearCampania(req, res) {
     try {
-      const nueva = await CampaniasModel.crear(req.body);
+      const {
+        centro_id,
+        nombre,
+        descripcion,
+        imagen_url,
+        localidad_id,
+        barrio_id,
+        fecha_inicio,
+        fecha_fin,
+      } = req.body || {};
+
+      if (!centro_id || !nombre || !descripcion || !localidad_id || !barrio_id || !fecha_inicio || !fecha_fin) {
+        return res.status(400).json({ error: 'Faltan campos obligatorios' });
+      }
+
+      const nueva = await CampaniasModel.crear({
+        centro_id,
+        nombre,
+        descripcion,
+        imagen_url,
+        localidad_id,
+        barrio_id,
+        fecha_inicio,
+        fecha_fin,
+      });
       res.status(201).json(nueva);
     } catch (error) {
       console.error('Error al crear campaña:', error);
@@ -24,7 +60,7 @@ const CampaniasController = {
   async actualizarCampania(req, res) {
     try {
       const { id } = req.params;
-      const actualizada = await CampaniasModel.actualizar(id, req.body);
+      const actualizada = await CampaniasModel.actualizar(id, req.body || {});
       res.json(actualizada);
     } catch (error) {
       console.error('Error al actualizar campaña:', error);
@@ -45,3 +81,4 @@ const CampaniasController = {
 };
 
 module.exports = CampaniasController;
+
