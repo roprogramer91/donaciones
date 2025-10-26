@@ -31,6 +31,28 @@ function toggleSeccion(seccion) {
   seccionCampanias.style.display = seccion === 'campanias' ? 'block' : 'none';
 }
 
+// Catálogos en memoria para nombres de provincias/localidades
+const provinciasById = new Map();
+const localidadesById = new Map();
+const provinciasCargadasParaLocalidades = new Set();
+
+async function ensureProvincias() {
+  if (provinciasById.size > 0) return;
+  const res = await fetch(`${API_BASE_URL}/api/provincias`);
+  const provincias = await res.json();
+  provincias.forEach(p => provinciasById.set(p.id, p.nombre));
+}
+
+async function ensureLocalidadesFor(provinciaIds) {
+  for (const provId of provinciaIds) {
+    if (!provId || provinciasCargadasParaLocalidades.has(provId)) continue;
+    const res = await fetch(`${API_BASE_URL}/api/localidades?provincia_id=${provId}`);
+    const localidades = await res.json();
+    localidades.forEach(l => localidadesById.set(l.id, l.nombre));
+    provinciasCargadasParaLocalidades.add(provId);
+  }
+}
+
 // ---- Loader inicial ----
 setTimeout(() => {
   const centroNombre = localStorage.getItem("centroNombre") || "Centro de Hemoterapia";
@@ -134,6 +156,9 @@ async function cargarDonantes() {
 
     if (!res.ok) throw new Error("Error al obtener donantes");
     const data = await res.json();
+    const provIds = new Set((data || []).map(d => d.provincia_id).filter(Boolean));
+    await ensureProvincias();
+    await ensureLocalidadesFor(provIds);
     renderDonantes(data);
   } catch (err) {
     console.error("Error al cargar donantes:", err);
@@ -150,11 +175,13 @@ function renderDonantes(donantes) {
 
   donantes.forEach((d) => {
     const tr = document.createElement("tr");
+    const provinciaNombre = d.provincia_nombre || provinciasById.get(d.provincia_id) || "";
+    const localidadNombre = d.localidad_nombre || localidadesById.get(d.localidad_id) || "";
     tr.innerHTML = `
       <td>${d.nombre || ""} ${d.apellido || ""}</td>
       <td>${d.grupo_sanguineo || ""}</td>
-      <td>${d.provincia_nombre || d.provincia_id || ""}</td>
-      <td>${d.localidad_nombre || d.localidad_id || ""}</td>
+      <td>${provinciaNombre}</td>
+      <td>${localidadNombre}</td>
       <td>${d.telefono || ""}</td>
       <td>${d.apto_para_donar ? "Sí" : "No"}</td>
       <td>${d.dias_restantes ?? ""}</td>
@@ -416,3 +443,4 @@ formCampania.addEventListener('submit', async (e) => {
     alert('Error al guardar la campaña: ' + error.message);
   }
 });
+
