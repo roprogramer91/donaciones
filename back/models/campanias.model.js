@@ -15,8 +15,8 @@ const CampaniasModel = {
         c.localidad_id,
         c.barrio_id,
         l.provincia_id AS provincia_id,
-        l.nombre AS localidad,
-        b.nombre AS barrio
+        l.nombre AS localidad_nombre,
+        b.nombre AS barrio_nombre
       FROM campanias c
       LEFT JOIN localidades l ON c.localidad_id = l.id
       LEFT JOIN barrios b ON c.barrio_id = b.id
@@ -39,8 +39,8 @@ const CampaniasModel = {
         c.localidad_id,
         c.barrio_id,
         l.provincia_id AS provincia_id,
-        l.nombre AS localidad,
-        b.nombre AS barrio
+        l.nombre AS localidad_nombre,
+        b.nombre AS barrio_nombre
       FROM campanias c
       LEFT JOIN localidades l ON c.localidad_id = l.id
       LEFT JOIN barrios b ON c.barrio_id = b.id
@@ -102,8 +102,8 @@ CampaniasModel.obtenerPorCentro = async function (centroId) {
       c.localidad_id,
       c.barrio_id,
       l.provincia_id AS provincia_id,
-      l.nombre AS localidad,
-      b.nombre AS barrio
+      l.nombre AS localidad_nombre,
+      b.nombre AS barrio_nombre
     FROM campanias c
     LEFT JOIN localidades l ON c.localidad_id = l.id
     LEFT JOIN barrios b ON c.barrio_id = b.id
