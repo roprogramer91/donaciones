@@ -35,19 +35,35 @@
 
         <!-- RESUMEN RÃPIDO -->
         <section class="dashboard-centro-resumen">
-          <h2>Resumen</h2>
-          <div class="resumen-grid">
-            <div class="resumen-card">
-              <span class="resumen-label">Donantes aptos hoy</span>
-              <b id="donantes-activos">--</b>
-            </div>
-            <div class="resumen-card">`n              <span class="resumen-label">Proximas 14 dias</span>`n              <b id="campanias-proximas">--<\/b>`n            <\/div>
-            <div class="resumen-card">
-              <span class="resumen-label">CampaÃ±as activas</span>
-              <b id="campanias-activas">--</b>
-            </div>
-          </div>
-        </section>
+  <h2>Resumen</h2>
+  <div class="resumen-grid">
+    <div class="resumen-card">
+      <span class="resumen-label">Donantes aptos hoy</span>
+      <b id="donantes-activos">--</b>
+    </div>
+    <div class="resumen-card">
+      <span class="resumen-label">Campanias activas</span>
+      <b id="campanias-activas">--</b>
+    </div>
+    <div class="resumen-card">
+      <span class="resumen-label">Proximas 14 dias</span>
+      <b id="campanias-proximas">--</b>
+    </div>
+    <div class="resumen-card">
+      <span class="resumen-label">Total donantes</span>
+      <b id="donantes-totales">--</b>
+    </div>
+    <div class="resumen-card">
+      <span class="resumen-label">Ultima campaña finalizada</span>
+      <b id="campania-ultima">--</b>
+    </div>
+    <div class="resumen-card">
+      <span class="resumen-label">Siguiente campaña</span>
+      <b id="campania-siguiente">--</b>
+    </div>
+  </div>
+  <div id="resumen-grupos" style="margin-top:0.8rem; display:flex; flex-wrap:wrap; gap:0.5rem; color:#4b5563;"></div>
+</section>
 
         <!-- ACCIONES PRINCIPALES -->
         <section class="dashboard-centro-acciones">
@@ -217,4 +233,5 @@
   <script type="module" src="dashboard-centro.js"></script>
 </body>
 </html>
+
 

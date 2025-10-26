@@ -217,11 +217,34 @@ async function cargarDonantes() {
 async function cargarResumen() {
   try {
     // Donantes aptos hoy
-    const resDon = await fetch(`${API_BASE_URL}/api/donantes/filtro?apto=true`, { headers: authHeaders() });
-    const listaAptos = resDon.ok ? await resDon.json() : [];
+    const resDonAptos = await fetch(`${API_BASE_URL}/api/donantes/filtro?apto=true`, { headers: authHeaders() });
+    const listaAptos = resDonAptos.ok ? await resDonAptos.json() : [];
     const aptos = Array.isArray(listaAptos) ? listaAptos.length : 0;
     const elAptos = document.getElementById('donantes-activos');
     if (elAptos) elAptos.textContent = String(aptos);
+
+    // Total donantes y breakdown por grupo
+    const resDonTodos = await fetch(`${API_BASE_URL}/api/donantes`, { headers: authHeaders() });
+    const donTodos = resDonTodos.ok ? await resDonTodos.json() : [];
+    const total = Array.isArray(donTodos) ? donTodos.length : 0;
+    const elTot = document.getElementById('donantes-totales');
+    if (elTot) elTot.textContent = String(total);
+
+    // Grupos: contar aptos por grupo
+    const gruposOrden = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
+    const conteo = new Map(gruposOrden.map(g => [g, 0]));
+    (listaAptos || []).forEach(d => {
+      if (d.grupo_sanguineo && conteo.has(d.grupo_sanguineo)) {
+        conteo.set(d.grupo_sanguineo, (conteo.get(d.grupo_sanguineo) || 0) + 1);
+      }
+    });
+    const contGrupos = document.getElementById('resumen-grupos');
+    if (contGrupos) {
+      contGrupos.innerHTML = gruposOrden.map(g => {
+        const n = conteo.get(g) || 0;
+        return `<span style="background:#e7f0fe;color:#1f3c80;padding:0.25rem 0.5rem;border-radius:999px;font-size:0.85rem;">${g}: <b>${n}</b></span>`;
+      }).join('');
+    }
 
     // Campanias
     const resCamp = await fetch(`${API_BASE_URL}/api/campanias`, { headers: authHeaders() });
@@ -247,6 +270,19 @@ async function cargarResumen() {
     }).length;
     const elProx = document.getElementById('campanias-proximas');
     if (elProx) elProx.textContent = String(proximas);
+
+    // Ultima campaña finalizada y siguiente campaña
+    const finalizadas = (campanias || []).filter(c => c.fecha_fin && new Date(c.fecha_fin) < hoy);
+    finalizadas.sort((a,b) => new Date(b.fecha_fin) - new Date(a.fecha_fin));
+    const ultima = finalizadas[0];
+    const elUlt = document.getElementById('campania-ultima');
+    if (elUlt) elUlt.textContent = ultima ? `${ultima.nombre || 'Campaña'} — ${new Date(ultima.fecha_fin).toLocaleDateString()}` : '--';
+
+    const futuras = (campanias || []).filter(c => c.fecha_inicio && new Date(c.fecha_inicio) > hoy);
+    futuras.sort((a,b) => new Date(a.fecha_inicio) - new Date(b.fecha_inicio));
+    const siguiente = futuras[0];
+    const elSig = document.getElementById('campania-siguiente');
+    if (elSig) elSig.textContent = siguiente ? `${siguiente.nombre || 'Campaña'} — ${new Date(siguiente.fecha_inicio).toLocaleDateString()}` : '--';
 
   } catch (e) {
     console.error('Error cargando resumen:', e);
