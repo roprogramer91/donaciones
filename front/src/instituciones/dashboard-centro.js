@@ -142,6 +142,7 @@ const filtroEdadMin = document.getElementById('filtro-edad-min');
 const filtroEdadMax = document.getElementById('filtro-edad-max');
 const filtroUltDonAntes = document.getElementById('filtro-ult-don-antes');
 const filtroDiasRestMax = document.getElementById('filtro-dias-rest-max');
+const btnLimpiarFiltro = document.getElementById('btn-limpiar-filtro');
 
 btnVerDonantes.addEventListener("click", async () => {
   toggleSeccion("donantes");
@@ -150,6 +151,22 @@ btnVerDonantes.addEventListener("click", async () => {
 });
 
 btnFiltro.addEventListener("click", async () => {
+  await cargarDonantes();
+});
+
+btnLimpiarFiltro?.addEventListener('click', async () => {
+  if (filtroGrupo) filtroGrupo.value = '';
+  if (filtroProvincia) filtroProvincia.value = '';
+  if (filtroLocalidad) {
+    filtroLocalidad.innerHTML = '<option value="">Todas las localidades</option>';
+    filtroLocalidad.disabled = true;
+  }
+  if (filtroBarrio) filtroBarrio.value = '';
+  if (filtroApto) filtroApto.checked = false;
+  if (filtroEdadMin) filtroEdadMin.value = '';
+  if (filtroEdadMax) filtroEdadMax.value = '';
+  if (filtroUltDonAntes) filtroUltDonAntes.value = '';
+  if (filtroDiasRestMax) filtroDiasRestMax.value = '';
   await cargarDonantes();
 });
 
@@ -226,7 +243,7 @@ async function inicializarFiltrosDonantes() {
         opt.value = l.id; opt.textContent = l.nombre; filtroLocalidad.appendChild(opt);
       });
       filtroLocalidad.disabled = false;
-    }, { once: true });
+    });
   } catch (e) {
     console.error('Error inicializando filtros de donantes:', e);
   }
