@@ -32,26 +32,7 @@ function toggleSeccion(seccion) {
 }
 
 // Catálogos en memoria para nombres de provincias/localidades
-const provinciasById = new Map();
-const localidadesById = new Map();
-const provinciasCargadasParaLocalidades = new Set();
-
-async function ensureProvincias() {
-  if (provinciasById.size > 0) return;
-  const res = await fetch(`${API_BASE_URL}/api/provincias`);
-  const provincias = await res.json();
-  provincias.forEach(p => provinciasById.set(p.id, p.nombre));
-}
-
-async function ensureLocalidadesFor(provinciaIds) {
-  for (const provId of provinciaIds) {
-    if (!provId || provinciasCargadasParaLocalidades.has(provId)) continue;
-    const res = await fetch(`${API_BASE_URL}/api/localidades?provincia_id=${provId}`);
-    const localidades = await res.json();
-    localidades.forEach(l => localidadesById.set(l.id, l.nombre));
-    provinciasCargadasParaLocalidades.add(provId);
-  }
-}
+// nombres vienen del backend\n
 
 // ---- Loader inicial ----
 setTimeout(() => {
@@ -199,10 +180,7 @@ async function cargarDonantes() {
 
     if (!res.ok) throw new Error("Error al obtener donantes");
     const data = await res.json();
-    const provIds = new Set((data || []).map(d => d.provincia_id).filter(Boolean));
-    await ensureProvincias();
-    await ensureLocalidadesFor(provIds);
-    ultimoResultadoDonantes = Array.isArray(data) ? data : [];
+        ultimoResultadoDonantes = Array.isArray(data) ? data : [];
     actualizarConteoYExport();
     renderDonantes(data);
   } catch (err) {
@@ -311,8 +289,8 @@ function exportarCSVDonantes() {
   if (!ultimoResultadoDonantes.length) return;
   const headers = ['Nombre','Grupo','Provincia','Localidad','Telefono','Apto','Dias restantes','Email'];
   const rows = ultimoResultadoDonantes.map(d => {
-    const provinciaNombre = d.provincia_nombre || provinciasById.get(d.provincia_id) || '';
-    const localidadNombre = d.localidad_nombre || localidadesById.get(d.localidad_id) || '';
+    const provinciaNombre = d.provincia_nombre || '';
+    const localidadNombre = d.localidad_nombre || '';
     const nombreCompleto = `${d.nombre || ''} ${d.apellido || ''}`.trim();
     const aptoTxt = d.apto_para_donar ? 'Si' : 'No';
     return [
@@ -394,8 +372,8 @@ async function cargarCampanias() {
       tr.innerHTML = `
         <td>${c.nombre}</td>
         <td>${fechaInicio} a ${fechaFin}</td>
-        <td>${c.localidad || c.localidad_nombre || c.localidad || '--'}</td>
-        <td>${c.estado ?? ''}</td>
+        <td></td>
+        <td></td>
         <td>
           <button class="btn-editar" data-id="${c.id}" title="Editar campaña">✏️</button>
           <button class="btn-eliminar" data-id="${c.id}" title="Eliminar campaña">🗑️</button>
@@ -619,6 +597,7 @@ formCampania.addEventListener('submit', async (e) => {
     alert('Error al guardar la campaña: ' + error.message);
   }
 });
+
 
 
 
