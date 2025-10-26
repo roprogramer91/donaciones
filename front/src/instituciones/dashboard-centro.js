@@ -7,6 +7,7 @@ const loader = document.getElementById('loader-centro');
 const contenido = document.getElementById('contenido-centro');
 const bienvenida = document.getElementById('bienvenida-centro');
 const logoutBtn = document.getElementById('logoutBtn');
+const btnPerfil = document.getElementById('btn-perfil');
 
 // Helpers comunes
 const token = localStorage.getItem("token");
@@ -42,6 +43,65 @@ setTimeout(() => {
 logoutBtn.addEventListener('click', () => {
   localStorage.clear();
   window.location.href = '../../index.html';
+});
+
+// ---- Perfil Centro ----
+const modalPerfil = document.getElementById('modal-perfil');
+const cerrarModalPerfil = document.getElementById('cerrarModalPerfil');
+const formPerfil = document.getElementById('form-perfil');
+
+btnPerfil?.addEventListener('click', async () => {
+  modalPerfil.style.display = 'flex';
+  await cargarPerfilCentro();
+});
+
+cerrarModalPerfil?.addEventListener('click', () => {
+  modalPerfil.style.display = 'none';
+});
+
+async function cargarPerfilCentro() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/centro/me`, {
+      headers: authHeaders({ 'X-Centro-Id': getCentroId() })
+    });
+    if (!res.ok) throw new Error('No se pudo cargar el perfil');
+    const data = await res.json();
+    document.getElementById('perfil_nombre').value = data.nombre || '';
+    document.getElementById('perfil_direccion').value = data.direccion || '';
+    document.getElementById('perfil_telefono').value = data.telefono || '';
+    document.getElementById('perfil_email').value = data.email || '';
+  } catch (e) {
+    console.error(e);
+    alert('Error al cargar el perfil');
+  }
+}
+
+formPerfil?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const payload = {
+    nombre: document.getElementById('perfil_nombre').value.trim(),
+    direccion: document.getElementById('perfil_direccion').value.trim(),
+    telefono: document.getElementById('perfil_telefono').value.trim(),
+    email: document.getElementById('perfil_email').value.trim(),
+  };
+  if (!payload.nombre) {
+    alert('El nombre es obligatorio');
+    return;
+  }
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/centro/me`, {
+      method: 'PUT',
+      headers: authHeaders({ 'Content-Type': 'application/json', 'X-Centro-Id': getCentroId() }),
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('No se pudo guardar el perfil');
+    const actualizado = await res.json();
+    bienvenida.textContent = `Bienvenido, ${actualizado.nombre || 'Centro de Hemoterapia'}!`;
+    modalPerfil.style.display = 'none';
+  } catch (e) {
+    console.error(e);
+    alert('Error al guardar el perfil');
+  }
 });
 
 // ------------------------------------------------------
@@ -356,4 +416,3 @@ formCampania.addEventListener('submit', async (e) => {
     alert('Error al guardar la campaña: ' + error.message);
   }
 });
-

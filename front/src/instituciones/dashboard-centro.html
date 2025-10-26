@@ -21,7 +21,7 @@
       <header class="dashboard-centro-header">
         <div class="centro-nombre" id="bienvenida-centro">¡Bienvenido, Centro de Hemoterapia!</div>
         <div class="header-icons">
-          <button class="icon-btn" title="Perfil">
+          <button class="icon-btn" id="btn-perfil" title="Perfil">
             <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/user.svg" alt="Perfil" />
           </button>
           <button class="icon-btn" id="logoutBtn" title="Cerrar sesión">
@@ -124,7 +124,32 @@
           </div>
         </section>
 
-      </main>
+  </main>
+
+      <!-- MODAL PERFIL CENTRO -->
+      <div id="modal-perfil" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+          <h3>Perfil del Centro</h3>
+          <form id="form-perfil">
+            <label>Nombre</label>
+            <input type="text" id="perfil_nombre" required>
+
+            <label>Dirección</label>
+            <input type="text" id="perfil_direccion">
+
+            <label>Teléfono</label>
+            <input type="text" id="perfil_telefono">
+
+            <label>Email</label>
+            <input type="email" id="perfil_email">
+
+            <div class="modal-buttons">
+              <button type="submit" class="btn-accion-centro">Guardar</button>
+              <button type="button" id="cerrarModalPerfil" class="btn-cancelar">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
 
       <!-- MODAL NUEVA CAMPAÑA -->
       <div id="modal-campania" class="modal-overlay" style="display: none;">

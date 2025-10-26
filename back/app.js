@@ -11,6 +11,7 @@ const provinciasRoutes = require('./routes/provinciasRoutes');
 const localidadesRoutes = require('./routes/localidadesRoutes');
 const barriosRoutes = require('./routes/barriosRoutes');
 const campaniasRoutes = require('./routes/campanias.routes');
+const centroRoutes = require('./routes/centro.routes');
 
 // Middlewares
 app.use(morgan('dev'));
@@ -24,6 +25,7 @@ app.use('/api/provincias', provinciasRoutes);
 app.use('/api/localidades', localidadesRoutes);
 app.use('/api/barrios', barriosRoutes);
 app.use('/api/campanias', campaniasRoutes);
+app.use('/api/centro', centroRoutes);
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;
@@ -41,4 +43,3 @@ app.get('/back', (req, res) => {
 app.use('/api/test-db', require('./data/probarconexion'));
 
 module.exports = app;
-
