@@ -123,7 +123,6 @@ const filtroBarrio = document.getElementById('filtro-barrio');
 const filtroApto = document.getElementById('filtro-apto');
 const filtroEdadMin = document.getElementById('filtro-edad-min');
 const filtroEdadMax = document.getElementById('filtro-edad-max');
-const filtroUltDonAntes = document.getElementById('filtro-ult-don-antes');
 const filtroDiasRestMax = document.getElementById('filtro-dias-rest-max');
 const btnLimpiarFiltro = document.getElementById('btn-limpiar-filtro');
 const btnExportarCSV = document.getElementById('btn-exportar-csv');
@@ -152,7 +151,6 @@ btnLimpiarFiltro?.addEventListener('click', async () => {
   if (filtroApto) filtroApto.checked = false;
   if (filtroEdadMin) filtroEdadMin.value = '';
   if (filtroEdadMax) filtroEdadMax.value = '';
-  if (filtroUltDonAntes) filtroUltDonAntes.value = '';
   if (filtroDiasRestMax) filtroDiasRestMax.value = '';
   await cargarDonantes();
 });
@@ -170,7 +168,6 @@ async function cargarDonantes() {
   if (filtroApto?.checked) params.append('apto', 'true');
   const eMin = parseInt(filtroEdadMin?.value || ''); if (!isNaN(eMin)) params.append('edad_min', String(eMin));
   const eMax = parseInt(filtroEdadMax?.value || ''); if (!isNaN(eMax)) params.append('edad_max', String(eMax));
-  const ud = filtroUltDonAntes?.value; if (ud) params.append('ultima_donacion_antes', ud);
   const drm = parseInt(filtroDiasRestMax?.value || ''); if (!isNaN(drm)) params.append('dias_restantes_max', String(drm));
 
   try {
@@ -597,8 +594,6 @@ formCampania.addEventListener('submit', async (e) => {
     alert('Error al guardar la campaña: ' + error.message);
   }
 });
-
-
 
 
 
