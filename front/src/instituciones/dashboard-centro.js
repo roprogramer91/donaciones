@@ -372,9 +372,9 @@ async function cargarCampanias() {
       tr.innerHTML = `
         <td>${c.nombre}</td>
         <td>${fechaInicio} a ${fechaFin}</td>
-        <td></td>
-        <td></td>
-        <td>
+        <td>${c.localidad_nombre || c.localidad || '--'}</td>
+        <td>${c.estado_calculado ?? c.estado ?? '--'}</td>
+
           <button class="btn-editar" data-id="${c.id}" title="Editar campaña">✏️</button>
           <button class="btn-eliminar" data-id="${c.id}" title="Eliminar campaña">🗑️</button>
         </td>
