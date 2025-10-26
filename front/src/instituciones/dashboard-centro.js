@@ -134,9 +134,14 @@ const seccionDonantes = document.getElementById("seccion-donantes");
 const tablaBody = document.querySelector("#tabla-donantes tbody");
 const filtroGrupo = document.getElementById("filtro-grupo");
 const btnFiltro = document.getElementById("btn-aplicar-filtro");
+const filtroProvincia = document.getElementById('filtro-provincia');
+const filtroLocalidad = document.getElementById('filtro-localidad');
+const filtroBarrio = document.getElementById('filtro-barrio');
+const filtroApto = document.getElementById('filtro-apto');
 
 btnVerDonantes.addEventListener("click", async () => {
   toggleSeccion("donantes");
+  await inicializarFiltrosDonantes();
   await cargarDonantes();
 });
 
@@ -148,6 +153,13 @@ async function cargarDonantes() {
   const grupo = filtroGrupo.value;
   const params = new URLSearchParams();
   if (grupo) params.append("grupo", grupo);
+  const provinciaId = filtroProvincia?.value;
+  const localidadId = filtroLocalidad?.value;
+  const barrioId = filtroBarrio?.value;
+  if (provinciaId) params.append('provincia', provinciaId);
+  if (localidadId) params.append('localidad', localidadId);
+  if (barrioId) params.append('barrio', barrioId);
+  if (filtroApto?.checked) params.append('apto', 'true');
 
   try {
     const res = await fetch(`${API_BASE_URL}/api/donantes/filtro?${params.toString()}`, {
@@ -163,6 +175,52 @@ async function cargarDonantes() {
   } catch (err) {
     console.error("Error al cargar donantes:", err);
     tablaBody.innerHTML = `<tr><td colspan="7">Error al cargar donantes</td></tr>`;
+  }
+}
+
+async function inicializarFiltrosDonantes() {
+  try {
+    // Provincias
+    if (filtroProvincia && filtroProvincia.options.length <= 1) {
+      const resP = await fetch(`${API_BASE_URL}/api/provincias`);
+      const provincias = await resP.json();
+      filtroProvincia.innerHTML = '<option value="">Todas las provincias</option>';
+      provincias.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id; opt.textContent = p.nombre; filtroProvincia.appendChild(opt);
+      });
+    }
+
+    // Barrios (lista simple)
+    if (filtroBarrio && filtroBarrio.options.length <= 1) {
+      const resB = await fetch(`${API_BASE_URL}/api/barrios`);
+      const barrios = await resB.json();
+      filtroBarrio.innerHTML = '<option value="">Todos los barrios</option>';
+      const vistos = new Set();
+      barrios.forEach(b => {
+        const nombre = (b.nombre||'').toLowerCase();
+        if (vistos.has(nombre)) return; vistos.add(nombre);
+        const opt = document.createElement('option');
+        opt.value = b.id; opt.textContent = b.nombre; filtroBarrio.appendChild(opt);
+      });
+    }
+
+    // Localidades dependientes de provincia
+    filtroProvincia?.addEventListener('change', async () => {
+      const provId = filtroProvincia.value;
+      filtroLocalidad.innerHTML = '<option value="">Todas las localidades</option>';
+      filtroLocalidad.disabled = true;
+      if (!provId) return;
+      const resL = await fetch(`${API_BASE_URL}/api/localidades?provincia_id=${provId}`);
+      const localidades = await resL.json();
+      localidades.forEach(l => {
+        const opt = document.createElement('option');
+        opt.value = l.id; opt.textContent = l.nombre; filtroLocalidad.appendChild(opt);
+      });
+      filtroLocalidad.disabled = false;
+    }, { once: true });
+  } catch (e) {
+    console.error('Error inicializando filtros de donantes:', e);
   }
 }
 

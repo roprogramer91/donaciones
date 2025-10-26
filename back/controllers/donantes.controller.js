@@ -115,7 +115,11 @@ const filtrarDonantes = async (req, res) => {
       return { ...d, apto_para_donar: apto, dias_restantes };
     });
 
-    res.json(resultado);
+    // Filtro opcional por aptitud (útil para campañas)
+    const soloAptos = String(req.query.apto).toLowerCase() === 'true';
+    const salida = soloAptos ? resultado.filter(d => d.apto_para_donar) : resultado;
+
+    res.json(salida);
   } catch (error) {
     console.error('Error al filtrar donantes:', error);
     res.status(500).json({ error: 'Error interno al filtrar donantes' });
