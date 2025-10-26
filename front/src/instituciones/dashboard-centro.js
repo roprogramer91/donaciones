@@ -251,10 +251,19 @@ async function cargarResumen() {
     const campanias = resCamp.ok ? await resCamp.json() : [];
     const hoy = new Date();
     const isActiva = (c) => {
-      if (typeof c.estado === 'string' && c.estado.toLowerCase().includes('act')) return true;
       const fi = c.fecha_inicio ? new Date(c.fecha_inicio) : null;
       const ff = c.fecha_fin ? new Date(c.fecha_fin) : null;
-      return fi && ff && fi <= hoy && hoy <= ff;
+      // Si hay fechas, prevalecen sobre el texto del estado
+      if (fi || ff) {
+        if (fi && ff) return fi <= hoy && hoy <= ff;
+        if (fi && !ff) return fi <= hoy; // iniciada sin fin
+        if (!fi && ff) return hoy <= ff; // fin definido, sin inicio
+      }
+      const est = (c.estado || '').toLowerCase();
+      if (est.includes('cancel')) return false;
+      if (est.includes('final')) return false;
+      if (est.includes('act')) return true;
+      return false;
     };
     const activas = (campanias || []).filter(isActiva).length;
     const elActivas = document.getElementById('campanias-activas');
@@ -271,12 +280,10 @@ async function cargarResumen() {
     const elProx = document.getElementById('campanias-proximas');
     if (elProx) elProx.textContent = String(proximas);
 
-    // Ultima campaña finalizada y siguiente campaña
+    // Campañas finalizadas (conteo) y siguiente campaña
     const finalizadas = (campanias || []).filter(c => c.fecha_fin && new Date(c.fecha_fin) < hoy);
-    finalizadas.sort((a,b) => new Date(b.fecha_fin) - new Date(a.fecha_fin));
-    const ultima = finalizadas[0];
-    const elUlt = document.getElementById('campania-ultima');
-    if (elUlt) elUlt.textContent = ultima ? `${ultima.nombre || 'Campaña'} — ${new Date(ultima.fecha_fin).toLocaleDateString()}` : '--';
+    const elFin = document.getElementById('campanias-finalizadas');
+    if (elFin) elFin.textContent = String(finalizadas.length);
 
     const futuras = (campanias || []).filter(c => c.fecha_inicio && new Date(c.fecha_inicio) > hoy);
     futuras.sort((a,b) => new Date(a.fecha_inicio) - new Date(b.fecha_inicio));
