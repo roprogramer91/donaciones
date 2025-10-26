@@ -143,10 +143,6 @@ const filtroEdadMax = document.getElementById('filtro-edad-max');
 const filtroUltDonAntes = document.getElementById('filtro-ult-don-antes');
 const filtroDiasRestMax = document.getElementById('filtro-dias-rest-max');
 const btnLimpiarFiltro = document.getElementById('btn-limpiar-filtro');
-const btnExportarCSV = document.getElementById('btn-exportar-csv');
-const conteoDonantes = document.getElementById('conteo-donantes');
-
-let ultimoResultadoDonantes = [];
 
 btnVerDonantes.addEventListener("click", async () => {
   toggleSeccion("donantes");
@@ -200,14 +196,10 @@ async function cargarDonantes() {
     const provIds = new Set((data || []).map(d => d.provincia_id).filter(Boolean));
     await ensureProvincias();
     await ensureLocalidadesFor(provIds);
-    ultimoResultadoDonantes = Array.isArray(data) ? data : [];
-    actualizarConteoYExport();
     renderDonantes(data);
   } catch (err) {
     console.error("Error al cargar donantes:", err);
     tablaBody.innerHTML = `<tr><td colspan="7">Error al cargar donantes</td></tr>`;
-    ultimoResultadoDonantes = [];
-    actualizarConteoYExport();
   }
 }
 
@@ -257,52 +249,6 @@ async function inicializarFiltrosDonantes() {
   }
 }
 
-function actualizarConteoYExport() {
-  if (conteoDonantes) {
-    const n = ultimoResultadoDonantes.length;
-    conteoDonantes.textContent = ${n} ;
-  }
-  if (btnExportarCSV) {
-    btnExportarCSV.disabled = ultimoResultadoDonantes.length === 0;
-    btnExportarCSV.onclick = () => exportarCSVDonantes();
-  }
-}
-
-function exportarCSVDonantes() {
-  if (!ultimoResultadoDonantes.length) return;
-  const headers = ['Nombre','Grupo','Provincia','Localidad','TelÈfono','Apto','DÌas restantes','Email'];
-  const rows = ultimoResultadoDonantes.map(d => {
-    const provinciaNombre = d.provincia_nombre || provinciasById.get(d.provincia_id) || '';
-    const localidadNombre = d.localidad_nombre || localidadesById.get(d.localidad_id) || '';
-    const nombreCompleto = ${d.nombre || ''} .trim();
-    const aptoTxt = d.apto_para_donar ? 'SÌ' : 'No';
-    return [
-      nombreCompleto,
-      d.grupo_sanguineo || '',
-      provinciaNombre,
-      localidadNombre,
-      d.telefono || '',
-      aptoTxt,
-      d.dias_restantes ?? '',
-      d.email || ''
-    ];
-  });
-  const escape = (val) => {
-    const s = String(val ?? '');
-    const needs = /[",\n]/.test(s);
-    return needs ? '"' + s.replace(/"/g, '""') + '"' : s;
-  };
-  const csv = [headers, ...rows].map(r => r.map(escape).join(',')).join('\n');
-  const bom = '\uFEFF';
-  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const now = new Date();
-  const pad = (x) => String(x).padStart(2, '0');
-  const fname = donantes_filtrados__.csv;
-  a.href = url; a.download = fname; document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
-}
 function renderDonantes(donantes) {
   tablaBody.innerHTML = "";
   if (!donantes || !donantes.length) {
@@ -580,9 +526,6 @@ formCampania.addEventListener('submit', async (e) => {
     alert('Error al guardar la campa√±a: ' + error.message);
   }
 });
-
-
-
 
 
 
