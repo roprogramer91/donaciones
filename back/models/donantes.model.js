@@ -121,9 +121,13 @@ const filtrar = async (filtros) => {
   }
 
   let sql = `
-    SELECT d.*, u.nombre, u.apellido, u.email
+    SELECT d.*, u.nombre, u.apellido, u.email,
+           p.nombre AS provincia_nombre,
+           l.nombre AS localidad_nombre
     FROM donantes d
     JOIN usuarios u ON d.usuario_id = u.id
+    LEFT JOIN provincias p ON d.provincia_id = p.id
+    LEFT JOIN localidades l ON d.localidad_id = l.id
   `;
 
   if (condiciones.length > 0) {

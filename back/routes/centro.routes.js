@@ -6,6 +6,6 @@ const CentrosController = require('../controllers/centros.controller');
 // Perfil del centro autenticado
 router.get('/me', CentrosController.obtenerMiPerfil);
 router.put('/me', CentrosController.actualizarMiPerfil);
+router.get('/summary', CentrosController.obtenerResumen);
 
 module.exports = router;
-

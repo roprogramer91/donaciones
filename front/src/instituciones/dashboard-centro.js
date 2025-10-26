@@ -32,26 +32,7 @@ function toggleSeccion(seccion) {
 }
 
 // Catálogos en memoria para nombres de provincias/localidades
-const provinciasById = new Map();
-const localidadesById = new Map();
-const provinciasCargadasParaLocalidades = new Set();
-
-async function ensureProvincias() {
-  if (provinciasById.size > 0) return;
-  const res = await fetch(`${API_BASE_URL}/api/provincias`);
-  const provincias = await res.json();
-  provincias.forEach(p => provinciasById.set(p.id, p.nombre));
-}
-
-async function ensureLocalidadesFor(provinciaIds) {
-  for (const provId of provinciaIds) {
-    if (!provId || provinciasCargadasParaLocalidades.has(provId)) continue;
-    const res = await fetch(`${API_BASE_URL}/api/localidades?provincia_id=${provId}`);
-    const localidades = await res.json();
-    localidades.forEach(l => localidadesById.set(l.id, l.nombre));
-    provinciasCargadasParaLocalidades.add(provId);
-  }
-}
+// nombres vienen del backend\n
 
 // ---- Loader inicial ----
 setTimeout(() => {
@@ -142,7 +123,6 @@ const filtroBarrio = document.getElementById('filtro-barrio');
 const filtroApto = document.getElementById('filtro-apto');
 const filtroEdadMin = document.getElementById('filtro-edad-min');
 const filtroEdadMax = document.getElementById('filtro-edad-max');
-const filtroUltDonAntes = document.getElementById('filtro-ult-don-antes');
 const filtroDiasRestMax = document.getElementById('filtro-dias-rest-max');
 const btnLimpiarFiltro = document.getElementById('btn-limpiar-filtro');
 const btnExportarCSV = document.getElementById('btn-exportar-csv');
@@ -171,7 +151,6 @@ btnLimpiarFiltro?.addEventListener('click', async () => {
   if (filtroApto) filtroApto.checked = false;
   if (filtroEdadMin) filtroEdadMin.value = '';
   if (filtroEdadMax) filtroEdadMax.value = '';
-  if (filtroUltDonAntes) filtroUltDonAntes.value = '';
   if (filtroDiasRestMax) filtroDiasRestMax.value = '';
   await cargarDonantes();
 });
@@ -189,7 +168,6 @@ async function cargarDonantes() {
   if (filtroApto?.checked) params.append('apto', 'true');
   const eMin = parseInt(filtroEdadMin?.value || ''); if (!isNaN(eMin)) params.append('edad_min', String(eMin));
   const eMax = parseInt(filtroEdadMax?.value || ''); if (!isNaN(eMax)) params.append('edad_max', String(eMax));
-  const ud = filtroUltDonAntes?.value; if (ud) params.append('ultima_donacion_antes', ud);
   const drm = parseInt(filtroDiasRestMax?.value || ''); if (!isNaN(drm)) params.append('dias_restantes_max', String(drm));
 
   try {
@@ -199,10 +177,7 @@ async function cargarDonantes() {
 
     if (!res.ok) throw new Error("Error al obtener donantes");
     const data = await res.json();
-    const provIds = new Set((data || []).map(d => d.provincia_id).filter(Boolean));
-    await ensureProvincias();
-    await ensureLocalidadesFor(provIds);
-    ultimoResultadoDonantes = Array.isArray(data) ? data : [];
+        ultimoResultadoDonantes = Array.isArray(data) ? data : [];
     actualizarConteoYExport();
     renderDonantes(data);
   } catch (err) {
@@ -216,80 +191,34 @@ async function cargarDonantes() {
 // ----- Resumen: donantes aptos, campanias activas y proximas -----
 async function cargarResumen() {
   try {
-    // Donantes aptos hoy
-    const resDonAptos = await fetch(`${API_BASE_URL}/api/donantes/filtro?apto=true`, { headers: authHeaders() });
-    const listaAptos = resDonAptos.ok ? await resDonAptos.json() : [];
-    const aptos = Array.isArray(listaAptos) ? listaAptos.length : 0;
-    const elAptos = document.getElementById('donantes-activos');
-    if (elAptos) elAptos.textContent = String(aptos);
-
-    // Total donantes y breakdown por grupo
-    const resDonTodos = await fetch(`${API_BASE_URL}/api/donantes`, { headers: authHeaders() });
-    const donTodos = resDonTodos.ok ? await resDonTodos.json() : [];
-    const total = Array.isArray(donTodos) ? donTodos.length : 0;
-    const elTot = document.getElementById('donantes-totales');
-    if (elTot) elTot.textContent = String(total);
-
-    // Grupos: contar aptos por grupo
-    const gruposOrden = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
-    const conteo = new Map(gruposOrden.map(g => [g, 0]));
-    (listaAptos || []).forEach(d => {
-      if (d.grupo_sanguineo && conteo.has(d.grupo_sanguineo)) {
-        conteo.set(d.grupo_sanguineo, (conteo.get(d.grupo_sanguineo) || 0) + 1);
-      }
+    const res = await fetch(`${API_BASE_URL}/api/centro/summary`, {
+      headers: authHeaders({ 'X-Centro-Id': getCentroId() })
     });
+    if (!res.ok) throw new Error('No se pudo cargar el resumen');
+    const s = await res.json();
+
+    const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = String(val ?? '--'); };
+    setText('donantes-activos', s.donantes_aptos_hoy);
+    setText('donantes-totales', s.donantes_totales);
+    setText('campanias-activas', s.campanias_activas);
+    setText('campanias-proximas', s.proximas_14_dias);
+    setText('campanias-finalizadas', s.campanias_finalizadas);
+
     const contGrupos = document.getElementById('resumen-grupos');
-    if (contGrupos) {
-      contGrupos.innerHTML = gruposOrden.map(g => {
-        const n = conteo.get(g) || 0;
-        return `<span style="background:#e7f0fe;color:#1f3c80;padding:0.25rem 0.5rem;border-radius:999px;font-size:0.85rem;">${g}: <b>${n}</b></span>`;
-      }).join('');
+    if (contGrupos && s.aptos_por_grupo) {
+      const orden = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
+      contGrupos.innerHTML = orden.map(g => `<span style="background:#e7f0fe;color:#1f3c80;padding:0.25rem 0.5rem;border-radius:999px;font-size:0.85rem;">${g}: <b>${s.aptos_por_grupo[g] || 0}</b></span>`).join('');
     }
 
-    // Campanias
-    const resCamp = await fetch(`${API_BASE_URL}/api/campanias`, { headers: authHeaders() });
-    const campanias = resCamp.ok ? await resCamp.json() : [];
-    const hoy = new Date();
-    const isActiva = (c) => {
-      const fi = c.fecha_inicio ? new Date(c.fecha_inicio) : null;
-      const ff = c.fecha_fin ? new Date(c.fecha_fin) : null;
-      // Si hay fechas, prevalecen sobre el texto del estado
-      if (fi || ff) {
-        if (fi && ff) return fi <= hoy && hoy <= ff;
-        if (fi && !ff) return fi <= hoy; // iniciada sin fin
-        if (!fi && ff) return hoy <= ff; // fin definido, sin inicio
-      }
-      const est = (c.estado || '').toLowerCase();
-      if (est.includes('cancel')) return false;
-      if (est.includes('final')) return false;
-      if (est.includes('act')) return true;
-      return false;
-    };
-    const activas = (campanias || []).filter(isActiva).length;
-    const elActivas = document.getElementById('campanias-activas');
-    if (elActivas) elActivas.textContent = String(activas);
-
-    // Proximas 14 dias
-    const en14 = new Date(hoy); en14.setDate(hoy.getDate() + 14);
-    const proximas = (campanias || []).filter(c => {
-      const fi = c.fecha_inicio ? new Date(c.fecha_inicio) : null;
-      if (!fi) return false;
-      if (typeof c.estado === 'string' && c.estado.toLowerCase().includes('cancel')) return false;
-      return fi > hoy && fi <= en14;
-    }).length;
-    const elProx = document.getElementById('campanias-proximas');
-    if (elProx) elProx.textContent = String(proximas);
-
-    // Campañas finalizadas (conteo) y siguiente campaña
-    const finalizadas = (campanias || []).filter(c => c.fecha_fin && new Date(c.fecha_fin) < hoy);
-    const elFin = document.getElementById('campanias-finalizadas');
-    if (elFin) elFin.textContent = String(finalizadas.length);
-
-    const futuras = (campanias || []).filter(c => c.fecha_inicio && new Date(c.fecha_inicio) > hoy);
-    futuras.sort((a,b) => new Date(a.fecha_inicio) - new Date(b.fecha_inicio));
-    const siguiente = futuras[0];
     const elSig = document.getElementById('campania-siguiente');
-    if (elSig) elSig.textContent = siguiente ? `${siguiente.nombre || 'Campaña'} — ${new Date(siguiente.fecha_inicio).toLocaleDateString()}` : '--';
+    if (elSig) {
+      if (s.siguiente_campania) {
+        const f = new Date(s.siguiente_campania.fecha_inicio);
+        elSig.textContent = `${s.siguiente_campania.nombre || 'Campaña'} — ${f.toLocaleDateString()}`;
+      } else {
+        elSig.textContent = '--';
+      }
+    }
 
   } catch (e) {
     console.error('Error cargando resumen:', e);
@@ -357,8 +286,8 @@ function exportarCSVDonantes() {
   if (!ultimoResultadoDonantes.length) return;
   const headers = ['Nombre','Grupo','Provincia','Localidad','Telefono','Apto','Dias restantes','Email'];
   const rows = ultimoResultadoDonantes.map(d => {
-    const provinciaNombre = d.provincia_nombre || provinciasById.get(d.provincia_id) || '';
-    const localidadNombre = d.localidad_nombre || localidadesById.get(d.localidad_id) || '';
+    const provinciaNombre = d.provincia_nombre || '';
+    const localidadNombre = d.localidad_nombre || '';
     const nombreCompleto = `${d.nombre || ''} ${d.apellido || ''}`.trim();
     const aptoTxt = d.apto_para_donar ? 'Si' : 'No';
     return [
@@ -440,9 +369,9 @@ async function cargarCampanias() {
       tr.innerHTML = `
         <td>${c.nombre}</td>
         <td>${fechaInicio} a ${fechaFin}</td>
-        <td>${c.localidad || c.localidad_nombre || c.localidad || '--'}</td>
-        <td>${c.estado ?? ''}</td>
-        <td>
+        <td>${c.localidad_nombre || c.localidad || '--'}</td>
+        <td>${c.estado_calculado ?? c.estado ?? '--'}</td>
+
           <button class="btn-editar" data-id="${c.id}" title="Editar campaña">✏️</button>
           <button class="btn-eliminar" data-id="${c.id}" title="Eliminar campaña">🗑️</button>
         </td>
@@ -665,6 +594,7 @@ formCampania.addEventListener('submit', async (e) => {
     alert('Error al guardar la campaña: ' + error.message);
   }
 });
+
 
 
 
