@@ -115,9 +115,58 @@ const filtrarDonantes = async (req, res) => {
       return { ...d, apto_para_donar: apto, dias_restantes };
     });
 
+    // Filtros adicionales para campañas
+    let salida = resultado;
+
     // Filtro opcional por aptitud (útil para campañas)
     const soloAptos = String(req.query.apto).toLowerCase() === 'true';
-    const salida = soloAptos ? resultado.filter(d => d.apto_para_donar) : resultado;
+    if (soloAptos) {
+      salida = salida.filter(d => d.apto_para_donar);
+    }
+
+    // Edad min/max
+    const edadMin = req.query.edad_min ? parseInt(req.query.edad_min, 10) : null;
+    const edadMax = req.query.edad_max ? parseInt(req.query.edad_max, 10) : null;
+    if (edadMin !== null || edadMax !== null) {
+      const calcEdad = (fecha_nac) => {
+        if (!fecha_nac) return null;
+        const fn = new Date(fecha_nac);
+        let edad = hoy.getFullYear() - fn.getFullYear();
+        const m = hoy.getMonth() - fn.getMonth();
+        if (m < 0 || (m === 0 && hoy.getDate() < fn.getDate())) edad--;
+        return edad;
+      };
+      salida = salida.filter(d => {
+        const edad = calcEdad(d.fecha_nacimiento);
+        if (edad === null || isNaN(edad)) return false;
+        if (edadMin !== null && edad < edadMin) return false;
+        if (edadMax !== null && edad > edadMax) return false;
+        return true;
+      });
+    }
+
+    // Última donación antes de fecha (incluye nulos)
+    if (req.query.ultima_donacion_antes) {
+      const limite = new Date(req.query.ultima_donacion_antes);
+      if (!isNaN(limite)) {
+        salida = salida.filter(d => {
+          if (!d.fecha_ultima_donacion) return true; // sin registro, incluir
+          const f = new Date(d.fecha_ultima_donacion);
+          return f <= limite;
+        });
+      }
+    }
+
+    // Días restantes máximo
+    if (req.query.dias_restantes_max) {
+      const max = parseInt(req.query.dias_restantes_max, 10);
+      if (!isNaN(max)) {
+        salida = salida.filter(d => {
+          const dr = (d.dias_restantes ?? 0);
+          return dr <= max;
+        });
+      }
+    }
 
     res.json(salida);
   } catch (error) {

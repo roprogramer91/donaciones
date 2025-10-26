@@ -138,6 +138,10 @@ const filtroProvincia = document.getElementById('filtro-provincia');
 const filtroLocalidad = document.getElementById('filtro-localidad');
 const filtroBarrio = document.getElementById('filtro-barrio');
 const filtroApto = document.getElementById('filtro-apto');
+const filtroEdadMin = document.getElementById('filtro-edad-min');
+const filtroEdadMax = document.getElementById('filtro-edad-max');
+const filtroUltDonAntes = document.getElementById('filtro-ult-don-antes');
+const filtroDiasRestMax = document.getElementById('filtro-dias-rest-max');
 
 btnVerDonantes.addEventListener("click", async () => {
   toggleSeccion("donantes");
@@ -160,6 +164,10 @@ async function cargarDonantes() {
   if (localidadId) params.append('localidad', localidadId);
   if (barrioId) params.append('barrio', barrioId);
   if (filtroApto?.checked) params.append('apto', 'true');
+  const eMin = parseInt(filtroEdadMin?.value || ''); if (!isNaN(eMin)) params.append('edad_min', String(eMin));
+  const eMax = parseInt(filtroEdadMax?.value || ''); if (!isNaN(eMax)) params.append('edad_max', String(eMax));
+  const ud = filtroUltDonAntes?.value; if (ud) params.append('ultima_donacion_antes', ud);
+  const drm = parseInt(filtroDiasRestMax?.value || ''); if (!isNaN(drm)) params.append('dias_restantes_max', String(drm));
 
   try {
     const res = await fetch(`${API_BASE_URL}/api/donantes/filtro?${params.toString()}`, {
