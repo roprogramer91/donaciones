@@ -88,8 +88,8 @@ module.exports = CampaniasModel;
 
 
 // Extra methods
-CampaniasModel.obtenerPorCentro = async function(centroId) {
-  const query = 
+CampaniasModel.obtenerPorCentro = async function (centroId) {
+  const query = `
     SELECT 
       c.id,
       c.centro_id,
@@ -107,9 +107,9 @@ CampaniasModel.obtenerPorCentro = async function(centroId) {
     FROM campanias c
     LEFT JOIN localidades l ON c.localidad_id = l.id
     LEFT JOIN barrios b ON c.barrio_id = b.id
-    WHERE c.centro_id = 
+    WHERE c.centro_id = $1
     ORDER BY c.fecha_inicio NULLS LAST, c.id DESC;
-  ;
+  `;
   const { rows } = await pool.query(query, [centroId]);
   return rows;
 };

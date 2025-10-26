@@ -4,7 +4,28 @@ const CampaniasController = {
   async obtenerCampanias(req, res) {
     try {
       const campanias = await CampaniasModel.obtenerTodas();
-      res.json(campanias);
+            const hoy = new Date();
+      const mapEstado = (c) => {
+        const fi = c.fecha_inicio ? new Date(c.fecha_inicio) : null;
+        const ff = c.fecha_fin ? new Date(c.fecha_fin) : null;
+        if (fi && ff) {
+          if (fi <= hoy && hoy <= ff) return 'activa';
+          if (ff < hoy) return 'finalizada';
+          if (fi > hoy) return 'futura';
+        } else if (fi && !ff) {
+          return fi <= hoy ? 'activa' : 'futura';
+        } else if (!fi && ff) {
+          return hoy <= ff ? 'activa' : 'finalizada';
+        }
+        const est = (c.estado || '').toLowerCase();
+        if (est.includes('cancel')) return 'cancelada';
+        if (est.includes('final')) return 'finalizada';
+        if (est.includes('act')) return 'activa';
+        if (est.includes('fut')) return 'futura';
+        return 'desconocido';
+      };
+      const resp = campanias.map(c => ({ ...c, estado_calculado: mapEstado(c) }));
+      res.json(resp);
     } catch (error) {
       console.error('Error al obtener campañas:', error);
       res.status(500).json({ error: 'Error al obtener campañas' });
@@ -81,4 +102,5 @@ const CampaniasController = {
 };
 
 module.exports = CampaniasController;
+
 
