@@ -260,7 +260,7 @@ async function inicializarFiltrosDonantes() {
 function actualizarConteoYExport() {
   if (conteoDonantes) {
     const n = ultimoResultadoDonantes.length;
-    conteoDonantes.textContent = ${n} ;
+    conteoDonantes.textContent = `${n} ${n === 1 ? 'resultado' : 'resultados'}`;
   }
   if (btnExportarCSV) {
     btnExportarCSV.disabled = ultimoResultadoDonantes.length === 0;
@@ -270,12 +270,12 @@ function actualizarConteoYExport() {
 
 function exportarCSVDonantes() {
   if (!ultimoResultadoDonantes.length) return;
-  const headers = ['Nombre','Grupo','Provincia','Localidad','TelÈfono','Apto','DÌas restantes','Email'];
+  const headers = ['Nombre','Grupo','Provincia','Localidad','Telefono','Apto','Dias restantes','Email'];
   const rows = ultimoResultadoDonantes.map(d => {
     const provinciaNombre = d.provincia_nombre || provinciasById.get(d.provincia_id) || '';
     const localidadNombre = d.localidad_nombre || localidadesById.get(d.localidad_id) || '';
-    const nombreCompleto = ${d.nombre || ''} .trim();
-    const aptoTxt = d.apto_para_donar ? 'SÌ' : 'No';
+    const nombreCompleto = `${d.nombre || ''} ${d.apellido || ''}`.trim();
+    const aptoTxt = d.apto_para_donar ? 'Si' : 'No';
     return [
       nombreCompleto,
       d.grupo_sanguineo || '',
@@ -299,7 +299,7 @@ function exportarCSVDonantes() {
   const a = document.createElement('a');
   const now = new Date();
   const pad = (x) => String(x).padStart(2, '0');
-  const fname = donantes_filtrados__.csv;
+  const fname = `donantes_filtrados_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.csv`;
   a.href = url; a.download = fname; document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
 }
@@ -320,7 +320,7 @@ function renderDonantes(donantes) {
       <td>${provinciaNombre}</td>
       <td>${localidadNombre}</td>
       <td>${d.telefono || ""}</td>
-      <td>${d.apto_para_donar ? "S√≠" : "No"}</td>
+      <td>${d.apto_para_donar ? "Si" : "No"}</td>
       <td>${d.dias_restantes ?? ""}</td>
     `;
     tablaBody.appendChild(tr);
@@ -580,6 +580,7 @@ formCampania.addEventListener('submit', async (e) => {
     alert('Error al guardar la campa√±a: ' + error.message);
   }
 });
+
 
 
 
