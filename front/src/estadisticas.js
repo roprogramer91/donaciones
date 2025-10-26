@@ -3,7 +3,7 @@ import { API_BASE_URL } from "./config.js";
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     const [donantes, solicitantes] = await Promise.all([
-      fetch(`${API_BASE_URL}/donantes`).then(r => r.json()),
+      fetch(`${API_BASE_URL}/api/donantes`).then(r => r.json()),
       fetch(`${API_BASE_URL}/solicitudes`).then(r => r.json())
     ]);
 
@@ -101,3 +101,4 @@ new Chart(document.getElementById("graficoEdades"), {
     console.error("Error al cargar estadísticas:", err);
   }
 });
+

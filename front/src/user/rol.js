@@ -1,4 +1,5 @@
 // src/rol.js
+import { API_BASE_URL } from '../config.js';
 document.getElementById('btn-donante').onclick = () => elegirRol(['donante']);
 document.getElementById('btn-solicitante').onclick = () => elegirRol(['solicitante']);
 document.getElementById('btn-ambos').onclick = () => elegirRol(['donante', 'solicitante']);
@@ -16,7 +17,7 @@ async function elegirRol(roles) {
 
   try {
  
-    const res = await fetch('http://localhost:3000/api/users/roles', {
+    const res = await fetch(`${API_BASE_URL}/api/users/roles`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
