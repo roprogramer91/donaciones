@@ -37,7 +37,26 @@ const CampaniasController = {
       const { id } = req.params;
       const campania = await CampaniasModel.obtenerPorId(id);
       if (!campania) return res.status(404).json({ error: 'Campaña no encontrada' });
-      res.json(campania);
+            const hoy = new Date();
+      const fi = campania.fecha_inicio ? new Date(campania.fecha_inicio) : null;
+      const ff = campania.fecha_fin ? new Date(campania.fecha_fin) : null;
+      let estado_calculado = 'desconocido';
+      if (fi && ff) {
+        if (fi <= hoy && hoy <= ff) estado_calculado = 'activa';
+        else if (ff < hoy) estado_calculado = 'finalizada';
+        else if (fi > hoy) estado_calculado = 'futura';
+      } else if (fi && !ff) {
+        estado_calculado = fi <= hoy ? 'activa' : 'futura';
+      } else if (!fi && ff) {
+        estado_calculado = hoy <= ff ? 'activa' : 'finalizada';
+      } else {
+        const est = (campania.estado || '').toLowerCase();
+        if (est.includes('cancel')) estado_calculado = 'cancelada';
+        else if (est.includes('final')) estado_calculado = 'finalizada';
+        else if (est.includes('act')) estado_calculado = 'activa';
+        else if (est.includes('fut')) estado_calculado = 'futura';
+      }
+      res.json({ ...campania, estado_calculado });
     } catch (error) {
       console.error('Error al obtener campaña por ID:', error);
       res.status(500).json({ error: 'Error al obtener campaña' });
@@ -102,5 +121,6 @@ const CampaniasController = {
 };
 
 module.exports = CampaniasController;
+
 
 
