@@ -59,6 +59,8 @@ setTimeout(() => {
   bienvenida.textContent = `Bienvenido, ${centroNombre}!`;
   loader.style.display = "none";
   contenido.style.display = "block";
+  // Cargar resumen al mostrar el panel
+  cargarResumen();
 }, 800);
 
 // ---- Logout ----
@@ -208,6 +210,46 @@ async function cargarDonantes() {
     tablaBody.innerHTML = `<tr><td colspan="7">Error al cargar donantes</td></tr>`;
     ultimoResultadoDonantes = [];
     actualizarConteoYExport();
+  }
+}
+
+// ----- Resumen: donantes aptos, campanias activas y proximas -----
+async function cargarResumen() {
+  try {
+    // Donantes aptos hoy
+    const resDon = await fetch(`${API_BASE_URL}/api/donantes/filtro?apto=true`, { headers: authHeaders() });
+    const listaAptos = resDon.ok ? await resDon.json() : [];
+    const aptos = Array.isArray(listaAptos) ? listaAptos.length : 0;
+    const elAptos = document.getElementById('donantes-activos');
+    if (elAptos) elAptos.textContent = String(aptos);
+
+    // Campanias
+    const resCamp = await fetch(`${API_BASE_URL}/api/campanias`, { headers: authHeaders() });
+    const campanias = resCamp.ok ? await resCamp.json() : [];
+    const hoy = new Date();
+    const isActiva = (c) => {
+      if (typeof c.estado === 'string' && c.estado.toLowerCase().includes('act')) return true;
+      const fi = c.fecha_inicio ? new Date(c.fecha_inicio) : null;
+      const ff = c.fecha_fin ? new Date(c.fecha_fin) : null;
+      return fi && ff && fi <= hoy && hoy <= ff;
+    };
+    const activas = (campanias || []).filter(isActiva).length;
+    const elActivas = document.getElementById('campanias-activas');
+    if (elActivas) elActivas.textContent = String(activas);
+
+    // Proximas 14 dias
+    const en14 = new Date(hoy); en14.setDate(hoy.getDate() + 14);
+    const proximas = (campanias || []).filter(c => {
+      const fi = c.fecha_inicio ? new Date(c.fecha_inicio) : null;
+      if (!fi) return false;
+      if (typeof c.estado === 'string' && c.estado.toLowerCase().includes('cancel')) return false;
+      return fi > hoy && fi <= en14;
+    }).length;
+    const elProx = document.getElementById('campanias-proximas');
+    if (elProx) elProx.textContent = String(proximas);
+
+  } catch (e) {
+    console.error('Error cargando resumen:', e);
   }
 }
 
