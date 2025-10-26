@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mi Perfil - Donante</title>
+  <link rel="stylesheet" href="perfil-donante.css" />
+</head>
+<body>
+  <div class="perfil-wrapper">
+    <header class="dashboard-header">
+      <div class="user-nombre" id="bienvenida">Mi Perfil</div>
+      <div class="header-icons">
+        <button class="icon-btn" id="btn-dashboard" title="Volver al dashboard">
+          <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/home.svg" alt="Dashboard"/>
+        </button>
+        <button class="icon-btn" id="logoutBtn" title="Cerrar sesión">
+          <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/log-out.svg" alt="Salir" />
+        </button>
+      </div>
+    </header>
+
+    <main class="perfil-main">
+      <h2>Mi perfil</h2>
+      <form id="perfil-form">
+        <div class="form-row">
+          <label>Nombre</label>
+          <input type="text" id="nombre" name="nombre" required disabled placeholder="Nombre" title="Nombre" />
+        </div>
+        <div class="form-row">
+          <label>Apellido</label>
+          <input type="text" id="apellido" name="apellido" required disabled placeholder="Apellido" title="Apellido" />
+        </div>
+        <div class="form-row">
+          <label>DNI</label>
+          <input type="text" id="dni" name="dni" disabled placeholder="DNI" title="Documento Nacional de Identidad" />
+        </div>
+        <div class="form-row">
+          <label>Email</label>
+          <input type="email" id="email" name="email" disabled placeholder="Correo electrónico" title="Correo electrónico" />
+        </div>
+        <div class="form-row">
+          <label>Grupo sanguíneo</label>
+          <input type="text" id="grupo_sanguineo" name="grupo_sanguineo" maxlength="5" required placeholder="Grupo sanguíneo" title="Grupo sanguíneo" />
+        </div>
+        <div class="form-row">
+          <label>Fecha de nacimiento</label>
+          <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" placeholder="Fecha de nacimiento" title="Fecha de nacimiento" />
+        </div>
+        <div class="form-row">
+          <label>Teléfono</label>
+          <input type="tel" id="telefono" name="telefono" placeholder="Teléfono" title="Teléfono" />
+        </div>
+        <!-- Podés sumar dropdowns para provincia, localidad, barrio, preferencias -->
+        <button type="submit" class="btn-accion">Guardar cambios</button>
+      </form>
+      <div id="perfil-mensaje"></div>
+      <a href="dashboard-donante.html" class="volver-dashboard">&lt; Volver al Dashboard</a>
+    </main>
+  </div>
+  <script type="module" src="perfil-donante.js"></script>
+</body>
+</html>

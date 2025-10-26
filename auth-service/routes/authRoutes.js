@@ -1,6 +1,9 @@
 const express = require('express');
 const passport = require('passport');
 const AuthController = require('../controllers/AuthController');
+const handleDniLogin = AuthController.handleDniLogin;
+const handleLoginCentro = AuthController.handleLoginCentro;
+
 require('dotenv').config();
 
 const router = express.Router();
@@ -40,5 +43,15 @@ router.get(
     });
   }
 );
+
+
+//LOGIN CON DNI 
+router.post('/dni-login', handleDniLogin);
+
+
+//Loguin para centro hemoterapia (similar a donante, pero con su propio controlador)
+router.post('/login-centro', handleLoginCentro);
+
+
 
 module.exports = router;

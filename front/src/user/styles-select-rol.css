@@ -1,0 +1,107 @@
+body {
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  background: #fff;
+  margin: 0;
+  color: #1e1e1e;
+}
+.main-rol {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff6f6;
+}
+.rol-container {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 18px rgba(139,0,0,0.07);
+  padding: 32px 32px 38px 32px;
+  min-width: 330px;
+  max-width: 480px;
+  width: 98vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+h1 {
+  color: #5a0000;
+  margin-bottom: 16px;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+}
+.bienvenida {
+  background: #fff3f3;
+  border-radius: 14px;
+  padding: 18px 10px 18px 10px;
+  margin-bottom: 34px;
+  text-align: center;
+}
+.bienvenida h2 {
+  color: #8b0000;
+  margin-bottom: 7px;
+  font-size: 1.22rem;
+  font-weight: 600;
+}
+.selector-rol {
+  display: flex;
+  gap: 18px;
+  margin: 10px 0 12px 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.rol-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff7f7;
+  color: #8b0000;
+  border: 2px solid #8b0000;
+  border-radius: 14px;
+  padding: 25px 38px;
+  font-size: 1.16rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 120px;
+  min-height: 90px;
+  margin: 0;
+  gap: 6px;
+  box-shadow: 0 2px 14px rgba(139,0,0,0.03);
+  transition: background 0.18s, color 0.18s, border 0.15s, box-shadow 0.12s;
+}
+.rol-btn span {
+  font-size: 1.8rem;
+  margin-bottom: 4px;
+}
+.rol-btn:hover, .rol-btn:focus {
+  background: #8b0000;
+  color: #fff;
+  border-color: #5a0000;
+  box-shadow: 0 4px 18px rgba(139,0,0,0.13);
+}
+.rol-btn.ambos:hover {
+  background: #a52a2a;
+  border-color: #a52a2a;
+}
+.info-opciones {
+  margin-top: 16px;
+  color: #8b0000;
+  font-size: 0.99rem;
+  min-height: 1.5em;
+  text-align: center;
+}
+/* Responsive */
+@media (max-width: 600px) {
+  .rol-container {
+    min-width: 0;
+    max-width: 99vw;
+    padding: 10px 1vw 18px 1vw;
+  }
+  .selector-rol { gap: 9px; }
+  .rol-btn {
+    padding: 16px 4vw;
+    font-size: 1.02rem;
+    min-width: 80px;
+    min-height: 70px;
+  }
+}

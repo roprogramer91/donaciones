@@ -1,0 +1,431 @@
+/* ===============================
+   ESTILO GENERAL
+================================= */
+body {
+  background: #f5f6fa;
+  font-family: 'Poppins', Arial, sans-serif;
+  margin: 0;
+  color: #222;
+}
+
+.dashboard-centro-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===============================
+   HEADER
+================================= */
+.dashboard-centro-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  box-shadow: 0 2px 8px #e0e0e0;
+  padding: 1rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.centro-nombre#bienvenida-centro {
+  color: #2e5dbe;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.header-icons {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.icon-btn:hover {
+  background: #e7f0fe;
+}
+
+/* ===============================
+   CONTENIDO PRINCIPAL
+================================= */
+.dashboard-centro-main {
+  flex: 1;
+  max-width: 1100px;
+  margin: 1.5rem auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  padding: 0 1rem;
+}
+
+/* ===============================
+   RESUMEN
+================================= */
+.dashboard-centro-resumen {
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 12px #e2e7f7;
+  padding: 1.8rem 1.2rem;
+}
+
+.dashboard-centro-resumen h2 {
+  margin-top: 0;
+  font-size: 1.3rem;
+}
+
+.resumen-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  margin-top: 1rem;
+}
+
+.resumen-card {
+  background: #e7f0fe;
+  border-radius: 1rem;
+  padding: 1rem;
+  flex: 1 1 140px;
+  text-align: center;
+}
+
+.resumen-label {
+  display: block;
+  font-size: 0.95rem;
+  color: #6e7681;
+  margin-bottom: 0.3rem;
+}
+
+.resumen-card b {
+  font-size: 1.5rem;
+  color: #2560be;
+}
+
+/* ===============================
+   ACCIONES
+================================= */
+.dashboard-centro-acciones {
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 12px #e2e7f7;
+  padding: 1.8rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dashboard-centro-acciones h3 {
+  margin-top: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.acciones-lista {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+}
+
+.btn-accion-centro {
+  background: #2560be;
+  color: #fff;
+  border: none;
+  border-radius: 0.7rem;
+  padding: 0.8rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+
+.btn-accion-centro:hover {
+  background: #19397c;
+}
+
+/* ===============================
+   SECCIÓN DONANTES
+================================= */
+.dashboard-centro-seccion {
+  grid-column: 1 / -1;
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 12px #e2e7f7;
+  padding: 1.8rem 1.2rem;
+}
+
+.dashboard-centro-seccion h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1f3c80;
+  margin-bottom: 1rem;
+}
+
+/* Filtros */
+.filtros-donantes {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+}
+
+.filtros-donantes select,
+.filtros-donantes button {
+  font-family: inherit;
+  font-size: 1rem;
+  border-radius: 0.6rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #c5cce3;
+  background: #f8faff;
+}
+
+.filtros-donantes button {
+  background: #2560be;
+  color: white;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+}
+
+.filtros-donantes button:hover {
+  background: #19397c;
+}
+
+/* Tabla */
+.tabla-wrapper {
+  overflow-x: auto;
+  border-radius: 1rem;
+}
+
+#tabla-donantes {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+
+#tabla-donantes thead {
+  background: #e7f0fe;
+}
+
+#tabla-donantes th {
+  text-align: left;
+  padding: 0.8rem;
+  font-weight: 600;
+  color: #2e5dbe;
+  font-size: 0.95rem;
+}
+
+#tabla-donantes td {
+  padding: 0.7rem 0.8rem;
+  border-top: 1px solid #e3e6f0;
+  font-size: 0.94rem;
+  color: #333;
+}
+
+#tabla-donantes tbody tr:nth-child(even) {
+  background: #f7f9fc;
+}
+
+#tabla-donantes tbody tr:hover {
+  background: #eaf2ff;
+}
+
+/* ===============================
+   LOADER
+================================= */
+#loader-centro {
+  position: fixed;
+  inset: 0;
+  background: #dfe7fae6;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+}
+
+.spinner {
+  border: 6px solid #b1d0f9;
+  border-top: 6px solid #2560be;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===============================
+   RESPONSIVE DESIGN
+================================= */
+@media (max-width: 950px) {
+  .dashboard-centro-main {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  .dashboard-centro-resumen,
+  .dashboard-centro-acciones,
+  .dashboard-centro-seccion {
+    padding: 1.2rem;
+  }
+
+  .btn-accion-centro {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .centro-nombre#bienvenida-centro {
+    font-size: 1.05rem;
+  }
+
+  .dashboard-centro-resumen h2 {
+    font-size: 1.1rem;
+  }
+
+  .resumen-grid {
+    flex-direction: column;
+  }
+
+  .filtros-donantes {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #tabla-donantes th,
+  #tabla-donantes td {
+    font-size: 0.85rem;
+    padding: 0.6rem;
+  }
+}
+
+/* ===============================
+   FIX RESPONSIVE TABLA DONANTES
+================================= */
+.dashboard-centro-seccion {
+  width: 100%;
+  overflow: hidden;
+}
+
+@media (max-width: 600px) {
+  .dashboard-centro-main {
+    grid-template-columns: 1fr;
+    padding: 0.5rem;
+  }
+
+  #seccion-donantes {
+    margin: 0;
+    padding: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .tabla-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #tabla-donantes {
+    min-width: 700px;
+    width: 100%;
+    display: block;
+    border-collapse: collapse;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .dashboard-centro-seccion h3 {
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  .filtros-donantes {
+    justify-content: center;
+  }
+}
+
+
+/* ===============================
+   MODAL NUEVA CAMPAÑA
+================================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: #2560be;
+  text-align: center;
+}
+
+#form-campania {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+#form-campania input,
+#form-campania textarea {
+  padding: 0.6rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  font-family: inherit;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.btn-cancelar {
+  background: #ccc;
+  color: black;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+}
+
+.btn-cancelar:hover {
+  background: #b3b3b3;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
