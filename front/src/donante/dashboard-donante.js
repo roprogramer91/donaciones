@@ -144,12 +144,23 @@ function renderCampanias(campanias) {
     strong.textContent = c.nombre || 'Campaña';
     const p = document.createElement('p');
     p.textContent = c.descripcion || '';
+    const tag = document.createElement('span');
+    tag.style.cssText = 'display:inline-block;margin-top:4px;padding:2px 8px;border-radius:10px;font-size:0.78rem;background:#eee;color:#555;';
+    if (c.estado_calculado === 'activa') {
+      tag.textContent = 'Activa';
+      tag.style.background = '#d4f5d7'; tag.style.color = '#1b7e20';
+    } else if (c.estado_calculado === 'futura') {
+      const dias = typeof c.dias_para_inicio === 'number' && c.dias_para_inicio > 0 ? ` (en ${c.dias_para_inicio} dias)` : '';
+      tag.textContent = 'Proxima' + dias;
+      tag.style.background = '#e7f0ff'; tag.style.color = '#0a58ca';
+    }
     const btn = document.createElement('button');
     btn.textContent = 'Ver';
     btn.className = 'btn-secundario';
     btn.addEventListener('click', () => abrirModalCampania(c));
     info.appendChild(strong);
     info.appendChild(p);
+    info.appendChild(tag);
     info.appendChild(btn);
     card.appendChild(img);
     card.appendChild(info);

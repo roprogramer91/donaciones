@@ -277,12 +277,35 @@ async function campaniasParaDonante(req, res) {
       return 'desconocido';
     };
 
-    // Solo activas por requerimiento
-    const activas = campanias
-      .map(c => ({ ...c, estado_calculado: mapEstado(c) }))
-      .filter(c => c.estado_calculado === 'activa');
+    // Incluir activas y futuras para permitir preinscripción
+    const enriquecidas = campanias.map(c => {
+      const estado_calculado = mapEstado(c);
+      let dias_para_inicio = null;
+      if (c.fecha_inicio) {
+        const fi0 = new Date(c.fecha_inicio);
+        const fi = new Date(fi0.getFullYear(), fi0.getMonth(), fi0.getDate());
+        dias_para_inicio = Math.ceil((fi - hoy) / (1000*60*60*24));
+      }
+      const inscribible = ['activa','futura'].includes(estado_calculado);
+      return { ...c, estado_calculado, dias_para_inicio, inscribible };
+    });
 
-    res.json({ localidad_id: perfil.localidad_id, localidad_nombre: perfil.localidad_nombre, campanias: activas });
+    // Filtrar finalizadas/canceladas; ordenar: activas primero, luego futuras por fecha
+    const visibles = enriquecidas
+      .filter(c => c.estado_calculado === 'activa' || c.estado_calculado === 'futura')
+      .sort((a,b) => {
+        const rank = s => (s==='activa'?0:(s==='futura'?1:2));
+        const ra = rank(a.estado_calculado), rb = rank(b.estado_calculado);
+        if (ra !== rb) return ra - rb;
+        const da = a.fecha_inicio ? new Date(a.fecha_inicio) : null;
+        const db = b.fecha_inicio ? new Date(b.fecha_inicio) : null;
+        if (da && db) return da - db;
+        if (da && !db) return -1;
+        if (!da && db) return 1;
+        return 0;
+      });
+
+    res.json({ localidad_id: perfil.localidad_id, localidad_nombre: perfil.localidad_nombre, campanias: visibles });
   } catch (error) {
     console.error('Error al obtener campañas para donante:', error);
     res.status(500).json({ error: 'Error al obtener campañas' });
@@ -300,6 +323,29 @@ async function asistirCampania(req, res) {
 
     const camp = await CampaniasModel.obtenerPorId(campaniaId);
     if (!camp) return res.status(404).json({ error: 'Campaña no encontrada' });
+
+    // Validar que la campaña acepte inscripción (activa o futura)
+    const today = new Date();
+    const hoy = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const fi0 = camp.fecha_inicio ? new Date(camp.fecha_inicio) : null;
+    const ff0 = camp.fecha_fin ? new Date(camp.fecha_fin) : null;
+    const fi = fi0 ? new Date(fi0.getFullYear(), fi0.getMonth(), fi0.getDate()) : null;
+    const ff = ff0 ? new Date(ff0.getFullYear(), ff0.getMonth(), ff0.getDate()) : null;
+    const estado = (() => {
+      if (fi && ff) {
+        if (fi <= hoy && hoy <= ff) return 'activa';
+        if (ff < hoy) return 'finalizada';
+        if (fi > hoy) return 'futura';
+      } else if (fi && !ff) {
+        return fi <= hoy ? 'activa' : 'futura';
+      } else if (!fi && ff) {
+        return hoy <= ff ? 'activa' : 'finalizada';
+      }
+      return (camp.estado || '').toLowerCase();
+    })();
+    if (estado && ['finalizada','cancelada'].includes(estado)) {
+      return res.status(400).json({ error: 'La campaña no admite nuevas inscripciones' });
+    }
 
     const rel = await CampaniasModel.inscribirDonante(campaniaId, usuarioId);
     res.json({ mensaje: 'Inscripción registrada', inscripcion: rel });
