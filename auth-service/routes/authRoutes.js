@@ -8,7 +8,7 @@ require('dotenv').config();
 
 const router = express.Router();
 
-// Login Google (paso 1) - incluir redirect_to en state para preservarlo
+/*  */// Login Google (paso 1) - incluir redirect_to en state para preservarlo
 router.get('/auth/google', (req, res, next) => {
   const state = req.query.redirect_to ? encodeURIComponent(req.query.redirect_to) : '';
   return passport.authenticate('google', { scope: ['profile', 'email'], state })(req, res, next);

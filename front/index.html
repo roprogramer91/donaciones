@@ -82,8 +82,14 @@
       import { AUTH_URL } from './src/config.js';
       const link = document.getElementById('googleLoginLink');
       if (link) {
-        const redirect = encodeURIComponent(location.origin);
-        link.href = `${AUTH_URL}/auth/google?redirect_to=${redirect}`;
+        const returnTo = `${location.origin}/front/index.html`;
+        const url = `${AUTH_URL}/auth/google?redirect_to=${encodeURIComponent(returnTo)}`;
+        link.setAttribute('href', url);
+        link.addEventListener('click', (e) => {
+          // Fuerza navegación de nivel superior (evita previews embebidos)
+          e.preventDefault();
+          window.location.href = url;
+        });
       }
     </script>
 
