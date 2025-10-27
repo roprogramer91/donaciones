@@ -8,11 +8,11 @@ require('dotenv').config();
 
 const router = express.Router();
 
-// Login Google (paso 1)
-router.get(
-  '/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
+// Login Google (paso 1) - incluir redirect_to en state para preservarlo
+router.get('/auth/google', (req, res, next) => {
+  const state = req.query.redirect_to ? encodeURIComponent(req.query.redirect_to) : '';
+  return passport.authenticate('google', { scope: ['profile', 'email'], state })(req, res, next);
+});
 
 // Callback (paso 2)
 router.get(
@@ -25,33 +25,25 @@ router.get(
         return res.status(500).json({ error: 'Error en la autenticación' });
       }
 
-      // Redirección dinámica (desde query, o default a FRONTEND_URL)
-      const redirectTo =
-        req.query.redirect_to ||
-        process.env.FRONTEND_URL ||
-        'http://localhost:5500';
+      // Priorizar state (redirect_to) enviado en el inicio del flujo
+      const stateRedirect = req.query.state ? decodeURIComponent(req.query.state) : null;
+      const redirectTo = stateRedirect || req.query.redirect_to || process.env.FRONTEND_URL || 'http://localhost:5500';
 
-      // ¡Redirigí SIEMPRE agregando el token!
       if (redirectTo) {
-        // Tip: Podés guardar el redirect_to en la DB/log si querés auditar el tráfico.
         const urlConToken = `${redirectTo}?token=${result.token}`;
         return res.redirect(urlConToken);
       }
 
-      // En apps móviles/desktop, devolvé JSON si no hay redirect
       res.json(result);
     });
   }
 );
 
-
-//LOGIN CON DNI 
+// LOGIN CON DNI
 router.post('/dni-login', handleDniLogin);
 
-
-//Loguin para centro hemoterapia (similar a donante, pero con su propio controlador)
+// Login para centro hemoterapia (similar a donante, pero con su propio controlador)
 router.post('/login-centro', handleLoginCentro);
 
-
-
 module.exports = router;
+
