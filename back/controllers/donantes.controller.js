@@ -251,11 +251,15 @@ async function campaniasParaDonante(req, res) {
       return res.status(404).json({ error: 'No se encontró localidad del donante' });
     }
 
-    const hoy = new Date();
+    // Comparaciones por fecha (ignorar horas/zona horaria)
+    const today = new Date();
+    const hoy = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const campanias = await CampaniasModel.obtenerPorLocalidad(perfil.localidad_id);
     const mapEstado = (c) => {
-      const fi = c.fecha_inicio ? new Date(c.fecha_inicio) : null;
-      const ff = c.fecha_fin ? new Date(c.fecha_fin) : null;
+      const fi0 = c.fecha_inicio ? new Date(c.fecha_inicio) : null;
+      const ff0 = c.fecha_fin ? new Date(c.fecha_fin) : null;
+      const fi = fi0 ? new Date(fi0.getFullYear(), fi0.getMonth(), fi0.getDate()) : null;
+      const ff = ff0 ? new Date(ff0.getFullYear(), ff0.getMonth(), ff0.getDate()) : null;
       if (fi && ff) {
         if (fi <= hoy && hoy <= ff) return 'activa';
         if (ff < hoy) return 'finalizada';
