@@ -33,4 +33,7 @@ router.get('/filtro', authMiddleware, filtrarDonantes);
 //POST
 router.post('/', authMiddleware, crearDonante);
 
+//PUT
+router.put('/api/donantes/perfil', authMiddleware, editarPerfilDonante); 
+
 module.exports = router;

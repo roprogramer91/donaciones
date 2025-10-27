@@ -43,7 +43,7 @@ form.addEventListener('submit', async e => {
   };
   try {
     const res = await fetch(`${API_BASE_URL}/api/donantes/perfil`, {
-      method: 'PUT', // o PATCH según tu backend
+      method: 'PUT', 
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + token

@@ -140,6 +140,59 @@ const filtrar = async (filtros) => {
   return rows;
 };
 
+
+// Actualizar perfil por usuario_id (campos permitidos)
+const updatePerfilByUsuarioId = async (usuarioId, data) => {
+  const payload = { ...data };
+
+  // Normalizar strings vacíos a null donde aplique
+  ['fecha_nacimiento', 'telefono'].forEach(k => {
+    if (payload[k] === '') payload[k] = null;
+  });
+
+  // Solo estos campos se pueden editar
+  const allowed = [
+    'grupo_sanguineo',
+    'fecha_nacimiento',
+    'telefono',
+    'provincia_id',
+    'localidad_id',
+    'barrio_id',
+  ];
+
+  const sets = [];
+  const values = [];
+  let i = 1;
+
+  // Copiar únicamente campos permitidos
+  for (const k of allowed) {
+    if (Object.prototype.hasOwnProperty.call(payload, k) && payload[k] !== undefined) {
+      let val = payload[k];
+      if (['provincia_id', 'localidad_id', 'barrio_id'].includes(k) && val !== null && val !== '') {
+        const n = parseInt(val, 10);
+        if (!Number.isNaN(n)) val = n; else continue;
+      }
+      sets.push(`${k} = $${i++}`);
+      values.push(val);
+    }
+  }
+
+  // Si no hay nada que actualizar, devolvés el perfil actual
+  if (sets.length === 0) {
+    return await getPerfilCompletoByUsuarioId(usuarioId);
+  }
+
+  const sql = `UPDATE donantes SET ${sets.join(', ')} WHERE usuario_id = $${i} RETURNING *`;
+  values.push(usuarioId);
+
+  const { rows } = await db.query(sql, values);
+  if (!rows[0]) return null;
+
+  // Devolver el perfil completo con joins de nombres
+  return await getPerfilCompletoByUsuarioId(usuarioId);
+};
+
+
 module.exports = {
   obtenerTodos,
   guardar,
@@ -147,5 +200,6 @@ module.exports = {
   findByUsuarioId,
   findByEmail,
   getPerfilCompletoByUsuarioId,
+  updatePerfilByUsuarioId,
   filtrar
 };

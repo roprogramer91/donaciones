@@ -175,10 +175,60 @@ const filtrarDonantes = async (req, res) => {
   }
 };
 
+
+//EDITAR PERFIL DONANTE/////
+// Campos editables desde el perfil
+const ALLOWED = [
+  'grupo_sanguineo',
+  'fecha_nacimiento',
+  'telefono',
+  'provincia_id',
+  'localidad_id',
+  'barrio_id'
+];
+
+const payload = req.body || {};
+const data = {};
+
+// Copiar solo campos permitidos si vienen definidos
+for (const k of ALLOWED) {
+  if (Object.prototype.hasOwnProperty.call(payload, k) && payload[k] !== undefined) {
+    data[k] = payload[k];
+  }
+}
+
+// Normalizar ids numéricos (si vienen como string)
+['provincia_id', 'localidad_id', 'barrio_id'].forEach((k) => {
+  if (data[k] !== undefined && data[k] !== null && data[k] !== '') {
+    const n = parseInt(data[k], 10);
+    if (!Number.isNaN(n)) data[k] = n;
+    else delete data[k];
+  }
+});
+
+if (Object.keys(data).length === 0) {
+  return res.status(400).json({ error: 'No hay campos válidos para actualizar' });
+}
+
+// Persistir
+const actualizado = await Donante.updatePerfilByUsuarioId(usuarioId, data);
+if (!actualizado) {
+  return res.status(404).json({ error: 'No sos donante registrado' });
+}
+
+return res.json({
+  mensaje: 'Perfil actualizado',
+  perfil: actualizado
+});
+
+//FIN EDITAR PERFIL DONANTE/////
+
+
 module.exports = {
   crearDonante,
   obtenerDonantes,
   getDonanteByEmail,
   getPerfilDonanteCompleto,
-  filtrarDonantes
+  filtrarDonantes,
+  editarPerfilDonante
 };
