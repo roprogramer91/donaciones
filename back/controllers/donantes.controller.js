@@ -177,6 +177,11 @@ const filtrarDonantes = async (req, res) => {
 
 
 //EDITAR PERFIL DONANTE/////
+async function editarPerfilDonante(req, res) {
+  const usuarioId = req.user && req.user.id;
+  if (!usuarioId) {
+    return res.status(401).json({ mensaje: 'Token no proporcionado' });
+  }
 // Campos editables desde el perfil
 const ALLOWED = [
   'grupo_sanguineo',
@@ -222,6 +227,7 @@ return res.json({
 });
 
 //FIN EDITAR PERFIL DONANTE/////
+}
 
 
 module.exports = {
