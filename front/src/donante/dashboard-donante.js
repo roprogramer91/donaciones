@@ -62,6 +62,9 @@ async function cargarPanel() {
   
     // document.getElementById('provincia-nombre').textContent = donante.provincia_nombre;
 
+    // Cargar campañas por localidad
+    await cargarCampanias(token);
+
     loader.style.display = "none";
     contenidoPrivado.style.display = "block";
 
@@ -95,3 +98,89 @@ logoutBtn.addEventListener('click', () => {
 
 
 cargarPanel();
+
+// ---------------- Campañas disponibles -----------------
+const campaniasList = document.getElementById('campaniasList');
+const modal = document.getElementById('modalCampania');
+const btnCerrarModal = document.getElementById('btnCerrarModal');
+const btnAsistir = document.getElementById('btnAsistir');
+let campaniaSeleccionada = null;
+
+btnCerrarModal?.addEventListener('click', () => {
+  modal.style.display = 'none';
+  campaniaSeleccionada = null;
+});
+
+async function cargarCampanias(tok) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/donantes/campanias`, {
+      headers: { 'Authorization': 'Bearer ' + tok }
+    });
+    if (!res.ok) throw new Error('Error al obtener campañas');
+    const data = await res.json();
+    renderCampanias(data.campanias || []);
+  } catch (err) {
+    console.error('Error al cargar campañas:', err);
+    if (campaniasList) campaniasList.innerHTML = '<em>No se pudieron cargar las campañas</em>';
+  }
+}
+
+function renderCampanias(campanias) {
+  if (!campaniasList) return;
+  if (!campanias || campanias.length === 0) {
+    campaniasList.innerHTML = '<em>No hay campañas activas en tu localidad.</em>';
+    return;
+  }
+  campaniasList.innerHTML = '';
+  campanias.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'campania-card';
+    const img = document.createElement('img');
+    img.src = c.imagen_url || 'https://placehold.co/64x64/EEE/AAA?text=Img';
+    img.alt = c.nombre || 'Campaña';
+    const info = document.createElement('div');
+    info.className = 'campania-info';
+    const strong = document.createElement('strong');
+    strong.textContent = c.nombre || 'Campaña';
+    const p = document.createElement('p');
+    p.textContent = c.descripcion || '';
+    const btn = document.createElement('button');
+    btn.textContent = 'Ver';
+    btn.className = 'btn-secundario';
+    btn.addEventListener('click', () => abrirModalCampania(c));
+    info.appendChild(strong);
+    info.appendChild(p);
+    info.appendChild(btn);
+    card.appendChild(img);
+    card.appendChild(info);
+    campaniasList.appendChild(card);
+  });
+}
+
+function abrirModalCampania(c) {
+  campaniaSeleccionada = c;
+  document.getElementById('modalTitulo').textContent = c.nombre || 'Campaña';
+  document.getElementById('modalDescripcion').textContent = c.descripcion || '';
+  const lugar = `${c.localidad_nombre || ''}${c.barrio_nombre ? ' - ' + c.barrio_nombre : ''}`;
+  document.getElementById('modalLugar').textContent = lugar.trim();
+  modal.style.display = 'flex';
+}
+
+btnAsistir?.addEventListener('click', async () => {
+  if (!campaniaSeleccionada) return;
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/donantes/campanias/${campaniaSeleccionada.id}/asistir`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) {
+      const t = await res.text();
+      throw new Error(t || 'Error al inscribirse');
+    }
+    alert('Inscripción registrada. ¡Gracias por participar!');
+    modal.style.display = 'none';
+  } catch (err) {
+    console.error('Error al inscribirse:', err);
+    alert('No se pudo registrar tu asistencia.');
+  }
+});

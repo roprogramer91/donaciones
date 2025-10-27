@@ -3,6 +3,7 @@
 
 // Importaciones necesarias
 const Donante = require('../models/donantes.model');
+const CampaniasModel = require('../models/campanias.model');
 const { validarDNI, validarFechaNacimiento, validarGrupo } = require('../validations/donanteValidations');
 const { calcularAptoYRestante } = require('../utils/donanteUtils');
 
@@ -238,3 +239,72 @@ module.exports = {
   filtrarDonantes,
   editarPerfilDonante
 };
+
+// Nuevos handlers: campañas para el donante y asistir
+async function campaniasParaDonante(req, res) {
+  try {
+    const usuarioId = req.user && req.user.id;
+    if (!usuarioId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
+
+    const perfil = await Donante.getPerfilCompletoByUsuarioId(usuarioId);
+    if (!perfil || !perfil.localidad_id) {
+      return res.status(404).json({ error: 'No se encontró localidad del donante' });
+    }
+
+    const hoy = new Date();
+    const campanias = await CampaniasModel.obtenerPorLocalidad(perfil.localidad_id);
+    const mapEstado = (c) => {
+      const fi = c.fecha_inicio ? new Date(c.fecha_inicio) : null;
+      const ff = c.fecha_fin ? new Date(c.fecha_fin) : null;
+      if (fi && ff) {
+        if (fi <= hoy && hoy <= ff) return 'activa';
+        if (ff < hoy) return 'finalizada';
+        if (fi > hoy) return 'futura';
+      } else if (fi && !ff) {
+        return fi <= hoy ? 'activa' : 'futura';
+      } else if (!fi && ff) {
+        return hoy <= ff ? 'activa' : 'finalizada';
+      }
+      const est = (c.estado || '').toLowerCase();
+      if (est.includes('cancel')) return 'cancelada';
+      if (est.includes('final')) return 'finalizada';
+      if (est.includes('act')) return 'activa';
+      if (est.includes('fut')) return 'futura';
+      return 'desconocido';
+    };
+
+    // Solo activas por requerimiento
+    const activas = campanias
+      .map(c => ({ ...c, estado_calculado: mapEstado(c) }))
+      .filter(c => c.estado_calculado === 'activa');
+
+    res.json({ localidad_id: perfil.localidad_id, localidad_nombre: perfil.localidad_nombre, campanias: activas });
+  } catch (error) {
+    console.error('Error al obtener campañas para donante:', error);
+    res.status(500).json({ error: 'Error al obtener campañas' });
+  }
+}
+
+async function asistirCampania(req, res) {
+  try {
+    const usuarioId = req.user && req.user.id;
+    if (!usuarioId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
+
+    const { id } = req.params; // campania id
+    const campaniaId = parseInt(id, 10);
+    if (!campaniaId) return res.status(400).json({ error: 'campania_id inválido' });
+
+    const camp = await CampaniasModel.obtenerPorId(campaniaId);
+    if (!camp) return res.status(404).json({ error: 'Campaña no encontrada' });
+
+    const rel = await CampaniasModel.inscribirDonante(campaniaId, usuarioId);
+    res.json({ mensaje: 'Inscripción registrada', inscripcion: rel });
+  } catch (error) {
+    console.error('Error al inscribir donante en campaña:', error);
+    res.status(500).json({ error: 'Error al inscribirse a la campaña' });
+  }
+}
+
+// export named after definition to avoid hoist confusion
+module.exports.campaniasParaDonante = campaniasParaDonante;
+module.exports.asistirCampania = asistirCampania;

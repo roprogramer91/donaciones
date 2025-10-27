@@ -38,7 +38,7 @@
         <!-- CAMPAÑAS -->
         <section class="dashboard-campanias">
           <h2>Campañas</h2>
-          <div class="campanias-list">
+          <div class="campanias-list" id="campaniasList">
             <!-- Estas campañas después se cargan dinámicamente -->
             <div class="campania-card">
               <img src="https://placehold.co/64x64/EEE/AAA?text=Img" alt="Campaña 1">
@@ -74,6 +74,18 @@
           </div>
         </aside>
       </main>
+    </div>
+  </div>
+  <!-- Modal Campaña -->
+  <div id="modalCampania" style="display:none; position:fixed; inset:0; background:#0008; z-index:50; align-items:center; justify-content:center;">
+    <div style="background:#fff; padding:1rem 1.2rem; border-radius:0.8rem; max-width:520px; width:90%;">
+      <h3 id="modalTitulo" style="margin-top:0"></h3>
+      <p id="modalDescripcion"></p>
+      <p id="modalLugar" style="font-size:0.95rem; color:#444"></p>
+      <div style="display:flex; gap:0.6rem; justify-content:flex-end; margin-top:1rem;">
+        <button id="btnAsistir" class="btn-primario">ASISTIR</button>
+        <button id="btnCerrarModal" class="btn-secundario">Cerrar</button>
+      </div>
     </div>
   </div>
   <script type="module" src="dashboard-donante.js"></script>

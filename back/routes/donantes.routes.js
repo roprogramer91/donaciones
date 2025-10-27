@@ -15,7 +15,9 @@ const {
     getDonanteByEmail, 
     getPerfilDonanteCompleto,
     filtrarDonantes,
-    editarPerfilDonante
+    editarPerfilDonante,
+    campaniasParaDonante,
+    asistirCampania
  } = require('../controllers/donantes.controller');
 //fin controladores-----
 
@@ -30,11 +32,15 @@ router.get('/', obtenerDonantes);
 router.get('/me', authMiddleware, getDonanteByEmail);
 router.get('/perfil', authMiddleware, getPerfilDonanteCompleto);
 router.get('/filtro', authMiddleware, filtrarDonantes);
+router.get('/campanias', authMiddleware, campaniasParaDonante);
 
 //POST
 router.post('/', authMiddleware, crearDonante);
 
 //PUT
 router.put('/perfil', authMiddleware, editarPerfilDonante); 
+
+// POST acción: inscribirse a una campaña
+router.post('/campanias/:id/asistir', authMiddleware, asistirCampania);
 
 module.exports = router;
