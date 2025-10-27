@@ -14,7 +14,8 @@ const {
     obtenerDonantes, 
     getDonanteByEmail, 
     getPerfilDonanteCompleto,
-    filtrarDonantes
+    filtrarDonantes,
+    editarPerfilDonante
  } = require('../controllers/donantes.controller');
 //fin controladores-----
 
@@ -34,6 +35,6 @@ router.get('/filtro', authMiddleware, filtrarDonantes);
 router.post('/', authMiddleware, crearDonante);
 
 //PUT
-router.put('/api/donantes/perfil', authMiddleware, editarPerfilDonante); 
+router.put('/perfil', authMiddleware, editarPerfilDonante); 
 
 module.exports = router;
