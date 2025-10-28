@@ -616,7 +616,7 @@ btnEnviarNotif?.addEventListener('click', async () => {
   const mensaje = (document.getElementById('notif_mensaje')?.value || '').trim();
   const tipo = document.getElementById('notif_tipo')?.value || 'aviso';
   const campania_id = parseInt(document.getElementById('notif_campania_sel')?.value || '', 10) || null;
-  const localidad = parseInt(document.getElementById('f_notif_localidad')?.value || '', 10) || undefined;
+  const provincia = parseInt(document.getElementById('f_notif_provincia')?.value || '', 10) || undefined; const localidad = parseInt(document.getElementById('f_notif_localidad')?.value || '', 10) || undefined;
   const grupo = document.getElementById('f_notif_grupo')?.value || undefined;
   const apto = document.getElementById('f_notif_apto')?.checked ? 'true' : undefined;
   if (!mensaje) { msgNotif.textContent = 'El mensaje es obligatorio'; return; }
@@ -665,14 +665,14 @@ btnVerNotifs?.addEventListener('click', async () => {
 const btnPreviewNotif = document.getElementById('btn-preview-notif');
 const previewOut = document.getElementById('notif-centro-preview');
 btnPreviewNotif?.addEventListener('click', async () => {
-  const localidad = parseInt(document.getElementById('f_notif_localidad')?.value || '', 10) || undefined;
+  const provincia = parseInt(document.getElementById('f_notif_provincia')?.value || '', 10) || undefined; const localidad = parseInt(document.getElementById('f_notif_localidad')?.value || '', 10) || undefined;
   const grupo = document.getElementById('f_notif_grupo')?.value || undefined;
   const apto = document.getElementById('f_notif_apto')?.checked ? 'true' : undefined;
   try {
     const res = await fetch(`${API_BASE_URL}/api/centro/notificaciones/preview`, {
       method: 'POST',
       headers: authHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ filtros: { localidad, grupo, estado: undefined, apto } })
+      body: JSON.stringify({ filtros: { provincia, localidad, grupo, estado: undefined, apto } })
     });
     if (!res.ok) throw new Error('No se pudo previsualizar');
     const r = await res.json();
