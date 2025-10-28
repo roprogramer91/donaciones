@@ -14,4 +14,7 @@ router.post('/notificaciones/felicitaciones', CentrosController.enviarFelicitaci
 router.post('/notificaciones/preview', CentrosController.previewNotificaciones);
 router.post('/notificaciones/felicitaciones/preview', CentrosController.previewFelicitaciones);
 
+router.get('/notificaciones/log', CentrosController.getNotificacionesLog);
+
 module.exports = router;
+

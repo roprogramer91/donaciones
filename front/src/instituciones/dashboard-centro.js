@@ -771,3 +771,36 @@ const debReach = debounce(actualizarBadgeReach, 300);
 });
 // trigger when opening the section
 btnVerNotifs?.addEventListener('click', () => { setTimeout(actualizarBadgeReach, 200); });
+// Historial de envíos
+async function cargarLogNotifs(){
+  try{
+    const res = await fetch(`${API_BASE_URL}/api/centro/notificaciones/log`, { headers: authHeaders() });
+    if(!res.ok) throw new Error('log');
+    const data = await res.json();
+    renderLogNotifs(Array.isArray(data)?data:[]);
+  }catch(e){ console.error('Error log notifs', e); }
+}
+function ensureLogContainer(){
+  const sec = document.getElementById('seccion-notifs');
+  if(!sec) return null;
+  let log = document.getElementById('notif-centro-log');
+  if(log) return log;
+  log = document.createElement('div');
+  log.id='notif-centro-log';
+  log.innerHTML = '<h4 style="margin-top:1rem;">Historial de envíos</h4><table id="tabla-notif-log" style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;">Fecha</th><th style="text-align:left;">Tipo</th><th style="text-align:left;">Enviados</th><th style="text-align:left;">Mensaje</th></tr></thead><tbody></tbody></table>';
+  sec.appendChild(log);
+  return log;
+}
+function renderLogNotifs(lista){
+  const log = ensureLogContainer(); if(!log) return;
+  const tbody = log.querySelector('tbody');
+  tbody.innerHTML='';
+  if(!lista.length){ tbody.innerHTML='<tr><td colspan="4">Sin envíos recientes</td></tr>'; return; }
+  lista.forEach(it=>{
+    const tr = document.createElement('tr');
+    const fecha = it.created_at ? new Date(it.created_at).toLocaleString() : '';
+    tr.innerHTML = `<td style="padding:4px 6px;border-top:1px solid #eee;">${fecha}</td><td style="padding:4px 6px;border-top:1px solid #eee;">${it.tipo||''}</td><td style="padding:4px 6px;border-top:1px solid #eee;">${it.enviados||0}</td><td style="padding:4px 6px;border-top:1px solid #eee;">${(it.mensaje||'').substring(0,120)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+btnVerNotifs?.addEventListener('click', () => { setTimeout(cargarLogNotifs, 250); });

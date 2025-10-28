@@ -149,6 +149,24 @@ module.exports.enviarNotificaciones = async function(req, res) {
         enviados++;
       } catch {}
     }
+    // Log
+    try {
+      const centroId = obtenerCentroIdDeRequest(req);
+      await db.query(`CREATE TABLE IF NOT EXISTS notificaciones_log (
+        id SERIAL PRIMARY KEY,
+        centro_id INTEGER,
+        tipo TEXT,
+        mensaje TEXT NOT NULL,
+        enviados INTEGER NOT NULL DEFAULT 0,
+        filtros JSONB,
+        created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+      );`);
+      await db.query(
+        `INSERT INTO notificaciones_log(centro_id, tipo, mensaje, enviados, filtros) VALUES($1,$2,$3,$4,$5)`,
+        [centroId, tipo, mensaje, enviados, JSON.stringify(filtros || {})]
+      );
+    } catch (e) { console.error('No se pudo registrar notificaciones_log:', e.message); }
+
     res.json({ enviados });
   } catch (e) {
     console.error('Error al enviar notificaciones:', e);
@@ -182,6 +200,24 @@ module.exports.enviarFelicitacionesCumple = async function(req, res) {
         : `¡Feliz cumpleaños, ${nombre}! Gracias por ser parte.`;
       try { await Notificaciones.createForUsuario(c.usuario_id, { tipo: 'cumple', mensaje: msg }); enviados++; } catch {}
     }
+    // Log
+    try {
+      const centroId = obtenerCentroIdDeRequest(req);
+      await db.query(`CREATE TABLE IF NOT EXISTS notificaciones_log (
+        id SERIAL PRIMARY KEY,
+        centro_id INTEGER,
+        tipo TEXT,
+        mensaje TEXT NOT NULL,
+        enviados INTEGER NOT NULL DEFAULT 0,
+        filtros JSONB,
+        created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+      );`);
+      await db.query(
+        `INSERT INTO notificaciones_log(centro_id, tipo, mensaje, enviados, filtros) VALUES($1,$2,$3,$4,$5)`,
+        [centroId, 'cumple', 'Felicitaciones de cumpleaños', enviados, JSON.stringify({ dias })]
+      );
+    } catch (e) { console.error('No se pudo registrar notificaciones_log:', e.message); }
+
     res.json({ candidatos: candidatos.length, enviados });
   } catch (e) {
     console.error('Error en felicitaciones:', e);
@@ -229,5 +265,33 @@ module.exports.previewFelicitaciones = async function(req, res) {
   } catch (e) {
     console.error('Error en preview felicitaciones:', e);
     res.status(500).json({ error: 'Error al previsualizar felicitaciones' });
+  }
+};
+
+// Listado simple del historial
+module.exports.getNotificacionesLog = async function(req, res) {
+  try {
+    const centroId = obtenerCentroIdDeRequest(req);
+    await db.query(`CREATE TABLE IF NOT EXISTS notificaciones_log (
+      id SERIAL PRIMARY KEY,
+      centro_id INTEGER,
+      tipo TEXT,
+      mensaje TEXT NOT NULL,
+      enviados INTEGER NOT NULL DEFAULT 0,
+      filtros JSONB,
+      created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+    );`);
+    const { rows } = await db.query(
+      `SELECT id, tipo, mensaje, enviados, filtros, created_at
+       FROM notificaciones_log
+       WHERE ($1::int IS NULL AND centro_id IS NULL) OR centro_id = $1
+       ORDER BY id DESC
+       LIMIT 30`,
+      [centroId || null]
+    );
+    res.json(rows);
+  } catch (e) {
+    console.error('Error al obtener notificaciones_log:', e);
+    res.status(500).json({ error: 'Error al obtener historial' });
   }
 };
