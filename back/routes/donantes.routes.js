@@ -17,7 +17,8 @@ const {
     filtrarDonantes,
     editarPerfilDonante,
     campaniasParaDonante,
-    asistirCampania
+    asistirCampania,
+    cancelarAsistencia
  } = require('../controllers/donantes.controller');
 //fin controladores-----
 
@@ -55,5 +56,7 @@ router.put('/perfil', authMiddleware, editarPerfilDonante);
 
 // POST acción: inscribirse a una campaña
 router.post('/campanias/:id/asistir', authMiddleware, asistirCampania);
+// DELETE acción: cancelar inscripción
+router.delete('/campanias/:id/asistir', authMiddleware, cancelarAsistencia);
 
 module.exports = router;

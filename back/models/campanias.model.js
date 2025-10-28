@@ -192,6 +192,14 @@ CampaniasModel.listarInscripcionesPorUsuario = async function (usuarioId) {
   return rows;
 };
 
+CampaniasModel.cancelarInscripcion = async function (campaniaId, usuarioId) {
+  const { rows } = await pool.query(
+    'DELETE FROM campanias_donantes WHERE campania_id=$1 AND usuario_id=$2 RETURNING *',
+    [campaniaId, usuarioId]
+  );
+  return rows[0] || null;
+};
+
 CampaniasModel.listarInscriptosDeCampania = async function (campaniaId) {
   const { rows } = await pool.query(
     `SELECT u.id as usuario_id, u.nombre, u.apellido, u.email, d.grupo_sanguineo

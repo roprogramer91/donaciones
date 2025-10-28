@@ -107,6 +107,7 @@ const campaniasList = document.getElementById('campaniasList');
 const modal = document.getElementById('modalCampania');
 const btnCerrarModal = document.getElementById('btnCerrarModal');
 const btnAsistir = document.getElementById('btnAsistir');
+const btnCancelar = document.getElementById('btnCancelar');
 let campaniaSeleccionada = null;
 let proximaSeleccionada = null;
 
@@ -132,13 +133,13 @@ async function cargarCampanias(tok) {
 
 function renderCampanias(campanias) {
   if (!campaniasList) return;
-  const disponibles = (campanias || []).filter(c => !c.ya_inscripto);
-  if (disponibles.length === 0) {
-    campaniasList.innerHTML = '<em>No hay campañas activas o futuras disponibles.</em>';
+  const items = (campanias || []);
+  if (items.length === 0) {
+    campaniasList.innerHTML = '<em>No hay campañas activas o futuras cerca.</em>';
     return;
   }
   campaniasList.innerHTML = '';
-  disponibles.forEach(c => {
+  items.forEach(c => {
     const card = document.createElement('div');
     card.className = 'campania-card';
     const img = document.createElement('img');
@@ -151,15 +152,14 @@ function renderCampanias(campanias) {
     const p = document.createElement('p');
     p.textContent = c.descripcion || '';
     const tag = document.createElement('span');
-    tag.style.cssText = 'display:inline-block;margin-top:4px;padding:2px 8px;border-radius:10px;font-size:0.78rem;background:#eee;color:#555;';
-    if (c.estado_calculado === 'activa') {
-      tag.textContent = 'Activa';
-      tag.style.background = '#d4f5d7'; tag.style.color = '#1b7e20';
-    } else if (c.estado_calculado === 'futura') {
-      const dias = typeof c.dias_para_inicio === 'number' && c.dias_para_inicio > 0 ? ` (en ${c.dias_para_inicio} dias)` : '';
-      tag.textContent = 'Proxima' + dias;
-      tag.style.background = '#e7f0ff'; tag.style.color = '#0a58ca';
-    }
+    tag.style.cssText = 'display:inline-block;margin-top:4px;margin-right:6px;padding:2px 8px;border-radius:10px;font-size:0.78rem;background:#eee;color:#555;';
+    if (c.estado_calculado === 'activa') { tag.textContent = 'Activa'; tag.style.background = '#d4f5d7'; tag.style.color = '#1b7e20'; }
+    else if (c.estado_calculado === 'futura') { const dias = typeof c.dias_para_inicio === 'number' && c.dias_para_inicio > 0 ? ` (en ${c.dias_para_inicio} dias)` : ''; tag.textContent = 'Proxima' + dias; tag.style.background = '#e7f0ff'; tag.style.color = '#0a58ca'; }
+
+    const tagIns = document.createElement('span');
+    tagIns.style.cssText = 'display:inline-block;margin-top:4px;padding:2px 8px;border-radius:10px;font-size:0.78rem;';
+    if (c.ya_inscripto) { tagIns.textContent = 'Inscripto'; tagIns.style.background = '#d4f5d7'; tagIns.style.color = '#1b7e20'; }
+    else { tagIns.textContent = 'No inscripto'; tagIns.style.background = '#fff3cd'; tagIns.style.color = '#946200'; }
     const btn = document.createElement('button');
     btn.textContent = 'Ver';
     btn.className = 'btn-secundario';
@@ -167,6 +167,7 @@ function renderCampanias(campanias) {
     info.appendChild(strong);
     info.appendChild(p);
     info.appendChild(tag);
+    info.appendChild(tagIns);
     info.appendChild(btn);
     card.appendChild(img);
     card.appendChild(info);
@@ -183,9 +184,23 @@ function abrirModalCampania(c) {
   if (c.ya_inscripto === true) {
     btnAsistir.disabled = true;
     btnAsistir.textContent = 'Inscripto';
+    if (btnCancelar) { btnCancelar.style.display = 'inline-block'; btnCancelar.disabled = false; btnCancelar.onclick = async () => {
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/donantes/campanias/${c.id}/asistir`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }});
+          if (!res.ok) throw new Error(await res.text());
+          alert('Inscripción cancelada');
+          modal.style.display = 'none';
+          await cargarCampanias(token);
+          await cargarProximaInscripcion(token);
+        } catch (er) {
+          console.error('Error al cancelar inscripción:', er);
+          alert('No se pudo cancelar la inscripción');
+        }
+      }; }
   } else {
     btnAsistir.disabled = !c.inscribible;
     btnAsistir.textContent = 'ASISTIR';
+    if (btnCancelar) { btnCancelar.style.display = 'none'; btnCancelar.onclick = null; }
   }
   modal.style.display = 'flex';
 }

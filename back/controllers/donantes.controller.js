@@ -359,6 +359,24 @@ async function asistirCampania(req, res) {
   }
 }
 
+async function cancelarAsistencia(req, res) {
+  try {
+    const usuarioId = req.user && req.user.id;
+    if (!usuarioId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
+    const { id } = req.params;
+    const campaniaId = parseInt(id, 10);
+    if (!campaniaId) return res.status(400).json({ error: 'campania_id inválido' });
+
+    const deleted = await CampaniasModel.cancelarInscripcion(campaniaId, usuarioId);
+    if (!deleted) return res.status(404).json({ error: 'No estabas inscripto en esta campaña' });
+    res.json({ mensaje: 'Inscripción cancelada' });
+  } catch (error) {
+    console.error('Error al cancelar inscripción:', error);
+    res.status(500).json({ error: 'Error al cancelar inscripción', detalle: String(error && error.message || error) });
+  }
+}
+
 // export named after definition to avoid hoist confusion
 module.exports.campaniasParaDonante = campaniasParaDonante;
 module.exports.asistirCampania = asistirCampania;
+module.exports.cancelarAsistencia = cancelarAsistencia;
