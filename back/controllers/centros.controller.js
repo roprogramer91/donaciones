@@ -1,6 +1,8 @@
 const CentrosModel = require('../models/centros.model');
 const Donante = require('../models/donantes.model');
 const CampaniasModel = require('../models/campanias.model');
+const Notificaciones = require('../models/notificaciones.model');
+const db = require('../data/config');
 const { calcularAptoYRestante } = require('../utils/donanteUtils');
 
 function obtenerCentroIdDeRequest(req) {
@@ -124,3 +126,65 @@ const CentrosController = {
 };
 
 module.exports = CentrosController;
+
+// ---------- Notificaciones del Centro ----------
+module.exports.enviarNotificaciones = async function(req, res) {
+  try {
+    const { mensaje, tipo = 'aviso', campania_id = null, filtros = {} } = req.body || {};
+    if (!mensaje || String(mensaje).trim() === '') return res.status(400).json({ error: 'Mensaje requerido' });
+    const lista = await Donante.filtrar({
+      provincia: filtros.provincia || undefined,
+      localidad: filtros.localidad || undefined,
+      barrio: filtros.barrio || undefined,
+      grupo: filtros.grupo || undefined,
+      estado: filtros.estado || undefined,
+    });
+    if (!Array.isArray(lista) || lista.length === 0) return res.json({ enviados: 0 });
+    let enviados = 0;
+    for (const d of lista) {
+      const uid = d.usuario_id || d.usuario || d.user_id;
+      if (!uid) continue;
+      try {
+        await Notificaciones.createForUsuario(uid, { tipo, mensaje, campania_id });
+        enviados++;
+      } catch {}
+    }
+    res.json({ enviados });
+  } catch (e) {
+    console.error('Error al enviar notificaciones:', e);
+    res.status(500).json({ error: 'Error al enviar notificaciones' });
+  }
+};
+
+module.exports.enviarFelicitacionesCumple = async function(req, res) {
+  try {
+    const dias = parseInt((req.body && req.body.dias) || '0', 10) || 0;
+    // seleccionar donantes cuyo cumpleaños es hoy (+dias)
+    const sql = `
+      SELECT d.usuario_id, d.fecha_nacimiento, u.nombre
+      FROM donantes d JOIN usuarios u ON d.usuario_id = u.id
+      WHERE d.fecha_nacimiento IS NOT NULL
+    `;
+    const { rows } = await db.query(sql);
+    const hoy = new Date();
+    const objetivo = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+    const candidatos = rows.filter(r => {
+      const fn = new Date(r.fecha_nacimiento);
+      const esteAnio = new Date(objetivo.getFullYear(), fn.getMonth(), fn.getDate());
+      const diff = Math.floor((esteAnio - objetivo) / (1000*60*60*24));
+      return diff >= 0 && diff <= dias;
+    });
+    let enviados = 0;
+    for (const c of candidatos) {
+      const nombre = c.nombre || 'donante';
+      const msg = dias > 0 && new Date(c.fecha_nacimiento).getDate() !== objetivo.getDate()
+        ? `Se acerca tu cumpleaños, ${nombre}! Gracias por ser parte.`
+        : `¡Feliz cumpleaños, ${nombre}! Gracias por ser parte.`;
+      try { await Notificaciones.createForUsuario(c.usuario_id, { tipo: 'cumple', mensaje: msg }); enviados++; } catch {}
+    }
+    res.json({ candidatos: candidatos.length, enviados });
+  } catch (e) {
+    console.error('Error en felicitaciones:', e);
+    res.status(500).json({ error: 'Error al generar felicitaciones' });
+  }
+};

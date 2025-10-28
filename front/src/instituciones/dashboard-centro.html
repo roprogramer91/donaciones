@@ -154,7 +154,49 @@
           </div>
         </section>
 
-  </main>
+        <!-- SECCION NOTIFICACIONES -->
+        <section id="seccion-notifs" class="dashboard-centro-seccion">
+          <h3>Notificaciones a donantes</h3>
+          <div style="display:flex; flex-direction:column; gap:0.6rem; max-width:600px;">
+            <label>Mensaje
+              <textarea id="notif_mensaje" rows="3" placeholder="Escriba el mensaje a enviar"></textarea>
+            </label>
+            <label>Tipo
+              <select id="notif_tipo">
+                <option value="aviso">Aviso</option>
+                <option value="campania_nueva">Campaña nueva</option>
+                <option value="alerta">Alerta</option>
+              </select>
+            </label>
+            <label>Campaña (opcional)
+              <input type="number" id="notif_campania_id" placeholder="ID de campaña" />
+            </label>
+            <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+              <input type="number" id="f_notif_localidad" placeholder="Localidad ID" style="width:140px;" />
+              <select id="f_notif_grupo">
+                <option value="">Todos los grupos</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
+              <label style="display:flex;align-items:center;gap:0.3rem;">
+                <input type="checkbox" id="f_notif_apto" /> Solo aptos
+              </label>
+            </div>
+            <div style="display:flex; gap:0.6rem;">
+              <button id="btn-enviar-notif" class="btn-accion-centro">Enviar notificación</button>
+              <button id="btn-felicitaciones-hoy" class="btn-accion-centro" style="background:#0a58ca;">Felicitaciones de hoy</button>
+            </div>
+            <div id="notif-centro-mensaje" style="color:#555"></div>
+          </div>
+        </section>
+
+      </main>
 
       <!-- MODAL PERFIL CENTRO -->
       <div id="modal-perfil" class="modal-overlay" style="display: none;">
@@ -231,6 +273,7 @@
   <script type="module" src="dashboard-centro.js"></script>
 </body>
 </html>
+
 
 
 

@@ -27,8 +27,10 @@ function getCentroId() {
 function toggleSeccion(seccion) {
   const seccionDonantes = document.getElementById("seccion-donantes");
   const seccionCampanias = document.getElementById("seccion-campanias");
+  const seccionNotifs = document.getElementById("seccion-notifs");
   seccionDonantes.style.display = seccion === 'donantes' ? 'block' : 'none';
   seccionCampanias.style.display = seccion === 'campanias' ? 'block' : 'none';
+  if (seccionNotifs) seccionNotifs.style.display = seccion === 'notifs' ? 'block' : 'none';
 }
 
 // Catálogos en memoria para nombres de provincias/localidades
@@ -602,3 +604,47 @@ formCampania.addEventListener('submit', async (e) => {
 
 
 
+
+// ------------------------------------------------------
+// SECCION: NOTIFICACIONES A DONANTES
+// ------------------------------------------------------
+const btnEnviarNotif = document.getElementById('btn-enviar-notif');
+const btnFelicitacionesHoy = document.getElementById('btn-felicitaciones-hoy');
+const msgNotif = document.getElementById('notif-centro-mensaje');
+
+btnEnviarNotif?.addEventListener('click', async () => {
+  const mensaje = (document.getElementById('notif_mensaje')?.value || '').trim();
+  const tipo = document.getElementById('notif_tipo')?.value || 'aviso';
+  const campania_id = parseInt(document.getElementById('notif_campania_id')?.value || '', 10) || null;
+  const localidad = parseInt(document.getElementById('f_notif_localidad')?.value || '', 10) || undefined;
+  const grupo = document.getElementById('f_notif_grupo')?.value || undefined;
+  const apto = document.getElementById('f_notif_apto')?.checked ? 'true' : undefined;
+  if (!mensaje) { msgNotif.textContent = 'El mensaje es obligatorio'; return; }
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/centro/notificaciones`, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ mensaje, tipo, campania_id, filtros: { localidad, grupo, estado: undefined, apto } })
+    });
+    if (!res.ok) throw new Error('No se pudo enviar');
+    const r = await res.json();
+    msgNotif.textContent = `Notificaciones enviadas: ${r.enviados}`;
+  } catch (e) {
+    console.error(e); msgNotif.textContent = 'Error al enviar notificaciones';
+  }
+});
+
+btnFelicitacionesHoy?.addEventListener('click', async () => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/centro/notificaciones/felicitaciones`, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ dias: 0 })
+    });
+    if (!res.ok) throw new Error('No se pudo generar');
+    const r = await res.json();
+    msgNotif.textContent = `Felicitaciones generadas: ${r.enviados}`;
+  } catch (e) {
+    console.error(e); msgNotif.textContent = 'Error al generar felicitaciones';
+  }
+});
