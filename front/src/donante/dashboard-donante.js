@@ -440,11 +440,11 @@ function renderNotificaciones(lista) {
   notifEmpty.style.display = 'none';
   lista.forEach(n => {
     const li = document.createElement('li');
-    li.style.padding = '0.6rem 0.8rem';
-    li.style.borderBottom = '1px solid #f3f3f3';
+    li.className = 'notif-item' + (!n.leida ? ' unread' : '');
+    
     const span = document.createElement('span');
     span.textContent = n.mensaje || (n.tipo ? n.tipo.replace('_',' ') : 'NotificaciÃ³n');
-    if (!n.leida) { li.style.background = '#f6fbff'; }
+    // unread style via CSS class
     li.addEventListener('click', async () => {
       try {
         await fetch(`${API_BASE_URL}/api/donantes/notificaciones/${n.id}/leida`, {
@@ -480,3 +480,7 @@ function actualizarBadgeNotificaciones(lista) {
     }
   } catch {}
 }
+
+
+
+
