@@ -649,10 +649,17 @@ btnFelicitacionesHoy?.addEventListener('click', async () => {
   }
 });
 
-// Bot�n para abrir secci�n Notificaciones
+// Botón para abrir sección Notificaciones
 const btnVerNotifs = document.getElementById('btn-ver-notifs');
 const seccionNotifs = document.getElementById('seccion-notifs');
-btnVerNotifs?.addEventListener('click', async () => {\n  toggleSeccion('notifs');\n  await cargarProvinciasNotif();\n  await cargarCampaniasNotif();\n  if (seccionNotifs) seccionNotifs.scrollIntoView({ behavior: 'smooth', block: 'start' });\n});
+btnVerNotifs?.addEventListener('click', async () => {
+  toggleSeccion('notifs');
+  await cargarProvinciasNotif();
+  await cargarCampaniasNotif();
+  if (seccionNotifs) {
+    seccionNotifs.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+});
 
 // Previsualizar alcance de notificaciones
 const btnPreviewNotif = document.getElementById('btn-preview-notif');
