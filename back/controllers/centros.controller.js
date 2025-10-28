@@ -188,3 +188,46 @@ module.exports.enviarFelicitacionesCumple = async function(req, res) {
     res.status(500).json({ error: 'Error al generar felicitaciones' });
   }
 };
+
+// Preview: cantidad de destinatarios por filtros
+module.exports.previewNotificaciones = async function(req, res) {
+  try {
+    const filtros = req.body && req.body.filtros ? req.body.filtros : {};
+    const lista = await Donante.filtrar({
+      provincia: filtros.provincia || undefined,
+      localidad: filtros.localidad || undefined,
+      barrio: filtros.barrio || undefined,
+      grupo: filtros.grupo || undefined,
+      estado: filtros.estado || undefined,
+    });
+    res.json({ destinatarios: Array.isArray(lista) ? lista.length : 0 });
+  } catch (e) {
+    console.error('Error en preview notificaciones:', e);
+    res.status(500).json({ error: 'Error al previsualizar' });
+  }
+};
+
+// Preview felicitaciones: cantidad de candidatos
+module.exports.previewFelicitaciones = async function(req, res) {
+  try {
+    const dias = parseInt((req.body && req.body.dias) || '0', 10) || 0;
+    const sql = `
+      SELECT d.usuario_id, d.fecha_nacimiento
+      FROM donantes d
+      WHERE d.fecha_nacimiento IS NOT NULL
+    `;
+    const { rows } = await db.query(sql);
+    const hoy = new Date();
+    const objetivo = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+    const candidatos = rows.filter(r => {
+      const fn = new Date(r.fecha_nacimiento);
+      const esteAnio = new Date(objetivo.getFullYear(), fn.getMonth(), fn.getDate());
+      const diff = Math.floor((esteAnio - objetivo) / (1000*60*60*24));
+      return diff >= 0 && diff <= dias;
+    });
+    res.json({ candidatos: candidatos.length });
+  } catch (e) {
+    console.error('Error en preview felicitaciones:', e);
+    res.status(500).json({ error: 'Error al previsualizar felicitaciones' });
+  }
+};

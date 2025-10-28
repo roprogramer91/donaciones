@@ -11,5 +11,7 @@ router.get('/summary', CentrosController.obtenerResumen);
 // Notificaciones desde el centro
 router.post('/notificaciones', CentrosController.enviarNotificaciones);
 router.post('/notificaciones/felicitaciones', CentrosController.enviarFelicitacionesCumple);
+router.post('/notificaciones/preview', CentrosController.previewNotificaciones);
+router.post('/notificaciones/felicitaciones/preview', CentrosController.previewFelicitaciones);
 
 module.exports = router;

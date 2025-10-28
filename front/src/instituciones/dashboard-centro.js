@@ -656,3 +656,41 @@ btnVerNotifs?.addEventListener('click', () => {
   toggleSeccion('notifs');
   if (seccionNotifs) seccionNotifs.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
+
+// Previsualizar alcance de notificaciones
+const btnPreviewNotif = document.getElementById('btn-preview-notif');
+const previewOut = document.getElementById('notif-centro-preview');
+btnPreviewNotif?.addEventListener('click', async () => {
+  const localidad = parseInt(document.getElementById('f_notif_localidad')?.value || '', 10) || undefined;
+  const grupo = document.getElementById('f_notif_grupo')?.value || undefined;
+  const apto = document.getElementById('f_notif_apto')?.checked ? 'true' : undefined;
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/centro/notificaciones/preview`, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ filtros: { localidad, grupo, estado: undefined, apto } })
+    });
+    if (!res.ok) throw new Error('No se pudo previsualizar');
+    const r = await res.json();
+    if (previewOut) previewOut.textContent = `Alcance estimado: ${r.destinatarios} donantes`;
+  } catch (e) {
+    console.error(e); if (previewOut) previewOut.textContent = 'Error al previsualizar alcance';
+  }
+});
+
+// Previsualizar felicitaciones
+const btnPreviewFel = document.getElementById('btn-preview-felicitaciones');
+btnPreviewFel?.addEventListener('click', async () => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/centro/notificaciones/felicitaciones/preview`, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ dias: 0 })
+    });
+    if (!res.ok) throw new Error('No se pudo previsualizar');
+    const r = await res.json();
+    if (previewOut) previewOut.textContent = `Cumpleaños hoy: ${r.candidatos} donantes`;
+  } catch (e) {
+    console.error(e); if (previewOut) previewOut.textContent = 'Error al previsualizar felicitaciones';
+  }
+});
