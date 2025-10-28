@@ -742,3 +742,32 @@ async function cargarCampaniasNotif() {
 }
 
 
+
+// --- Realtime badge for reach ---
+const badgeReach = document.getElementById('notif-centro-badge');
+function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+async function actualizarBadgeReach(){
+  try{
+    const provincia = parseInt(document.getElementById('f_notif_provincia')?.value || '',10) || undefined;
+    const localidad = parseInt(document.getElementById('f_notif_localidad')?.value || '',10) || undefined;
+    const grupo = document.getElementById('f_notif_grupo')?.value || undefined;
+    const apto = document.getElementById('f_notif_apto')?.checked ? 'true' : undefined;
+    const res = await fetch(`${API_BASE_URL}/api/centro/notificaciones/preview`, {
+      method:'POST', headers: authHeaders({'Content-Type':'application/json'}),
+      body: JSON.stringify({ filtros: { provincia, localidad, grupo, estado: undefined, apto } })
+    });
+    if(!res.ok) throw new Error('preview');
+    const r = await res.json();
+    if(badgeReach){ badgeReach.textContent = `Alcance: ${r.destinatarios || 0}`; }
+    const btnSend = document.getElementById('btn-enviar-notif');
+    if(btnSend) btnSend.disabled = !r.destinatarios;
+  }catch{
+    if(badgeReach) badgeReach.textContent = 'Alcance: 0';
+  }
+}
+const debReach = debounce(actualizarBadgeReach, 300);
+['f_notif_provincia','f_notif_localidad','f_notif_grupo','f_notif_apto'].forEach(id=>{
+  const el = document.getElementById(id); if(el){ el.addEventListener('change', debReach); el.addEventListener('input', debReach); }
+});
+// trigger when opening the section
+btnVerNotifs?.addEventListener('click', () => { setTimeout(actualizarBadgeReach, 200); });
