@@ -648,3 +648,11 @@ btnFelicitacionesHoy?.addEventListener('click', async () => {
     console.error(e); msgNotif.textContent = 'Error al generar felicitaciones';
   }
 });
+
+// Botón para abrir sección Notificaciones
+const btnVerNotifs = document.getElementById('btn-ver-notifs');
+const seccionNotifs = document.getElementById('seccion-notifs');
+btnVerNotifs?.addEventListener('click', () => {
+  toggleSeccion('notifs');
+  if (seccionNotifs) seccionNotifs.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
