@@ -33,6 +33,19 @@ router.get('/me', authMiddleware, getDonanteByEmail);
 router.get('/perfil', authMiddleware, getPerfilDonanteCompleto);
 router.get('/filtro', authMiddleware, filtrarDonantes);
 router.get('/campanias', authMiddleware, campaniasParaDonante);
+router.get('/inscripciones', authMiddleware, async (req, res) => {
+  // Devolver campañas a las que el usuario está inscripto
+  try {
+    const { listarInscripcionesPorUsuario } = require('../models/campanias.model');
+    const usuarioId = req.user && req.user.id;
+    if (!usuarioId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
+    const lista = await listarInscripcionesPorUsuario(usuarioId);
+    res.json(lista);
+  } catch (e) {
+    console.error('Error al obtener inscripciones del donante:', e);
+    res.status(500).json({ error: 'Error al obtener inscripciones' });
+  }
+});
 
 //POST
 router.post('/', authMiddleware, crearDonante);

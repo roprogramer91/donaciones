@@ -117,6 +117,17 @@ const CampaniasController = {
       console.error('Error al eliminar campaña:', error);
       res.status(500).json({ error: 'Error al eliminar campaña' });
     }
+  },
+
+  async obtenerInscriptos(req, res) {
+    try {
+      const { id } = req.params;
+      const inscriptos = await CampaniasModel.listarInscriptosDeCampania(id);
+      res.json(inscriptos);
+    } catch (error) {
+      console.error('Error al listar inscriptos de campaña:', error);
+      res.status(500).json({ error: 'Error al listar inscriptos' });
+    }
   }
 };
 

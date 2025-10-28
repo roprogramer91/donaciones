@@ -255,6 +255,9 @@ async function campaniasParaDonante(req, res) {
     const today = new Date();
     const hoy = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const campanias = await CampaniasModel.obtenerPorLocalidad(perfil.localidad_id);
+    // Marcar inscripciones del usuario
+    const inscripciones = await CampaniasModel.listarInscripcionesPorUsuario(usuarioId);
+    const inscSet = new Set(inscripciones.map(c => c.id));
     const mapEstado = (c) => {
       const fi0 = c.fecha_inicio ? new Date(c.fecha_inicio) : null;
       const ff0 = c.fecha_fin ? new Date(c.fecha_fin) : null;
@@ -286,8 +289,9 @@ async function campaniasParaDonante(req, res) {
         const fi = new Date(fi0.getFullYear(), fi0.getMonth(), fi0.getDate());
         dias_para_inicio = Math.ceil((fi - hoy) / (1000*60*60*24));
       }
-      const inscribible = ['activa','futura'].includes(estado_calculado);
-      return { ...c, estado_calculado, dias_para_inicio, inscribible };
+      const ya_inscripto = inscSet.has(c.id);
+      const inscribible = !ya_inscripto && ['activa','futura'].includes(estado_calculado);
+      return { ...c, estado_calculado, dias_para_inicio, inscribible, ya_inscripto };
     });
 
     // Filtrar finalizadas/canceladas; ordenar: activas primero, luego futuras por fecha

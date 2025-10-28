@@ -174,6 +174,13 @@ function abrirModalCampania(c) {
   document.getElementById('modalDescripcion').textContent = c.descripcion || '';
   const lugar = `${c.localidad_nombre || ''}${c.barrio_nombre ? ' - ' + c.barrio_nombre : ''}`;
   document.getElementById('modalLugar').textContent = lugar.trim();
+  if (c.ya_inscripto === true) {
+    btnAsistir.disabled = true;
+    btnAsistir.textContent = 'Inscripto';
+  } else {
+    btnAsistir.disabled = !c.inscribible;
+    btnAsistir.textContent = 'ASISTIR';
+  }
   modal.style.display = 'flex';
 }
 

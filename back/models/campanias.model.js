@@ -145,18 +145,7 @@ CampaniasModel.obtenerPorLocalidad = async function (localidadId) {
 
 // Inscribir donante a campaña (crea tabla si no existe)
 CampaniasModel.inscribirDonante = async function (campaniaId, usuarioId) {
-  // Crear tabla relación si no existe (idempotente)
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS campanias_donantes (
-      id SERIAL PRIMARY KEY,
-      campania_id INTEGER REFERENCES campanias(id) ON DELETE CASCADE,
-      usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
-      created_at TIMESTAMP DEFAULT NOW(),
-      UNIQUE (campania_id, usuario_id)
-    );
-  `);
-
-  // Insertar relación (idempotente)
+  // Insertar relación (idempotente). La tabla se crea por migraciones.
   const insert = await pool.query(
     `INSERT INTO campanias_donantes (campania_id, usuario_id)
      VALUES ($1, $2)
@@ -181,4 +170,37 @@ CampaniasModel.inscribirDonante = async function (campaniaId, usuarioId) {
   }
 
   return insert.rows[0];
+};
+
+CampaniasModel.estaInscripto = async function (campaniaId, usuarioId) {
+  const { rows } = await pool.query(
+    'SELECT 1 FROM campanias_donantes WHERE campania_id=$1 AND usuario_id=$2 LIMIT 1',
+    [campaniaId, usuarioId]
+  );
+  return !!rows[0];
+};
+
+CampaniasModel.listarInscripcionesPorUsuario = async function (usuarioId) {
+  const { rows } = await pool.query(
+    `SELECT c.*
+     FROM campanias_donantes cd
+     JOIN campanias c ON c.id = cd.campania_id
+     WHERE cd.usuario_id = $1
+     ORDER BY c.fecha_inicio NULLS LAST, c.id DESC`,
+    [usuarioId]
+  );
+  return rows;
+};
+
+CampaniasModel.listarInscriptosDeCampania = async function (campaniaId) {
+  const { rows } = await pool.query(
+    `SELECT u.id as usuario_id, u.nombre, u.apellido, u.email, d.grupo_sanguineo
+     FROM campanias_donantes cd
+     JOIN usuarios u ON u.id = cd.usuario_id
+     LEFT JOIN donantes d ON d.usuario_id = u.id
+     WHERE cd.campania_id = $1
+     ORDER BY cd.created_at DESC`,
+    [campaniaId]
+  );
+  return rows;
 };
