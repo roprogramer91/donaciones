@@ -55,7 +55,7 @@ async function cargarPanel() {
     }
     
     // Mostrar saludo
-    bienvenida.textContent = `Ã‚Â¡Hola, ${donante.nombre || 'Donante'}!`;
+    bienvenida.textContent = `ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡Hola, ${donante.nombre || 'Donante'}!`;
 
     // Mostrar datos principales
     grupoSangre.textContent = donante.grupo_sanguineo || '--';
@@ -63,13 +63,13 @@ async function cargarPanel() {
       ? new Date(donante.fecha_ultima_donacion).toLocaleDateString()
       : '--/--/----';
     diasApto.textContent = (donante.dias_restantes !== undefined)
-      ? `${donante.dias_restantes} dÃƒÂ­as`
-      : '-- dÃƒÂ­as';
+      ? `${donante.dias_restantes} dÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­as`
+      : '-- dÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­as';
 
   
     // document.getElementById('provincia-nombre').textContent = donante.provincia_nombre;
 
-    // Cargar campaÃƒÂ±as por localidad y mis inscripciones
+    // Cargar campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±as por localidad y mis inscripciones
     await cargarCampanias(token); await cargarNotificaciones();
     await cargarProximaInscripcion(token);
 
@@ -77,26 +77,26 @@ async function cargarPanel() {
     contenidoPrivado.style.display = "block";
 
   } catch (e) {
-  console.error("Ã¢Å¡Â Ã¯Â¸Â Error detallado en cargarPanel():", e);
+  console.error("ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â Error detallado en cargarPanel():", e);
 
   loader.innerHTML = `
     <p style="color:red;">
       Error al cargar datos.<br>
       <strong>Detalles:</strong> ${e.message || 'Error desconocido'}<br>
-      Revisa la consola para mÃƒÂ¡s informaciÃƒÂ³n.
+      Revisa la consola para mÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡s informaciÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n.
     </p>`;
 }
 
  
 }
 
-// BotÃƒÂ³n de perfil
+// BotÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n de perfil
 document.getElementById('btn-perfil').addEventListener('click', () => {
   window.location.href = "perfil-donante.html";
 });
 
 
-// BotÃƒÂ³n de logout
+// BotÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n de logout
 logoutBtn.addEventListener('click', () => {
   localStorage.removeItem('token');
   window.location.href = '../../index.html';
@@ -107,7 +107,7 @@ logoutBtn.addEventListener('click', () => {
 
 cargarPanel();
 
-// ---------------- CampaÃƒÂ±as disponibles -----------------
+// ---------------- CampaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±as disponibles -----------------
 const campaniasList = document.getElementById('campaniasList');
 const modal = document.getElementById('modalCampania');
 const btnCerrarModal = document.getElementById('btnCerrarModal');
@@ -130,13 +130,13 @@ async function cargarCampanias(tok) {
     const res = await fetch(`${API_BASE_URL}/api/donantes/campanias`, {
       headers: { 'Authorization': 'Bearer ' + tok }
     });
-    if (!res.ok) throw new Error('Error al obtener campaÃƒÂ±as');
+    if (!res.ok) throw new Error('Error al obtener campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±as');
     const data = await res.json();
     const lista = data.campanias || [];
     renderCampanias(lista);
   } catch (err) {
-    console.error('Error al cargar campaÃƒÂ±as:', err);
-    if (campaniasList) campaniasList.innerHTML = '<em>No se pudieron cargar las campaÃƒÂ±as</em>';
+    console.error('Error al cargar campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±as:', err);
+    if (campaniasList) campaniasList.innerHTML = '<em>No se pudieron cargar las campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±as</em>';
   }
 }
 
@@ -159,7 +159,7 @@ function renderCampanias(campanias) {
     return 0;
   });
   if (items.length === 0) {
-    campaniasList.innerHTML = '<em>No hay campaÃ±as activas o futuras cerca.</em>';
+    campaniasList.innerHTML = '<em>No hay campaÃƒÆ’Ã‚Â±as activas o futuras cerca.</em>';
     return;
   }
   campaniasList.innerHTML = '';
@@ -168,11 +168,11 @@ function renderCampanias(campanias) {
     card.className = 'campania-card';
     const img = document.createElement('img');
     img.src = c.imagen_url || 'https://placehold.co/64x64/EEE/AAA?text=Img';
-    img.alt = c.nombre || 'CampaÃƒÂ±a';
+    img.alt = c.nombre || 'CampaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a';
     const info = document.createElement('div');
     info.className = 'campania-info';
     const strong = document.createElement('strong');
-    strong.textContent = c.nombre || 'CampaÃƒÂ±a';
+    strong.textContent = c.nombre || 'CampaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a';
     const p = document.createElement('p');
     p.textContent = c.descripcion || '';
     const tag = document.createElement('span');
@@ -201,7 +201,7 @@ function renderCampanias(campanias) {
 
 function abrirModalCampania(c) {
   campaniaSeleccionada = c;
-  document.getElementById('modalTitulo').textContent = c.nombre || 'CampaÃƒÂ±a';
+  document.getElementById('modalTitulo').textContent = c.nombre || 'CampaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a';
   document.getElementById('modalDescripcion').textContent = c.descripcion || '';
   const lugar = `${c.localidad_nombre || ''}${c.barrio_nombre ? ' - ' + c.barrio_nombre : ''}`;
   document.getElementById('modalLugar').textContent = lugar.trim();
@@ -212,20 +212,20 @@ function abrirModalCampania(c) {
       btnCancelar.style.display = 'inline-block';
       btnCancelar.disabled = false;
       btnCancelar.onclick = () => {
-        if (confirmMsg) confirmMsg.textContent = `Â¿Cancelar tu inscripciÃ³n a "${c.nombre}"?`;
+        if (confirmMsg) confirmMsg.textContent = `Ãƒâ€šÃ‚Â¿Cancelar tu inscripciÃƒÆ’Ã‚Â³n a "${c.nombre}"?`;
         confirmDlg.style.display = 'flex';
         confirmYes.onclick = async () => {
           try {
             const res = await fetch(`${API_BASE_URL}/api/donantes/campanias/${c.id}/asistir`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }});
             if (!res.ok) throw new Error(await res.text());
-            showToast('InscripciÃ³n cancelada', 'success');
+            showToast('InscripciÃƒÆ’Ã‚Â³n cancelada', 'success');
             confirmDlg.style.display = 'none';
             modal.style.display = 'none';
             await cargarCampanias(token); await cargarNotificaciones();
             await cargarProximaInscripcion(token);
           } catch (er) {
-            console.error('Error al cancelar inscripciÃ³n:', er);
-            showToast('No se pudo cancelar la inscripciÃ³n', 'error');
+            console.error('Error al cancelar inscripciÃƒÆ’Ã‚Â³n:', er);
+            showToast('No se pudo cancelar la inscripciÃƒÆ’Ã‚Â³n', 'error');
           }
         };
         confirmNo.onclick = () => {
@@ -252,7 +252,7 @@ btnAsistir?.addEventListener('click', async () => {
       const t = await res.text();
       throw new Error(t || 'Error al inscribirse');
     }
-    alert('InscripciÃƒÂ³n registrada. Ã‚Â¡Gracias por participar!');
+    alert('InscripciÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n registrada. ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡Gracias por participar!');
     modal.style.display = 'none';
     // refrescar listados y proxima
     await cargarCampanias(token); await cargarNotificaciones();
@@ -263,14 +263,14 @@ btnAsistir?.addEventListener('click', async () => {
   }
 });
 
-// -------- Mis CampaÃƒÂ±as (inscripciones del donante) ---------
+// -------- Mis CampaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±as (inscripciones del donante) ---------
 function ensureMisCampaniasContainer() {
   if (document.getElementById('misCampaniasList')) return document.getElementById('misCampaniasList');
   const section = document.querySelector('.dashboard-campanias');
   if (!section) return null;
   const hr = document.createElement('hr');
   const h2 = document.createElement('h2');
-  h2.textContent = 'Mis campaÃƒÂ±as';
+  h2.textContent = 'Mis campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±as';
   const div = document.createElement('div');
   div.className = 'campanias-list';
   div.id = 'misCampaniasList';
@@ -291,14 +291,14 @@ async function cargarMisCampanias(tok) {
     const data = await res.json();
     renderMisCampanias(data || [], listEl);
   } catch (e) {
-    console.error('Error al cargar mis campaÃƒÂ±as:', e);
+    console.error('Error al cargar mis campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±as:', e);
   }
 }
 
 function renderMisCampanias(campanias, container) {
   if (!container) return;
   if (!campanias || campanias.length === 0) {
-    container.innerHTML = '<em>TodavÃƒÂ­a no te inscribiste a campaÃƒÂ±as.</em>';
+    container.innerHTML = '<em>TodavÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­a no te inscribiste a campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±as.</em>';
     return;
   }
   container.innerHTML = '';
@@ -307,11 +307,11 @@ function renderMisCampanias(campanias, container) {
     card.className = 'campania-card';
     const img = document.createElement('img');
     img.src = c.imagen_url || 'https://placehold.co/64x64/EEE/AAA?text=Img';
-    img.alt = c.nombre || 'CampaÃƒÂ±a';
+    img.alt = c.nombre || 'CampaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a';
     const info = document.createElement('div');
     info.className = 'campania-info';
     const strong = document.createElement('strong');
-    strong.textContent = c.nombre || 'CampaÃƒÂ±a';
+    strong.textContent = c.nombre || 'CampaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a';
     const p = document.createElement('p');
     const fecha = c.fecha_inicio ? new Date(c.fecha_inicio).toLocaleDateString() : '';
     p.textContent = fecha ? `Te inscribiste. Fecha de inicio: ${fecha}` : 'Te inscribiste.';
@@ -328,7 +328,7 @@ function renderMisCampanias(campanias, container) {
   });
 }
 
-// -------- PrÃ³xima campaÃ±a inscripta (aside) ---------
+// -------- PrÃƒÆ’Ã‚Â³xima campaÃƒÆ’Ã‚Â±a inscripta (aside) ---------
 async function cargarProximaInscripcion(tok) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/donantes/inscripciones`, {
@@ -359,18 +359,18 @@ async function cargarProximaInscripcion(tok) {
     const span = proximasBox?.querySelector('span');
     if (prox && span && btnProxima) {
       const fecha = prox.fecha_inicio ? new Date(prox.fecha_inicio).toLocaleDateString() : '';
-      span.textContent = `Tu prÃ³xima campaÃ±a: ${prox.nombre}${fecha ? ' ('+fecha+')' : ''}`;
+      span.textContent = `Tu prÃƒÆ’Ã‚Â³xima campaÃƒÆ’Ã‚Â±a: ${prox.nombre}${fecha ? ' ('+fecha+')' : ''}`;
       btnProxima.disabled = false;
       btnProxima.textContent = 'Ver';
       btnProxima.onclick = () => abrirModalCampania({ ...prox, ya_inscripto: true });
     } else if (span && btnProxima) {
-      span.textContent = 'AÃºn no te inscribiste a campaÃ±as prÃ³ximas.';
+      span.textContent = 'AÃƒÆ’Ã‚Âºn no te inscribiste a campaÃƒÆ’Ã‚Â±as prÃƒÆ’Ã‚Â³ximas.';
       btnProxima.disabled = true;
       btnProxima.textContent = 'Muy pronto!';
       btnProxima.onclick = null;
     }
   } catch (e) {
-    console.error('Error al calcular prÃ³xima campaÃ±a inscripta:', e);
+    console.error('Error al calcular prÃƒÆ’Ã‚Â³xima campaÃƒÆ’Ã‚Â±a inscripta:', e);
   }
 }
 
@@ -442,10 +442,7 @@ function renderNotificaciones(lista) {
     const li = document.createElement('li');
     li.className = 'notif-item' + (!n.leida ? ' unread' : '');
     
-    const span = document.createElement('span');
-    span.textContent = n.mensaje || (n.tipo ? n.tipo.replace('_',' ') : 'NotificaciÃ³n');
-    // unread style via CSS class
-    li.addEventListener('click', async () => {
+    const text=document.createElement('div'); text.textContent = n.mensaje || (n.tipo ? n.tipo.replace('_',' ') : 'NotificaciÃ³n'); const meta=document.createElement('div'); meta.style.fontSize='0.78rem'; meta.style.color='#666'; if(n.created_at) meta.textContent=timeAgo(n.created_at); li.addEventListener('click', async () => {
       try {
         await fetch(`${API_BASE_URL}/api/donantes/notificaciones/${n.id}/leida`, {
           method: 'POST', headers: { 'Authorization': 'Bearer ' + token }
@@ -459,12 +456,12 @@ function renderNotificaciones(lista) {
           else { notifBadge.style.display = 'none'; }
         }
         if (n.campania_id) {
-          // abre modal si hay campaÃ±a asociada
+          // abre modal si hay campaÃƒÆ’Ã‚Â±a asociada
           abrirModalCampania({ id: n.campania_id, nombre: n.mensaje, ya_inscripto: true });
         }
       } catch {}
     });
-    li.appendChild(span);
+    li.appendChild(text); if(meta.textContent) li.appendChild(meta);
     notifList.appendChild(li);
   });
 }
@@ -484,3 +481,21 @@ function actualizarBadgeNotificaciones(lista) {
 
 
 
+
+// timeago simple
+function timeAgo(dateInput){
+  try{
+    const d=new Date(dateInput);
+    const now=new Date();
+    const diffMs=now-d;
+    const s=Math.floor(diffMs/1000);
+    if(s<60) return 'hace unos segundos';
+    const m=Math.floor(s/60);
+    if(m<60) return `hace ${m} min`;
+    const h=Math.floor(m/60);
+    if(h<24) return `hace ${h} h`;
+    const dias=Math.floor(h/24);
+    if(dias===1) return 'ayer';
+    return `${d.toLocaleDateString()} ${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+  }catch{ return ''; }
+}
