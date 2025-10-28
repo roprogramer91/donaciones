@@ -133,7 +133,22 @@ async function cargarCampanias(tok) {
 
 function renderCampanias(campanias) {
   if (!campaniasList) return;
-  const items = (campanias || []);
+  const items = (campanias || []).slice();
+  // Orden: inscripto primero, luego activas, luego futuras por fecha
+  const rankEstado = (s) => (s === 'activa' ? 0 : (s === 'futura' ? 1 : 2));
+  items.sort((a,b) => {
+    const ra = a.ya_inscripto ? 0 : 1;
+    const rb = b.ya_inscripto ? 0 : 1;
+    if (ra !== rb) return ra - rb;
+    const ea = rankEstado(a.estado_calculado), eb = rankEstado(b.estado_calculado);
+    if (ea !== eb) return ea - eb;
+    const da = a.fecha_inicio ? new Date(a.fecha_inicio) : null;
+    const db = b.fecha_inicio ? new Date(b.fecha_inicio) : null;
+    if (da && db) return da - db;
+    if (da && !db) return -1;
+    if (!da && db) return 1;
+    return 0;
+  });
   if (items.length === 0) {
     campaniasList.innerHTML = '<em>No hay campañas activas o futuras cerca.</em>';
     return;
@@ -223,7 +238,7 @@ btnAsistir?.addEventListener('click', async () => {
     await cargarProximaInscripcion(token);
   } catch (err) {
     console.error('Error al inscribirse:', err);
-    alert('No se pudo registrar tu asistencia.');
+    showToast('No se pudo registrar tu asistencia','error');
   }
 });
 
@@ -336,4 +351,30 @@ async function cargarProximaInscripcion(tok) {
   } catch (e) {
     console.error('Error al calcular próxima campaña inscripta:', e);
   }
+}
+
+
+// Toast minimal
+function showToast(msg, type = 'info') {
+  let el = document.getElementById('toast-msg');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast-msg';
+    el.style.position = 'fixed';
+    el.style.bottom = '20px';
+    el.style.right = '20px';
+    el.style.padding = '10px 14px';
+    el.style.borderRadius = '8px';
+    el.style.color = '#fff';
+    el.style.fontSize = '0.95rem';
+    el.style.boxShadow = '0 2px 12px rgba(0,0,0,0.2)';
+    el.style.zIndex = '1000';
+    document.body.appendChild(el);
+  }
+  const colors = { success: '#198754', error: '#c1121f', info: '#0d6efd' };
+  el.style.background = colors[type] || colors.info;
+  el.textContent = msg;
+  el.style.opacity = '1';
+  el.style.transition = 'opacity 0.4s ease';
+  setTimeout(() => { el.style.opacity = '0'; }, 2000);
 }
