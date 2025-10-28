@@ -11,7 +11,6 @@ const contenidoPrivado = document.getElementById('contenido-privado');
 const bienvenida = document.getElementById('bienvenida');
 const logoutBtn = document.getElementById('logoutBtn');
 const proximasBox = document.querySelector('.proximas-campanias');
-const btnProxima = document.getElementById('btn-campanias');
 
 // Elementos de los datos personales
 const grupoSangre = document.getElementById('grupo-sangre');
@@ -50,7 +49,7 @@ async function cargarPanel() {
     }
     
     // Mostrar saludo
-    bienvenida.textContent = `¡Hola, ${donante.nombre || 'Donante'}!`;
+    bienvenida.textContent = `Â¡Hola, ${donante.nombre || 'Donante'}!`;
 
     // Mostrar datos principales
     grupoSangre.textContent = donante.grupo_sanguineo || '--';
@@ -58,40 +57,40 @@ async function cargarPanel() {
       ? new Date(donante.fecha_ultima_donacion).toLocaleDateString()
       : '--/--/----';
     diasApto.textContent = (donante.dias_restantes !== undefined)
-      ? `${donante.dias_restantes} días`
-      : '-- días';
+      ? `${donante.dias_restantes} dÃ­as`
+      : '-- dÃ­as';
 
   
     // document.getElementById('provincia-nombre').textContent = donante.provincia_nombre;
 
-    // Cargar campañas por localidad y mis inscripciones
+    // Cargar campaÃ±as por localidad y mis inscripciones
     await cargarCampanias(token);
-    await cargarMisCampanias(token);
+    await cargarProximaInscripcion(token);
 
     loader.style.display = "none";
     contenidoPrivado.style.display = "block";
 
   } catch (e) {
-  console.error("⚠️ Error detallado en cargarPanel():", e);
+  console.error("âš ï¸ Error detallado en cargarPanel():", e);
 
   loader.innerHTML = `
     <p style="color:red;">
       Error al cargar datos.<br>
       <strong>Detalles:</strong> ${e.message || 'Error desconocido'}<br>
-      Revisa la consola para más información.
+      Revisa la consola para mÃ¡s informaciÃ³n.
     </p>`;
 }
 
  
 }
 
-// Botón de perfil
+// BotÃ³n de perfil
 document.getElementById('btn-perfil').addEventListener('click', () => {
   window.location.href = "perfil-donante.html";
 });
 
 
-// Botón de logout
+// BotÃ³n de logout
 logoutBtn.addEventListener('click', () => {
   localStorage.removeItem('token');
   window.location.href = '../../index.html';
@@ -102,7 +101,7 @@ logoutBtn.addEventListener('click', () => {
 
 cargarPanel();
 
-// ---------------- Campañas disponibles -----------------
+// ---------------- CampaÃ±as disponibles -----------------
 const campaniasList = document.getElementById('campaniasList');
 const modal = document.getElementById('modalCampania');
 const btnCerrarModal = document.getElementById('btnCerrarModal');
@@ -120,50 +119,34 @@ async function cargarCampanias(tok) {
     const res = await fetch(`${API_BASE_URL}/api/donantes/campanias`, {
       headers: { 'Authorization': 'Bearer ' + tok }
     });
-    if (!res.ok) throw new Error('Error al obtener campañas');
+    if (!res.ok) throw new Error('Error al obtener campaÃ±as');
     const data = await res.json();
     const lista = data.campanias || [];
     renderCampanias(lista);
-
-    // Proxima campaña (la primera futura por fecha)
-    const futura = lista.find(c => c.estado_calculado === 'futura');
-    const span = proximasBox?.querySelector('span');
-    proximaSeleccionada = futura || null;
-    if (futura && span && btnProxima) {
-      const fecha = futura.fecha_inicio ? new Date(futura.fecha_inicio).toLocaleDateString() : '';
-      span.textContent = `Próxima campaña en tu zona: ${futura.nombre} (${fecha})`;
-      btnProxima.disabled = false;
-      btnProxima.textContent = 'Ver';
-      btnProxima.onclick = () => abrirModalCampania({ ...futura });
-    } else if (span && btnProxima) {
-      span.textContent = 'No hay campañas futuras cercanas.';
-      btnProxima.disabled = true;
-      btnProxima.textContent = 'Muy pronto!';
-      btnProxima.onclick = null;
-    }
   } catch (err) {
-    console.error('Error al cargar campañas:', err);
-    if (campaniasList) campaniasList.innerHTML = '<em>No se pudieron cargar las campañas</em>';
+    console.error('Error al cargar campaÃ±as:', err);
+    if (campaniasList) campaniasList.innerHTML = '<em>No se pudieron cargar las campaÃ±as</em>';
   }
 }
 
 function renderCampanias(campanias) {
   if (!campaniasList) return;
-  if (!campanias || campanias.length === 0) {
-    campaniasList.innerHTML = '<em>No hay campañas activas en tu localidad.</em>';
+  const disponibles = (campanias || []).filter(c => !c.ya_inscripto);
+  if (disponibles.length === 0) {
+    campaniasList.innerHTML = '<em>No hay campañas activas o futuras disponibles.</em>';
     return;
   }
   campaniasList.innerHTML = '';
-  campanias.forEach(c => {
+  disponibles.forEach(c => {
     const card = document.createElement('div');
     card.className = 'campania-card';
     const img = document.createElement('img');
     img.src = c.imagen_url || 'https://placehold.co/64x64/EEE/AAA?text=Img';
-    img.alt = c.nombre || 'Campaña';
+    img.alt = c.nombre || 'CampaÃ±a';
     const info = document.createElement('div');
     info.className = 'campania-info';
     const strong = document.createElement('strong');
-    strong.textContent = c.nombre || 'Campaña';
+    strong.textContent = c.nombre || 'CampaÃ±a';
     const p = document.createElement('p');
     p.textContent = c.descripcion || '';
     const tag = document.createElement('span');
@@ -192,7 +175,7 @@ function renderCampanias(campanias) {
 
 function abrirModalCampania(c) {
   campaniaSeleccionada = c;
-  document.getElementById('modalTitulo').textContent = c.nombre || 'Campaña';
+  document.getElementById('modalTitulo').textContent = c.nombre || 'CampaÃ±a';
   document.getElementById('modalDescripcion').textContent = c.descripcion || '';
   const lugar = `${c.localidad_nombre || ''}${c.barrio_nombre ? ' - ' + c.barrio_nombre : ''}`;
   document.getElementById('modalLugar').textContent = lugar.trim();
@@ -217,25 +200,25 @@ btnAsistir?.addEventListener('click', async () => {
       const t = await res.text();
       throw new Error(t || 'Error al inscribirse');
     }
-    alert('Inscripción registrada. ¡Gracias por participar!');
+    alert('InscripciÃ³n registrada. Â¡Gracias por participar!');
     modal.style.display = 'none';
     // refrescar listados y proxima
     await cargarCampanias(token);
-    await cargarMisCampanias(token);
+    await cargarProximaInscripcion(token);
   } catch (err) {
     console.error('Error al inscribirse:', err);
     alert('No se pudo registrar tu asistencia.');
   }
 });
 
-// -------- Mis Campañas (inscripciones del donante) ---------
+// -------- Mis CampaÃ±as (inscripciones del donante) ---------
 function ensureMisCampaniasContainer() {
   if (document.getElementById('misCampaniasList')) return document.getElementById('misCampaniasList');
   const section = document.querySelector('.dashboard-campanias');
   if (!section) return null;
   const hr = document.createElement('hr');
   const h2 = document.createElement('h2');
-  h2.textContent = 'Mis campañas';
+  h2.textContent = 'Mis campaÃ±as';
   const div = document.createElement('div');
   div.className = 'campanias-list';
   div.id = 'misCampaniasList';
@@ -256,14 +239,14 @@ async function cargarMisCampanias(tok) {
     const data = await res.json();
     renderMisCampanias(data || [], listEl);
   } catch (e) {
-    console.error('Error al cargar mis campañas:', e);
+    console.error('Error al cargar mis campaÃ±as:', e);
   }
 }
 
 function renderMisCampanias(campanias, container) {
   if (!container) return;
   if (!campanias || campanias.length === 0) {
-    container.innerHTML = '<em>Todavía no te inscribiste a campañas.</em>';
+    container.innerHTML = '<em>TodavÃ­a no te inscribiste a campaÃ±as.</em>';
     return;
   }
   container.innerHTML = '';
@@ -272,11 +255,11 @@ function renderMisCampanias(campanias, container) {
     card.className = 'campania-card';
     const img = document.createElement('img');
     img.src = c.imagen_url || 'https://placehold.co/64x64/EEE/AAA?text=Img';
-    img.alt = c.nombre || 'Campaña';
+    img.alt = c.nombre || 'CampaÃ±a';
     const info = document.createElement('div');
     info.className = 'campania-info';
     const strong = document.createElement('strong');
-    strong.textContent = c.nombre || 'Campaña';
+    strong.textContent = c.nombre || 'CampaÃ±a';
     const p = document.createElement('p');
     const fecha = c.fecha_inicio ? new Date(c.fecha_inicio).toLocaleDateString() : '';
     p.textContent = fecha ? `Te inscribiste. Fecha de inicio: ${fecha}` : 'Te inscribiste.';
