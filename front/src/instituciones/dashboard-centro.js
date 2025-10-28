@@ -649,13 +649,10 @@ btnFelicitacionesHoy?.addEventListener('click', async () => {
   }
 });
 
-// Botón para abrir sección Notificaciones
+// Botï¿½n para abrir secciï¿½n Notificaciones
 const btnVerNotifs = document.getElementById('btn-ver-notifs');
 const seccionNotifs = document.getElementById('seccion-notifs');
-btnVerNotifs?.addEventListener('click', () => {
-  toggleSeccion('notifs');
-  if (seccionNotifs) seccionNotifs.scrollIntoView({ behavior: 'smooth', block: 'start' });
-});
+btnVerNotifs?.addEventListener('click', async () => {\n  toggleSeccion('notifs');\n  await cargarProvinciasNotif();\n  await cargarCampaniasNotif();\n  if (seccionNotifs) seccionNotifs.scrollIntoView({ behavior: 'smooth', block: 'start' });\n});
 
 // Previsualizar alcance de notificaciones
 const btnPreviewNotif = document.getElementById('btn-preview-notif');
@@ -689,13 +686,13 @@ btnPreviewFel?.addEventListener('click', async () => {
     });
     if (!res.ok) throw new Error('No se pudo previsualizar');
     const r = await res.json();
-    if (previewOut) previewOut.textContent = `Cumpleaños hoy: ${r.candidatos} donantes`;
+    if (previewOut) previewOut.textContent = `Cumpleaï¿½os hoy: ${r.candidatos} donantes`;
   } catch (e) {
     console.error(e); if (previewOut) previewOut.textContent = 'Error al previsualizar felicitaciones';
   }
 });
 
-// Cargar catálogos para Notificaciones (provincia/localidad y campañas)
+// Cargar catï¿½logos para Notificaciones (provincia/localidad y campaï¿½as)
 const selProvN = document.getElementById('f_notif_provincia');
 const selLocN = document.getElementById('f_notif_localidad');
 const selCamp = document.getElementById('notif_campania_sel');
@@ -732,12 +729,9 @@ async function cargarCampaniasNotif() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/campanias`);
     const lista = await res.json();
-    selCamp.innerHTML = '<option value="">Seleccionar campaña...</option>';
+    selCamp.innerHTML = '<option value="">Seleccionar campaï¿½a...</option>';
     lista.forEach(c => { const opt=document.createElement('option'); opt.value=c.id; opt.textContent=c.nombre; selCamp.appendChild(opt); });
   } catch {}
 }
 
-// init notifs selectors when section opens
-const btnVerNotifs = document.getElementById('btn-ver-notifs');
-btnVerNotifs?.addEventListener('click', async () => { await cargarProvinciasNotif(); await cargarCampaniasNotif(); });
 
