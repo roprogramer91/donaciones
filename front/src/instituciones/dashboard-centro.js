@@ -24,13 +24,31 @@ function getCentroId() {
   }
   return 1; // TODO: guardar centroId durante el login y leerlo aquí
 }
+let currentSection = null;
 function toggleSeccion(seccion) {
-  const seccionDonantes = document.getElementById("seccion-donantes");
-  const seccionCampanias = document.getElementById("seccion-campanias");
-  const seccionNotifs = document.getElementById("seccion-notifs");
-  seccionDonantes.style.display = seccion === 'donantes' ? 'block' : 'none';
-  seccionCampanias.style.display = seccion === 'campanias' ? 'block' : 'none';
-  if (seccionNotifs) seccionNotifs.style.display = seccion === 'notifs' ? 'block' : 'none';
+  const seccionDonantes = document.getElementById('seccion-donantes');
+  const seccionCampanias = document.getElementById('seccion-campanias');
+  const seccionNotifs = document.getElementById('seccion-notifs');
+
+  const wasOpen = currentSection === seccion;
+
+  // Ocultar todas
+  if (seccionDonantes) seccionDonantes.style.display = 'none';
+  if (seccionCampanias) seccionCampanias.style.display = 'none';
+  if (seccionNotifs) seccionNotifs.style.display = 'none';
+
+  if (wasOpen) {
+    currentSection = null;
+    return false; // quedó oculto
+  }
+
+  // Mostrar la solicitada
+  if (seccion === 'donantes' && seccionDonantes) seccionDonantes.style.display = 'block';
+  if (seccion === 'campanias' && seccionCampanias) seccionCampanias.style.display = 'block';
+  if (seccion === 'notifs' && seccionNotifs) seccionNotifs.style.display = 'block';
+
+  currentSection = seccion;
+  return true; // quedó visible
 }
 
 // Catálogos en memoria para nombres de provincias/localidades
@@ -132,8 +150,9 @@ const conteoDonantes = document.getElementById('conteo-donantes');
 
 let ultimoResultadoDonantes = [];
 
-btnVerDonantes.addEventListener("click", async () => {
-  toggleSeccion("donantes");
+btnVerDonantes.addEventListener('click', async () => {
+  const visible = toggleSeccion('donantes');
+  if (!visible) return; // toggle off
   await inicializarFiltrosDonantes();
   await cargarDonantes();
 });
@@ -350,7 +369,8 @@ const btnVerCampanias = document.getElementById('btn-ver-campanias');
 const seccionCampanias = document.getElementById('seccion-campanias');
 
 btnVerCampanias.addEventListener('click', async () => {
-  toggleSeccion('campanias');
+  const visible = toggleSeccion('campanias');
+  if (!visible) return;
   await cargarCampanias();
 });
 
@@ -653,12 +673,11 @@ btnFelicitacionesHoy?.addEventListener('click', async () => {
 const btnVerNotifs = document.getElementById('btn-ver-notifs');
 const seccionNotifs = document.getElementById('seccion-notifs');
 btnVerNotifs?.addEventListener('click', async () => {
-  toggleSeccion('notifs');
+  const visible = toggleSeccion('notifs');
+  if (!visible) return;
   await cargarProvinciasNotif();
   await cargarCampaniasNotif();
-  if (seccionNotifs) {
-    seccionNotifs.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  if (seccionNotifs) seccionNotifs.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
 // Previsualizar alcance de notificaciones
