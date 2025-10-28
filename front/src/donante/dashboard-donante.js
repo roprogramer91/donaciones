@@ -11,6 +11,7 @@ const contenidoPrivado = document.getElementById('contenido-privado');
 const bienvenida = document.getElementById('bienvenida');
 const logoutBtn = document.getElementById('logoutBtn');
 const proximasBox = document.querySelector('.proximas-campanias');
+const btnProxima = document.getElementById('btn-campanias');
 
 // Elementos de los datos personales
 const grupoSangre = document.getElementById('grupo-sangre');
@@ -274,4 +275,50 @@ function renderMisCampanias(campanias, container) {
     card.appendChild(info);
     container.appendChild(card);
   });
+}
+
+// -------- Próxima campaña inscripta (aside) ---------
+async function cargarProximaInscripcion(tok) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/donantes/inscripciones`, {
+      headers: { 'Authorization': 'Bearer ' + tok }
+    });
+    if (!res.ok) throw new Error('Error al obtener mis inscripciones');
+    const data = await res.json();
+    const lista = Array.isArray(data) ? data : [];
+
+    const today = new Date();
+    const hoy = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const esActiva = (c) => {
+      const fi = c.fecha_inicio ? new Date(c.fecha_inicio) : null;
+      const ff = c.fecha_fin ? new Date(c.fecha_fin) : null;
+      return (fi && fi <= hoy) && (!ff || ff >= hoy);
+    };
+
+    let prox = null;
+    const activas = lista.filter(esActiva);
+    if (activas.length > 0) {
+      prox = activas.sort((a,b) => new Date(a.fecha_inicio) - new Date(b.fecha_inicio))[0];
+    } else {
+      const futuras = lista.filter(c => c.fecha_inicio && new Date(c.fecha_inicio) > hoy);
+      futuras.sort((a,b) => new Date(a.fecha_inicio) - new Date(b.fecha_inicio));
+      prox = futuras[0] || null;
+    }
+
+    const span = proximasBox?.querySelector('span');
+    if (prox && span && btnProxima) {
+      const fecha = prox.fecha_inicio ? new Date(prox.fecha_inicio).toLocaleDateString() : '';
+      span.textContent = `Tu próxima campaña: ${prox.nombre}${fecha ? ' ('+fecha+')' : ''}`;
+      btnProxima.disabled = false;
+      btnProxima.textContent = 'Ver';
+      btnProxima.onclick = () => abrirModalCampania({ ...prox, ya_inscripto: true });
+    } else if (span && btnProxima) {
+      span.textContent = 'Aún no te inscribiste a campañas próximas.';
+      btnProxima.disabled = true;
+      btnProxima.textContent = 'Muy pronto!';
+      btnProxima.onclick = null;
+    }
+  } catch (e) {
+    console.error('Error al calcular próxima campaña inscripta:', e);
+  }
 }
