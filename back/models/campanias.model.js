@@ -154,27 +154,18 @@ CampaniasModel.inscribirDonante = async function (campaniaId, usuarioId) {
     [campaniaId, usuarioId]
   );
 
-  // Intentar notificar al centro; si no existe tabla/columna, no bloquear la inscripción
+  // Intentar notificar; si falla, no bloquear
   try {
     const camp = await CampaniasModel.obtenerPorId(campaniaId);
     const centroId = camp ? camp.centro_id : null;
     if (centroId) {
-      await pool.query(
-        `INSERT INTO notificaciones (centro_id, tipo, mensaje)
-         VALUES ($1,$2,$3);`,
-        [centroId, 'inscripcion', `Usuario ${usuarioId} se inscribió en campaña ${campaniaId}`]
-      );
+      try { await pool.query(`INSERT INTO notificaciones (centro_id, tipo, mensaje) VALUES ($1,$2,$3);`, [centroId, 'inscripcion', `Usuario ${usuarioId} se inscribió en campaña ${campaniaId}`]); } catch {}
     }
-
-    // Notificación para el donante
-    await pool.query(
-      `INSERT INTO notificaciones (usuario_id, tipo, mensaje, campania_id)
-       VALUES ($1,$2,$3,$4)`,
-      [usuarioId, 'inscripcion', `Te inscribiste a "${camp?.nombre || 'una campaña'}"`, campaniaId]
-    );
-  } catch (_) {
-    // noop en dev si la tabla/estructura difiere
-  }
+    try {
+      const Notificaciones = require('./notificaciones.model');
+      await Notificaciones.createForUsuario(usuarioId, { tipo: 'inscripcion', mensaje: `Te inscribiste a "${camp?.nombre || 'una campaña'}"`, campania_id: campaniaId });
+    } catch {}
+  } catch (_) {}
 
   return insert.rows[0];
 };
