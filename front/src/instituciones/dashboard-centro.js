@@ -615,7 +615,7 @@ const msgNotif = document.getElementById('notif-centro-mensaje');
 btnEnviarNotif?.addEventListener('click', async () => {
   const mensaje = (document.getElementById('notif_mensaje')?.value || '').trim();
   const tipo = document.getElementById('notif_tipo')?.value || 'aviso';
-  const campania_id = parseInt(document.getElementById('notif_campania_id')?.value || '', 10) || null;
+  const campania_id = parseInt(document.getElementById('notif_campania_sel')?.value || '', 10) || null;
   const localidad = parseInt(document.getElementById('f_notif_localidad')?.value || '', 10) || undefined;
   const grupo = document.getElementById('f_notif_grupo')?.value || undefined;
   const apto = document.getElementById('f_notif_apto')?.checked ? 'true' : undefined;
@@ -694,3 +694,50 @@ btnPreviewFel?.addEventListener('click', async () => {
     console.error(e); if (previewOut) previewOut.textContent = 'Error al previsualizar felicitaciones';
   }
 });
+
+// Cargar catálogos para Notificaciones (provincia/localidad y campañas)
+const selProvN = document.getElementById('f_notif_provincia');
+const selLocN = document.getElementById('f_notif_localidad');
+const selCamp = document.getElementById('notif_campania_sel');
+
+async function cargarProvinciasNotif() {
+  if (!selProvN) return;
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/provincias`);
+    const data = await res.json();
+    selProvN.innerHTML = '<option value="">Todas las provincias</option>';
+    data.forEach(p => {
+      const opt = document.createElement('option'); opt.value = p.id; opt.textContent = p.nombre; selProvN.appendChild(opt);
+    });
+  } catch {}
+}
+
+async function cargarLocalidadesNotif(provId) {
+  if (!selLocN) return;
+  selLocN.disabled = !provId; selLocN.innerHTML = '<option value="">Todas las localidades</option>';
+  if (!provId) return;
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/localidades?provincia=${provId}`);
+    const data = await res.json();
+    data.forEach(l => { const opt = document.createElement('option'); opt.value = l.id; opt.textContent = l.nombre; selLocN.appendChild(opt); });
+  } catch {}
+}
+
+selProvN?.addEventListener('change', async (e) => {
+  await cargarLocalidadesNotif(e.target.value || '');
+});
+
+async function cargarCampaniasNotif() {
+  if (!selCamp) return;
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/campanias`);
+    const lista = await res.json();
+    selCamp.innerHTML = '<option value="">Seleccionar campaña...</option>';
+    lista.forEach(c => { const opt=document.createElement('option'); opt.value=c.id; opt.textContent=c.nombre; selCamp.appendChild(opt); });
+  } catch {}
+}
+
+// init notifs selectors when section opens
+const btnVerNotifs = document.getElementById('btn-ver-notifs');
+btnVerNotifs?.addEventListener('click', async () => { await cargarProvinciasNotif(); await cargarCampaniasNotif(); });
+
