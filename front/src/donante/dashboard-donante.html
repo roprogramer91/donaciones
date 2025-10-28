@@ -89,6 +89,18 @@
       </div>
     </div>
   </div>
+
+  <!-- Confirmación de cancelación -->
+  <div id="confirmCancel" style="display:none; position:fixed; inset:0; background:#0006; z-index:60; align-items:center; justify-content:center;">
+    <div style="background:#fff; padding:1rem 1.2rem; border-radius:0.8rem; max-width:420px; width:90%;">
+      <h4 style="margin:0 0 0.6rem 0;">Confirmar cancelación</h4>
+      <p id="confirmCancelMsg" style="margin:0 0 0.8rem 0; color:#333"></p>
+      <div style="display:flex; gap:0.6rem; justify-content:flex-end;">
+        <button id="btnCancelNo" class="btn-secundario">No</button>
+        <button id="btnCancelYes" class="btn-primario">Sí, cancelar</button>
+      </div>
+    </div>
+  </div>
   <script type="module" src="dashboard-donante.js"></script>
 </body>
 </html>

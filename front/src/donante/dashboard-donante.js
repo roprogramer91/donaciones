@@ -108,6 +108,10 @@ const modal = document.getElementById('modalCampania');
 const btnCerrarModal = document.getElementById('btnCerrarModal');
 const btnAsistir = document.getElementById('btnAsistir');
 const btnCancelar = document.getElementById('btnCancelar');
+const confirmDlg = document.getElementById('confirmCancel');
+const confirmMsg = document.getElementById('confirmCancelMsg');
+const confirmYes = document.getElementById('btnCancelYes');
+const confirmNo = document.getElementById('btnCancelNo');
 let campaniaSeleccionada = null;
 let proximaSeleccionada = null;
 
@@ -199,19 +203,31 @@ function abrirModalCampania(c) {
   if (c.ya_inscripto === true) {
     btnAsistir.disabled = true;
     btnAsistir.textContent = 'Inscripto';
-    if (btnCancelar) { btnCancelar.style.display = 'inline-block'; btnCancelar.disabled = false; btnCancelar.onclick = async () => {
-        try {
-          const res = await fetch(`${API_BASE_URL}/api/donantes/campanias/${c.id}/asistir`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }});
-          if (!res.ok) throw new Error(await res.text());
-          alert('Inscripción cancelada');
-          modal.style.display = 'none';
-          await cargarCampanias(token);
-          await cargarProximaInscripcion(token);
-        } catch (er) {
-          console.error('Error al cancelar inscripción:', er);
-          alert('No se pudo cancelar la inscripción');
-        }
-      }; }
+    if (btnCancelar) {
+      btnCancelar.style.display = 'inline-block';
+      btnCancelar.disabled = false;
+      btnCancelar.onclick = () => {
+        if (confirmMsg) confirmMsg.textContent = `¿Cancelar tu inscripción a "${c.nombre}"?`;
+        confirmDlg.style.display = 'flex';
+        confirmYes.onclick = async () => {
+          try {
+            const res = await fetch(`${API_BASE_URL}/api/donantes/campanias/${c.id}/asistir`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }});
+            if (!res.ok) throw new Error(await res.text());
+            showToast('Inscripción cancelada', 'success');
+            confirmDlg.style.display = 'none';
+            modal.style.display = 'none';
+            await cargarCampanias(token);
+            await cargarProximaInscripcion(token);
+          } catch (er) {
+            console.error('Error al cancelar inscripción:', er);
+            showToast('No se pudo cancelar la inscripción', 'error');
+          }
+        };
+        confirmNo.onclick = () => {
+          confirmDlg.style.display = 'none';
+        };
+      };
+    }
   } else {
     btnAsistir.disabled = !c.inscribible;
     btnAsistir.textContent = 'ASISTIR';
