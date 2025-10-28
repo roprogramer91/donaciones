@@ -16,6 +16,7 @@ const btnNotif = document.getElementById('btn-notif');
 const notifDropdown = document.getElementById('notifDropdown');
 const notifList = document.getElementById('notifList');
 const notifEmpty = document.getElementById('notifEmpty');
+const notifBadge = document.getElementById('notifBadge');
 
 // Elementos de los datos personales
 const grupoSangre = document.getElementById('grupo-sangre');
@@ -54,7 +55,7 @@ async function cargarPanel() {
     }
     
     // Mostrar saludo
-    bienvenida.textContent = `Â¡Hola, ${donante.nombre || 'Donante'}!`;
+    bienvenida.textContent = `Ã‚Â¡Hola, ${donante.nombre || 'Donante'}!`;
 
     // Mostrar datos principales
     grupoSangre.textContent = donante.grupo_sanguineo || '--';
@@ -62,40 +63,40 @@ async function cargarPanel() {
       ? new Date(donante.fecha_ultima_donacion).toLocaleDateString()
       : '--/--/----';
     diasApto.textContent = (donante.dias_restantes !== undefined)
-      ? `${donante.dias_restantes} dÃ­as`
-      : '-- dÃ­as';
+      ? `${donante.dias_restantes} dÃƒÂ­as`
+      : '-- dÃƒÂ­as';
 
   
     // document.getElementById('provincia-nombre').textContent = donante.provincia_nombre;
 
-    // Cargar campaÃ±as por localidad y mis inscripciones
-    await cargarCampanias(token);
+    // Cargar campaÃƒÂ±as por localidad y mis inscripciones
+    await cargarCampanias(token); await cargarNotificaciones();
     await cargarProximaInscripcion(token);
 
     loader.style.display = "none";
     contenidoPrivado.style.display = "block";
 
   } catch (e) {
-  console.error("âš ï¸ Error detallado en cargarPanel():", e);
+  console.error("Ã¢Å¡Â Ã¯Â¸Â Error detallado en cargarPanel():", e);
 
   loader.innerHTML = `
     <p style="color:red;">
       Error al cargar datos.<br>
       <strong>Detalles:</strong> ${e.message || 'Error desconocido'}<br>
-      Revisa la consola para mÃ¡s informaciÃ³n.
+      Revisa la consola para mÃƒÂ¡s informaciÃƒÂ³n.
     </p>`;
 }
 
  
 }
 
-// BotÃ³n de perfil
+// BotÃƒÂ³n de perfil
 document.getElementById('btn-perfil').addEventListener('click', () => {
   window.location.href = "perfil-donante.html";
 });
 
 
-// BotÃ³n de logout
+// BotÃƒÂ³n de logout
 logoutBtn.addEventListener('click', () => {
   localStorage.removeItem('token');
   window.location.href = '../../index.html';
@@ -106,7 +107,7 @@ logoutBtn.addEventListener('click', () => {
 
 cargarPanel();
 
-// ---------------- CampaÃ±as disponibles -----------------
+// ---------------- CampaÃƒÂ±as disponibles -----------------
 const campaniasList = document.getElementById('campaniasList');
 const modal = document.getElementById('modalCampania');
 const btnCerrarModal = document.getElementById('btnCerrarModal');
@@ -129,13 +130,13 @@ async function cargarCampanias(tok) {
     const res = await fetch(`${API_BASE_URL}/api/donantes/campanias`, {
       headers: { 'Authorization': 'Bearer ' + tok }
     });
-    if (!res.ok) throw new Error('Error al obtener campaÃ±as');
+    if (!res.ok) throw new Error('Error al obtener campaÃƒÂ±as');
     const data = await res.json();
     const lista = data.campanias || [];
     renderCampanias(lista);
   } catch (err) {
-    console.error('Error al cargar campaÃ±as:', err);
-    if (campaniasList) campaniasList.innerHTML = '<em>No se pudieron cargar las campaÃ±as</em>';
+    console.error('Error al cargar campaÃƒÂ±as:', err);
+    if (campaniasList) campaniasList.innerHTML = '<em>No se pudieron cargar las campaÃƒÂ±as</em>';
   }
 }
 
@@ -158,7 +159,7 @@ function renderCampanias(campanias) {
     return 0;
   });
   if (items.length === 0) {
-    campaniasList.innerHTML = '<em>No hay campañas activas o futuras cerca.</em>';
+    campaniasList.innerHTML = '<em>No hay campaÃ±as activas o futuras cerca.</em>';
     return;
   }
   campaniasList.innerHTML = '';
@@ -167,11 +168,11 @@ function renderCampanias(campanias) {
     card.className = 'campania-card';
     const img = document.createElement('img');
     img.src = c.imagen_url || 'https://placehold.co/64x64/EEE/AAA?text=Img';
-    img.alt = c.nombre || 'CampaÃ±a';
+    img.alt = c.nombre || 'CampaÃƒÂ±a';
     const info = document.createElement('div');
     info.className = 'campania-info';
     const strong = document.createElement('strong');
-    strong.textContent = c.nombre || 'CampaÃ±a';
+    strong.textContent = c.nombre || 'CampaÃƒÂ±a';
     const p = document.createElement('p');
     p.textContent = c.descripcion || '';
     const tag = document.createElement('span');
@@ -200,7 +201,7 @@ function renderCampanias(campanias) {
 
 function abrirModalCampania(c) {
   campaniaSeleccionada = c;
-  document.getElementById('modalTitulo').textContent = c.nombre || 'CampaÃ±a';
+  document.getElementById('modalTitulo').textContent = c.nombre || 'CampaÃƒÂ±a';
   document.getElementById('modalDescripcion').textContent = c.descripcion || '';
   const lugar = `${c.localidad_nombre || ''}${c.barrio_nombre ? ' - ' + c.barrio_nombre : ''}`;
   document.getElementById('modalLugar').textContent = lugar.trim();
@@ -211,20 +212,20 @@ function abrirModalCampania(c) {
       btnCancelar.style.display = 'inline-block';
       btnCancelar.disabled = false;
       btnCancelar.onclick = () => {
-        if (confirmMsg) confirmMsg.textContent = `¿Cancelar tu inscripción a "${c.nombre}"?`;
+        if (confirmMsg) confirmMsg.textContent = `Â¿Cancelar tu inscripciÃ³n a "${c.nombre}"?`;
         confirmDlg.style.display = 'flex';
         confirmYes.onclick = async () => {
           try {
             const res = await fetch(`${API_BASE_URL}/api/donantes/campanias/${c.id}/asistir`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }});
             if (!res.ok) throw new Error(await res.text());
-            showToast('Inscripción cancelada', 'success');
+            showToast('InscripciÃ³n cancelada', 'success');
             confirmDlg.style.display = 'none';
             modal.style.display = 'none';
-            await cargarCampanias(token);
+            await cargarCampanias(token); await cargarNotificaciones();
             await cargarProximaInscripcion(token);
           } catch (er) {
-            console.error('Error al cancelar inscripción:', er);
-            showToast('No se pudo cancelar la inscripción', 'error');
+            console.error('Error al cancelar inscripciÃ³n:', er);
+            showToast('No se pudo cancelar la inscripciÃ³n', 'error');
           }
         };
         confirmNo.onclick = () => {
@@ -251,10 +252,10 @@ btnAsistir?.addEventListener('click', async () => {
       const t = await res.text();
       throw new Error(t || 'Error al inscribirse');
     }
-    alert('InscripciÃ³n registrada. Â¡Gracias por participar!');
+    alert('InscripciÃƒÂ³n registrada. Ã‚Â¡Gracias por participar!');
     modal.style.display = 'none';
     // refrescar listados y proxima
-    await cargarCampanias(token);
+    await cargarCampanias(token); await cargarNotificaciones();
     await cargarProximaInscripcion(token);
   } catch (err) {
     console.error('Error al inscribirse:', err);
@@ -262,14 +263,14 @@ btnAsistir?.addEventListener('click', async () => {
   }
 });
 
-// -------- Mis CampaÃ±as (inscripciones del donante) ---------
+// -------- Mis CampaÃƒÂ±as (inscripciones del donante) ---------
 function ensureMisCampaniasContainer() {
   if (document.getElementById('misCampaniasList')) return document.getElementById('misCampaniasList');
   const section = document.querySelector('.dashboard-campanias');
   if (!section) return null;
   const hr = document.createElement('hr');
   const h2 = document.createElement('h2');
-  h2.textContent = 'Mis campaÃ±as';
+  h2.textContent = 'Mis campaÃƒÂ±as';
   const div = document.createElement('div');
   div.className = 'campanias-list';
   div.id = 'misCampaniasList';
@@ -290,14 +291,14 @@ async function cargarMisCampanias(tok) {
     const data = await res.json();
     renderMisCampanias(data || [], listEl);
   } catch (e) {
-    console.error('Error al cargar mis campaÃ±as:', e);
+    console.error('Error al cargar mis campaÃƒÂ±as:', e);
   }
 }
 
 function renderMisCampanias(campanias, container) {
   if (!container) return;
   if (!campanias || campanias.length === 0) {
-    container.innerHTML = '<em>TodavÃ­a no te inscribiste a campaÃ±as.</em>';
+    container.innerHTML = '<em>TodavÃƒÂ­a no te inscribiste a campaÃƒÂ±as.</em>';
     return;
   }
   container.innerHTML = '';
@@ -306,11 +307,11 @@ function renderMisCampanias(campanias, container) {
     card.className = 'campania-card';
     const img = document.createElement('img');
     img.src = c.imagen_url || 'https://placehold.co/64x64/EEE/AAA?text=Img';
-    img.alt = c.nombre || 'CampaÃ±a';
+    img.alt = c.nombre || 'CampaÃƒÂ±a';
     const info = document.createElement('div');
     info.className = 'campania-info';
     const strong = document.createElement('strong');
-    strong.textContent = c.nombre || 'CampaÃ±a';
+    strong.textContent = c.nombre || 'CampaÃƒÂ±a';
     const p = document.createElement('p');
     const fecha = c.fecha_inicio ? new Date(c.fecha_inicio).toLocaleDateString() : '';
     p.textContent = fecha ? `Te inscribiste. Fecha de inicio: ${fecha}` : 'Te inscribiste.';
@@ -327,7 +328,7 @@ function renderMisCampanias(campanias, container) {
   });
 }
 
-// -------- Próxima campaña inscripta (aside) ---------
+// -------- PrÃ³xima campaÃ±a inscripta (aside) ---------
 async function cargarProximaInscripcion(tok) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/donantes/inscripciones`, {
@@ -358,18 +359,18 @@ async function cargarProximaInscripcion(tok) {
     const span = proximasBox?.querySelector('span');
     if (prox && span && btnProxima) {
       const fecha = prox.fecha_inicio ? new Date(prox.fecha_inicio).toLocaleDateString() : '';
-      span.textContent = `Tu próxima campaña: ${prox.nombre}${fecha ? ' ('+fecha+')' : ''}`;
+      span.textContent = `Tu prÃ³xima campaÃ±a: ${prox.nombre}${fecha ? ' ('+fecha+')' : ''}`;
       btnProxima.disabled = false;
       btnProxima.textContent = 'Ver';
       btnProxima.onclick = () => abrirModalCampania({ ...prox, ya_inscripto: true });
     } else if (span && btnProxima) {
-      span.textContent = 'Aún no te inscribiste a campañas próximas.';
+      span.textContent = 'AÃºn no te inscribiste a campaÃ±as prÃ³ximas.';
       btnProxima.disabled = true;
       btnProxima.textContent = 'Muy pronto!';
       btnProxima.onclick = null;
     }
   } catch (e) {
-    console.error('Error al calcular próxima campaña inscripta:', e);
+    console.error('Error al calcular prÃ³xima campaÃ±a inscripta:', e);
   }
 }
 
@@ -424,6 +425,7 @@ async function cargarNotificaciones() {
     if (!res.ok) throw new Error('No se pudieron cargar notificaciones');
     const lista = await res.json();
     renderNotificaciones(lista);
+    actualizarBadgeNotificaciones(lista);
   } catch (err) {
     console.error('Error al cargar notificaciones:', err);
   }
@@ -440,26 +442,41 @@ function renderNotificaciones(lista) {
     const li = document.createElement('li');
     li.style.padding = '0.6rem 0.8rem';
     li.style.borderBottom = '1px solid #f3f3f3';
-    const strong = document.createElement('strong');
-    strong.textContent = (n.tipo || 'aviso').replace('_',' ');
-    strong.style.marginRight = '6px';
     const span = document.createElement('span');
-    span.textContent = n.mensaje || '';
+    span.textContent = n.mensaje || (n.tipo ? n.tipo.replace('_',' ') : 'NotificaciÃ³n');
     if (!n.leida) { li.style.background = '#f6fbff'; }
-    li.appendChild(strong);
-    li.appendChild(span);
     li.addEventListener('click', async () => {
       try {
         await fetch(`${API_BASE_URL}/api/donantes/notificaciones/${n.id}/leida`, {
           method: 'POST', headers: { 'Authorization': 'Bearer ' + token }
         });
         notifDropdown.style.display = 'none';
+        // Actualizar badge
+        if (notifBadge && notifBadge.style.display !== 'none') {
+          const current = parseInt(notifBadge.textContent || '0', 10) || 0;
+          const next = Math.max(0, current - (n.leida ? 0 : 1));
+          if (next > 0) { notifBadge.textContent = String(next); }
+          else { notifBadge.style.display = 'none'; }
+        }
         if (n.campania_id) {
-          // abre modal si hay campaña asociada
+          // abre modal si hay campaÃ±a asociada
           abrirModalCampania({ id: n.campania_id, nombre: n.mensaje, ya_inscripto: true });
         }
       } catch {}
     });
+    li.appendChild(span);
     notifList.appendChild(li);
   });
+}
+
+function actualizarBadgeNotificaciones(lista) {
+  try {
+    const unread = (lista || []).filter(n => !n.leida).length;
+    if (unread > 0) {
+      notifBadge.textContent = String(unread);
+      notifBadge.style.display = 'inline-block';
+    } else {
+      notifBadge.style.display = 'none';
+    }
+  } catch {}
 }
