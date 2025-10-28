@@ -203,3 +203,18 @@ module.exports = {
   updatePerfilByUsuarioId,
   filtrar
 };
+
+// BAJA TOTAL DEL DONANTE (y usuario)
+module.exports.bajaTotalByUsuarioId = async function(usuarioId) {
+  await db.query('BEGIN');
+  try {
+    await db.query('DELETE FROM campanias_donantes WHERE usuario_id = $1', [usuarioId]);
+    await db.query('DELETE FROM donantes WHERE usuario_id = $1', [usuarioId]);
+    await db.query('DELETE FROM usuarios WHERE id = $1', [usuarioId]);
+    await db.query('COMMIT');
+    return true;
+  } catch (e) {
+    await db.query('ROLLBACK');
+    throw e;
+  }
+};

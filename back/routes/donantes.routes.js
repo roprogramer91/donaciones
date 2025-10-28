@@ -18,7 +18,8 @@ const {
     editarPerfilDonante,
     campaniasParaDonante,
     asistirCampania,
-    cancelarAsistencia
+    cancelarAsistencia,
+    darBajaDonante
  } = require('../controllers/donantes.controller');
 //fin controladores-----
 
@@ -58,5 +59,8 @@ router.put('/perfil', authMiddleware, editarPerfilDonante);
 router.post('/campanias/:id/asistir', authMiddleware, asistirCampania);
 // DELETE acción: cancelar inscripción
 router.delete('/campanias/:id/asistir', authMiddleware, cancelarAsistencia);
+
+// DELETE BAJA DEFINITIVA DEL DONANTE
+router.delete('/baja', authMiddleware, darBajaDonante);
 
 module.exports = router;

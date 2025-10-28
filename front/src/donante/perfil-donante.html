@@ -56,6 +56,23 @@
       </form>
       <div id="perfil-mensaje"></div>
       <a href="dashboard-donante.html" class="volver-dashboard">&lt; Volver al Dashboard</a>
+      
+      <hr>
+      <section id="danger-zone" style="margin-top:1rem; background:#fff0f0; border:1px solid #f3c2c2; padding:1rem; border-radius:0.8rem;">
+        <h3 style="margin-top:0; color:#b00020;">Sección Peligro</h3>
+        <p style="color:#643;">
+          Si das de baja tu cuenta de donante: se eliminarán tus datos, se cancelarán tus inscripciones y se cerrará tu sesión.
+          Para volver a participar, tendrás que registrarte nuevamente y aprobar el test inicial.
+        </p>
+        <button id="btnMostrarBaja" class="btn-accion" style="background:#b00020;">Dar de baja mi cuenta</button>
+        <div id="bajaForm" style="display:none; margin-top:0.8rem;">
+          <label for="dniConfirm">Escribí tu DNI para confirmar:</label>
+          <input id="dniConfirm" type="text" placeholder="Tu DNI" style="margin:0 0.5rem;">
+          <button id="btnConfirmBaja" class="btn-accion" style="background:#b00020;">Confirmar baja</button>
+          <button id="btnCancelarBaja" class="btn-secundario">Cancelar</button>
+          <div id="bajaMensaje" style="margin-top:0.5rem; color:#b00020;"></div>
+        </div>
+      </section>
     </main>
   </div>
   <script type="module" src="perfil-donante.js"></script>

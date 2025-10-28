@@ -380,3 +380,26 @@ async function cancelarAsistencia(req, res) {
 module.exports.campaniasParaDonante = campaniasParaDonante;
 module.exports.asistirCampania = asistirCampania;
 module.exports.cancelarAsistencia = cancelarAsistencia;
+
+// Dar de baja definitiva al donante (requiere DNI)
+module.exports.darBajaDonante = async function(req, res) {
+  try {
+    const usuarioId = req.user && req.user.id;
+    if (!usuarioId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
+    const { dni } = req.body || {};
+    if (!dni) return res.status(400).json({ error: 'Debe ingresar DNI para confirmar' });
+
+    const perfil = await Donante.findByUsuarioId(usuarioId);
+    if (!perfil) return res.status(404).json({ error: 'No sos donante registrado' });
+    const normalizar = (s) => String(s || '').replace(/\D/g,'');
+    if (normalizar(perfil.dni) !== normalizar(dni)) {
+      return res.status(400).json({ error: 'DNI no coincide' });
+    }
+
+    await Donante.bajaTotalByUsuarioId(usuarioId);
+    return res.json({ mensaje: 'Baja realizada' });
+  } catch (e) {
+    console.error('Error en darBajaDonante:', e);
+    res.status(500).json({ error: 'Error al dar de baja', detalle: String(e && e.message || e) });
+  }
+};
