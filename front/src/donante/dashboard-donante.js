@@ -12,6 +12,10 @@ const bienvenida = document.getElementById('bienvenida');
 const logoutBtn = document.getElementById('logoutBtn');
 const proximasBox = document.querySelector('.proximas-campanias');
 const btnProxima = document.getElementById('btn-campanias');
+const btnNotif = document.getElementById('btn-notif');
+const notifDropdown = document.getElementById('notifDropdown');
+const notifList = document.getElementById('notifList');
+const notifEmpty = document.getElementById('notifEmpty');
 
 // Elementos de los datos personales
 const grupoSangre = document.getElementById('grupo-sangre');
@@ -393,4 +397,69 @@ function showToast(msg, type = 'info') {
   el.style.opacity = '1';
   el.style.transition = 'opacity 0.4s ease';
   setTimeout(() => { el.style.opacity = '0'; }, 2000);
+}
+
+// ----- Notificaciones ------
+btnNotif?.addEventListener('click', async (e) => {
+  e.stopPropagation();
+  const open = notifDropdown.style.display === 'block';
+  notifDropdown.style.display = open ? 'none' : 'block';
+  if (!open) {
+    await cargarNotificaciones();
+  }
+});
+
+document.addEventListener('click', (e) => {
+  if (notifDropdown && notifDropdown.style.display === 'block') {
+    const within = notifDropdown.contains(e.target) || btnNotif.contains(e.target);
+    if (!within) notifDropdown.style.display = 'none';
+  }
+});
+
+async function cargarNotificaciones() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/donantes/notificaciones`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) throw new Error('No se pudieron cargar notificaciones');
+    const lista = await res.json();
+    renderNotificaciones(lista);
+  } catch (err) {
+    console.error('Error al cargar notificaciones:', err);
+  }
+}
+
+function renderNotificaciones(lista) {
+  notifList.innerHTML = '';
+  if (!lista || lista.length === 0) {
+    notifEmpty.style.display = 'block';
+    return;
+  }
+  notifEmpty.style.display = 'none';
+  lista.forEach(n => {
+    const li = document.createElement('li');
+    li.style.padding = '0.6rem 0.8rem';
+    li.style.borderBottom = '1px solid #f3f3f3';
+    const strong = document.createElement('strong');
+    strong.textContent = (n.tipo || 'aviso').replace('_',' ');
+    strong.style.marginRight = '6px';
+    const span = document.createElement('span');
+    span.textContent = n.mensaje || '';
+    if (!n.leida) { li.style.background = '#f6fbff'; }
+    li.appendChild(strong);
+    li.appendChild(span);
+    li.addEventListener('click', async () => {
+      try {
+        await fetch(`${API_BASE_URL}/api/donantes/notificaciones/${n.id}/leida`, {
+          method: 'POST', headers: { 'Authorization': 'Bearer ' + token }
+        });
+        notifDropdown.style.display = 'none';
+        if (n.campania_id) {
+          // abre modal si hay campaña asociada
+          abrirModalCampania({ id: n.campania_id, nombre: n.mensaje, ya_inscripto: true });
+        }
+      } catch {}
+    });
+    notifList.appendChild(li);
+  });
 }

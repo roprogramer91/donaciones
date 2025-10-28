@@ -165,6 +165,13 @@ CampaniasModel.inscribirDonante = async function (campaniaId, usuarioId) {
         [centroId, 'inscripcion', `Usuario ${usuarioId} se inscribió en campaña ${campaniaId}`]
       );
     }
+
+    // Notificación para el donante
+    await pool.query(
+      `INSERT INTO notificaciones (usuario_id, tipo, mensaje, campania_id)
+       VALUES ($1,$2,$3,$4)`,
+      [usuarioId, 'inscripcion', `Te inscribiste a "${camp?.nombre || 'una campaña'}"`, campaniaId]
+    );
   } catch (_) {
     // noop en dev si la tabla/estructura difiere
   }

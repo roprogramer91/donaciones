@@ -403,3 +403,31 @@ module.exports.darBajaDonante = async function(req, res) {
     res.status(500).json({ error: 'Error al dar de baja', detalle: String(e && e.message || e) });
   }
 };
+
+// Notificaciones del donante
+const Notificaciones = require('../models/notificaciones.model');
+module.exports.getMisNotificaciones = async function(req, res) {
+  try {
+    const usuarioId = req.user && req.user.id;
+    if (!usuarioId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
+    const lista = await Notificaciones.getForUsuario(usuarioId, 30);
+    res.json(lista);
+  } catch (e) {
+    console.error('Error al traer notificaciones:', e);
+    res.status(500).json({ error: 'Error al traer notificaciones' });
+  }
+};
+
+module.exports.marcarNotificacionLeida = async function(req, res) {
+  try {
+    const usuarioId = req.user && req.user.id;
+    if (!usuarioId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
+    const { id } = req.params;
+    const n = await Notificaciones.marcarLeida(id, usuarioId);
+    if (!n) return res.status(404).json({ error: 'No encontrada' });
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('Error al marcar notificación:', e);
+    res.status(500).json({ error: 'Error al marcar notificación' });
+  }
+};

@@ -49,6 +49,11 @@ router.get('/inscripciones', authMiddleware, async (req, res) => {
   }
 });
 
+// Notificaciones del donante
+const { getMisNotificaciones, marcarNotificacionLeida } = require('../controllers/donantes.controller');
+router.get('/notificaciones', authMiddleware, getMisNotificaciones);
+router.post('/notificaciones/:id/leida', authMiddleware, marcarNotificacionLeida);
+
 //POST
 router.post('/', authMiddleware, crearDonante);
 

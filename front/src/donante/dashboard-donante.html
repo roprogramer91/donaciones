@@ -21,9 +21,14 @@
       <header class="dashboard-header">
         <div class="user-nombre" id="bienvenida">¡Hola, Donante!</div>
         <div class="header-icons">
-          <button class="icon-btn" title="Notificaciones">
+          <button class="icon-btn" id="btn-notif" title="Notificaciones" style="position:relative;">
             <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/bell.svg" alt="Notificaciones" />
           </button>
+          <div id="notifDropdown" style="display:none; position:absolute; right:10px; top:54px; background:#fff; border:1px solid #eee; border-radius:0.6rem; box-shadow:0 6px 18px rgba(0,0,0,0.15); width:300px; max-height:320px; overflow:auto; z-index:40;">
+            <div style="padding:0.6rem 0.8rem; font-weight:600; border-bottom:1px solid #f1f1f1;">Notificaciones</div>
+            <ul id="notifList" style="list-style:none; margin:0; padding:0;"></ul>
+            <div id="notifEmpty" style="display:none; padding:0.8rem; color:#666;">Aún no hay notificaciones</div>
+          </div>
           <button class="icon-btn" id="btn-perfil" title="Mi perfil">
             <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/user.svg" alt="Perfil" />
           </button>
