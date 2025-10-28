@@ -145,7 +145,7 @@ CampaniasModel.obtenerPorLocalidad = async function (localidadId) {
 
 // Inscribir donante a campaña (crea tabla si no existe)
 CampaniasModel.inscribirDonante = async function (campaniaId, usuarioId) {
-  // Crear tabla relación si no existe
+  // Crear tabla relación si no existe (idempotente)
   await pool.query(`
     CREATE TABLE IF NOT EXISTS campanias_donantes (
       id SERIAL PRIMARY KEY,
@@ -165,27 +165,19 @@ CampaniasModel.inscribirDonante = async function (campaniaId, usuarioId) {
     [campaniaId, usuarioId]
   );
 
-  // Crear tabla de notificaciones simple si no existe
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS notificaciones (
-      id SERIAL PRIMARY KEY,
-      centro_id INTEGER REFERENCES centros_hemoterapia(id) ON DELETE CASCADE,
-      tipo TEXT NOT NULL,
-      mensaje TEXT NOT NULL,
-      created_at TIMESTAMP DEFAULT NOW(),
-      leida BOOLEAN DEFAULT FALSE
-    );
-  `);
-
-  // Obtener centro_id de la campaña
-  const camp = await this.obtenerPorId(campaniaId);
-  const centroId = camp ? camp.centro_id : null;
-  if (centroId) {
-    const mensaje = `Usuario ${usuarioId} se inscribió en campaña ${campaniaId}`;
-    await pool.query(
-      `INSERT INTO notificaciones (centro_id, tipo, mensaje) VALUES ($1,$2,$3);`,
-      [centroId, 'inscripcion', mensaje]
-    );
+  // Intentar notificar al centro; si no existe tabla/columna, no bloquear la inscripción
+  try {
+    const camp = await CampaniasModel.obtenerPorId(campaniaId);
+    const centroId = camp ? camp.centro_id : null;
+    if (centroId) {
+      await pool.query(
+        `INSERT INTO notificaciones (centro_id, tipo, mensaje)
+         VALUES ($1,$2,$3);`,
+        [centroId, 'inscripcion', `Usuario ${usuarioId} se inscribió en campaña ${campaniaId}`]
+      );
+    }
+  } catch (_) {
+    // noop en dev si la tabla/estructura difiere
   }
 
   return insert.rows[0];

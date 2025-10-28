@@ -351,7 +351,7 @@ async function asistirCampania(req, res) {
     res.json({ mensaje: 'Inscripción registrada', inscripcion: rel });
   } catch (error) {
     console.error('Error al inscribir donante en campaña:', error);
-    res.status(500).json({ error: 'Error al inscribirse a la campaña' });
+    res.status(500).json({ error: 'Error al inscribirse a la campaña', detalle: String(error && error.message || error) });
   }
 }
 
