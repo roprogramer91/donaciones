@@ -295,3 +295,56 @@ module.exports.getNotificacionesLog = async function(req, res) {
     res.status(500).json({ error: 'Error al obtener historial' });
   }
 };
+
+// Notificaciones para el centro (UI campana/bell)
+module.exports.getNotificacionesCentro = async function(req, res){
+  try{
+    const centroId = obtenerCentroIdDeRequest(req);
+    if(!centroId) return res.status(400).json({ error: 'centro_id no especificado' });
+    const { rows } = await db.query(
+      `SELECT id, tipo, mensaje, COALESCE(leida, FALSE) AS leida, created_at
+       FROM notificaciones
+       WHERE centro_id = $1
+       ORDER BY id DESC
+       LIMIT 30`,
+      [centroId]
+    );
+    res.json(rows);
+  }catch(e){
+    console.error('Error al obtener notificaciones del centro:', e);
+    res.status(500).json({ error: 'Error al obtener notificaciones' });
+  }
+};
+
+module.exports.marcarNotificacionCentroLeida = async function(req, res){
+  try{
+    const centroId = obtenerCentroIdDeRequest(req);
+    if(!centroId) return res.status(400).json({ error: 'centro_id no especificado' });
+    const id = parseInt(req.params.id, 10);
+    if(!id) return res.status(400).json({ error: 'id inválido' });
+    const { rows } = await db.query(
+      `UPDATE notificaciones SET leida = TRUE
+       WHERE id = $1 AND centro_id = $2
+       RETURNING id, tipo, mensaje, leida, created_at`,
+      [id, centroId]
+    );
+    if(!rows[0]) return res.status(404).json({ error: 'No encontrada' });
+    res.json(rows[0]);
+  }catch(e){
+    console.error('Error al marcar notificación leída (centro):', e);
+    res.status(500).json({ error: 'Error al actualizar notificación' });
+  }
+};
+
+// Inscripciones de un usuario (para modal en Ver donantes)
+module.exports.getInscripcionesUsuario = async function(req, res){
+  try{
+    const usuarioId = parseInt(req.params.usuarioId, 10);
+    if(!usuarioId) return res.status(400).json({ error: 'usuarioId inválido' });
+    const lista = await CampaniasModel.listarInscripcionesPorUsuario(usuarioId);
+    res.json(Array.isArray(lista) ? lista : []);
+  }catch(e){
+    console.error('Error al obtener inscripciones por usuario:', e);
+    res.status(500).json({ error: 'Error al obtener inscripciones' });
+  }
+};

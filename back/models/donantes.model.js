@@ -123,7 +123,18 @@ const filtrar = async (filtros) => {
   let sql = `
     SELECT d.*, u.nombre, u.apellido, u.email,
            p.nombre AS provincia_nombre,
-           l.nombre AS localidad_nombre
+           l.nombre AS localidad_nombre,
+           EXISTS (
+             SELECT 1 FROM campanias_donantes cd WHERE cd.usuario_id = d.usuario_id
+           ) AS inscripto_en_campania,
+           (
+             SELECT c.nombre
+             FROM campanias_donantes cd
+             JOIN campanias c ON c.id = cd.campania_id
+             WHERE cd.usuario_id = d.usuario_id
+             ORDER BY cd.created_at DESC NULLS LAST, c.fecha_inicio DESC NULLS LAST, c.id DESC
+             LIMIT 1
+           ) AS campania_inscripta
     FROM donantes d
     JOIN usuarios u ON d.usuario_id = u.id
     LEFT JOIN provincias p ON d.provincia_id = p.id

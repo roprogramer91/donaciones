@@ -429,3 +429,12 @@ body {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
 }
+
+/* Blink highlight for selected campaign row */
+@keyframes blinkRow {
+  0%, 100% { background-color: #fff8e1; }
+  50% { background-color: #ffe082; }
+}
+.blink-highlight {
+  animation: blinkRow 1s ease-in-out 3;
+}

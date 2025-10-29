@@ -15,6 +15,12 @@ router.post('/notificaciones/preview', CentrosController.previewNotificaciones);
 router.post('/notificaciones/felicitaciones/preview', CentrosController.previewFelicitaciones);
 
 router.get('/notificaciones/log', CentrosController.getNotificacionesLog);
+// Notificaciones del centro (campana)
+router.get('/notificaciones', CentrosController.getNotificacionesCentro);
+router.put('/notificaciones/:id/leida', CentrosController.marcarNotificacionCentroLeida);
+
+// Inscripciones de donante (por usuario)
+router.get('/donantes/:usuarioId/inscripciones', CentrosController.getInscripcionesUsuario);
 
 module.exports = router;
 

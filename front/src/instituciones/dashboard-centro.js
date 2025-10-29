@@ -8,6 +8,15 @@ const contenido = document.getElementById('contenido-centro');
 const bienvenida = document.getElementById('bienvenida-centro');
 const logoutBtn = document.getElementById('logoutBtn');
 const btnPerfil = document.getElementById('btn-perfil');
+const btnNotifCentro = document.getElementById('btn-notif-centro');
+const badgeNotifCentro = document.getElementById('badge-notif-centro');
+const dropdownNotifCentro = document.getElementById('dropdown-notif-centro');
+const listaNotifCentro = document.getElementById('lista-notif-centro');
+// Modal Inscripciones
+const modalInscripciones = document.getElementById('modal-inscripciones');
+const cerrarModalInsc = document.getElementById('cerrarModalInsc');
+const inscLista = document.getElementById('insc_lista');
+const inscNombre = document.getElementById('insc_nombre');
 
 // Helpers comunes
 const token = localStorage.getItem("token");
@@ -62,6 +71,8 @@ setTimeout(() => {
   contenido.style.display = "block";
   // Cargar resumen al mostrar el panel
   cargarResumen();
+  // cargar notificaciones del centro tras abrir
+  cargarNotificacionesCentro();
 }, 800);
 
 // ---- Logout ----
@@ -69,6 +80,113 @@ logoutBtn.addEventListener('click', () => {
   localStorage.clear();
   window.location.href = '../../index.html';
 });
+
+// ---- Notificaciones Centro (campana en header) ----
+btnNotifCentro?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if(!dropdownNotifCentro) return;
+  const visible = dropdownNotifCentro.style.display === 'block';
+  dropdownNotifCentro.style.display = visible ? 'none' : 'block';
+  if(!visible) cargarNotificacionesCentro();
+});
+document.addEventListener('click', () => { if(dropdownNotifCentro) dropdownNotifCentro.style.display='none'; });
+dropdownNotifCentro?.addEventListener('click', e => e.stopPropagation());
+
+// Cerrar modal inscripciones
+cerrarModalInsc?.addEventListener('click', ()=>{ if(modalInscripciones) modalInscripciones.style.display='none'; });
+modalInscripciones?.addEventListener('click', (e)=>{ if(e.target === modalInscripciones) modalInscripciones.style.display='none'; });
+
+async function cargarNotificacionesCentro(){
+  try{
+    const res = await fetch(`${API_BASE_URL}/api/centro/notificaciones`, { headers: authHeaders({ 'X-Centro-Id': getCentroId() }) });
+    if(!res.ok) throw new Error('notifs centro');
+    const data = await res.json();
+    renderNotifsCentro(Array.isArray(data)?data:[]);
+  }catch(e){ console.error('Error al cargar notifs centro', e); }
+}
+
+function renderNotifsCentro(lista){
+  if(!listaNotifCentro) return;
+  listaNotifCentro.innerHTML = '';
+  const noLeidas = lista.filter(n => !n.leida).length;
+  if(badgeNotifCentro){
+    if(noLeidas>0){ badgeNotifCentro.textContent=String(noLeidas); badgeNotifCentro.style.display='inline-block'; }
+    else { badgeNotifCentro.style.display='none'; }
+  }
+  if(!lista.length){
+    const v = document.createElement('div'); v.style.padding='12px'; v.textContent='Sin notificaciones'; listaNotifCentro.appendChild(v); return;
+  }
+  lista.forEach(n => {
+    const item = document.createElement('div');
+    item.style.padding = '10px 12px';
+    item.style.borderBottom = '1px solid #f1f5f9';
+    item.style.background = n.leida ? '#fff' : '#f8fafc';
+    const fecha = n.created_at ? new Date(n.created_at).toLocaleString() : '';
+    item.innerHTML = `<div style="font-size:0.85rem; color:#0f172a; font-weight:600;">${n.tipo||'aviso'}</div>
+                      <div style="font-size:0.9rem; color:#334155; white-space:pre-wrap;">${n.mensaje||''}</div>
+                      <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">${fecha}</div>`;
+    item.addEventListener('click', async () => {
+      if(n.leida) return;
+      try{ await fetch(`${API_BASE_URL}/api/centro/notificaciones/${n.id}/leida`, { method:'PUT', headers: authHeaders({ 'X-Centro-Id': getCentroId() }) }); }catch{}
+      n.leida = true; renderNotifsCentro(lista);
+    });
+    listaNotifCentro.appendChild(item);
+  });
+}
+
+// ---- Inscripciones por usuario (popup desde tabla Donantes) ----
+async function abrirModalInscripciones(usuarioId, nombre){
+  if(!modalInscripciones || !inscLista) return;
+  inscNombre.textContent = nombre ? `Donante: ${nombre}` : '';
+  inscLista.innerHTML = '<div style="color:#64748b;">Cargando...</div>';
+  modalInscripciones.style.display = 'flex';
+  try{
+    const res = await fetch(`${API_BASE_URL}/api/centro/donantes/${usuarioId}/inscripciones`, { headers: authHeaders({'X-Centro-Id': getCentroId()}) });
+    const lista = await res.json();
+    inscLista.innerHTML = '';
+    if(!Array.isArray(lista) || !lista.length){
+      inscLista.innerHTML = '<div style="color:#6b7280;">Sin inscripciones</div>';
+      return;
+    }
+    lista.forEach(c => {
+      const div = document.createElement('div');
+      const fecha = (c.fecha_inicio ? new Date(c.fecha_inicio).toLocaleDateString() : '--');
+      div.innerHTML = `<a href="#" data-id="${c.id}">${c.nombre || 'Campaña'}</a> <span style="color:#64748b;">(${fecha})</span>`;
+      const a = div.querySelector('a');
+      a.addEventListener('click', (ev)=>{
+        ev.preventDefault();
+        modalInscripciones.style.display = 'none';
+        irAGestionCampaniasYResaltar(c.id);
+      });
+      inscLista.appendChild(div);
+    });
+  }catch(e){
+    console.error('Error al cargar inscripciones:', e);
+    inscLista.innerHTML = '<div style="color:#ef4444;">Error al cargar inscripciones</div>';
+  }
+}
+
+async function irAGestionCampaniasYResaltar(campaniaId){
+  // Asegurar sección abierta y datos cargados
+  if(currentSection !== 'campanias') toggleSeccion('campanias');
+  await cargarCampanias();
+  // Pequeño delay para asegurar render
+  setTimeout(()=> resaltarCampaniaEnTabla(campaniaId), 50);
+}
+
+function resaltarCampaniaEnTabla(campaniaId){
+  const tbody = document.querySelector('#tabla-campanias tbody');
+  if(!tbody) return;
+  const row = tbody.querySelector(`tr[data-id="${campaniaId}"]`);
+  if(row){
+    row.classList.remove('blink-highlight');
+    // scroll a la vista y parpadeo
+    try{ row.scrollIntoView({ behavior:'smooth', block:'center' }); } catch{}
+    setTimeout(()=> row.classList.add('blink-highlight'), 10);
+    // limpiar clase luego de la animación
+    setTimeout(()=> row.classList.remove('blink-highlight'), 3500);
+  }
+}
 
 // ---- Perfil Centro ----
 const modalPerfil = document.getElementById('modal-perfil');
@@ -203,7 +321,7 @@ async function cargarDonantes() {
     renderDonantes(data);
   } catch (err) {
     console.error("Error al cargar donantes:", err);
-    tablaBody.innerHTML = `<tr><td colspan="7">Error al cargar donantes</td></tr>`;
+    tablaBody.innerHTML = `<tr><td colspan=\"8\">Error al cargar donantes</td></tr>`;
     ultimoResultadoDonantes = [];
     actualizarConteoYExport();
   }
@@ -305,18 +423,20 @@ function actualizarConteoYExport() {
 
 function exportarCSVDonantes() {
   if (!ultimoResultadoDonantes.length) return;
-  const headers = ['Nombre','Grupo','Provincia','Localidad','Telefono','Apto','Dias restantes','Email'];
+  const headers = ['Nombre','Grupo','Provincia','Localidad','Telefono','Campaña','Apto','Dias restantes','Email'];
   const rows = ultimoResultadoDonantes.map(d => {
     const provinciaNombre = d.provincia_nombre || '';
     const localidadNombre = d.localidad_nombre || '';
     const nombreCompleto = `${d.nombre || ''} ${d.apellido || ''}`.trim();
     const aptoTxt = d.apto_para_donar ? 'Si' : 'No';
+    const insc = (d.inscripto_en_campania === true) || (!!d.campania_inscripta);
     return [
       nombreCompleto,
       d.grupo_sanguineo || '',
       provinciaNombre,
       localidadNombre,
       d.telefono || '',
+      insc ? 'Inscripto' : 'Ninguna',
       aptoTxt,
       d.dias_restantes ?? '',
       d.email || ''
@@ -341,7 +461,7 @@ function exportarCSVDonantes() {
 function renderDonantes(donantes) {
   tablaBody.innerHTML = "";
   if (!donantes || !donantes.length) {
-    tablaBody.innerHTML = `<tr><td colspan="7">No se encontraron donantes</td></tr>`;
+    tablaBody.innerHTML = `<tr><td colspan="8">No se encontraron donantes</td></tr>`;
     return;
   }
 
@@ -349,15 +469,30 @@ function renderDonantes(donantes) {
     const tr = document.createElement("tr");
     const provinciaNombre = d.provincia_nombre || provinciasById.get(d.provincia_id) || "";
     const localidadNombre = d.localidad_nombre || localidadesById.get(d.localidad_id) || "";
+    const nombreCompleto = `${d.nombre || ""} ${d.apellido || ""}`.trim();
+    const insc = (d.inscripto_en_campania === true) || (!!d.campania_inscripta);
+    const campaniaCol = insc
+      ? `<a href="#" class="link-inscripciones" data-uid="${d.usuario_id}" data-nombre="${nombreCompleto.replace(/"/g,'&quot;')}">Inscripto</a>`
+      : 'Ninguna';
     tr.innerHTML = `
       <td>${d.nombre || ""} ${d.apellido || ""}</td>
       <td>${d.grupo_sanguineo || ""}</td>
       <td>${provinciaNombre}</td>
       <td>${localidadNombre}</td>
       <td>${d.telefono || ""}</td>
+      <td>${campaniaCol}</td>
       <td>${d.apto_para_donar ? "Si" : "No"}</td>
       <td>${d.dias_restantes ?? ""}</td>
     `;
+    const a = tr.querySelector('.link-inscripciones');
+    if(a){
+      a.addEventListener('click', (ev)=>{
+        ev.preventDefault();
+        const uid = parseInt(a.getAttribute('data-uid'),10);
+        const nom = a.getAttribute('data-nombre') || '';
+        abrirModalInscripciones(uid, nom);
+      });
+    }
     tablaBody.appendChild(tr);
   });
 }
@@ -388,6 +523,7 @@ async function cargarCampanias() {
       const fechaInicio = c.fecha_inicio ? new Date(c.fecha_inicio).toLocaleDateString() : '--';
       const fechaFin = c.fecha_fin ? new Date(c.fecha_fin).toLocaleDateString() : '--';
       const tr = document.createElement('tr');
+      tr.setAttribute('data-id', c.id);
       tr.innerHTML = `
         <td>${c.nombre}</td>
         <td>${fechaInicio} a ${fechaFin}</td>
@@ -819,7 +955,78 @@ function renderLogNotifs(lista){
     const tr = document.createElement('tr');
     const fecha = it.created_at ? new Date(it.created_at).toLocaleString() : '';
     tr.innerHTML = `<td style="padding:4px 6px;border-top:1px solid #eee;">${fecha}</td><td style="padding:4px 6px;border-top:1px solid #eee;">${it.tipo||''}</td><td style="padding:4px 6px;border-top:1px solid #eee;">${it.enviados||0}</td><td style="padding:4px 6px;border-top:1px solid #eee;">${(it.mensaje||'').substring(0,120)}</td>`;
+    tr.style.cursor = 'pointer';
+    tr.title = 'Ver detalle';
+    tr.addEventListener('click', () => abrirModalNotifDetalle(it));
     tbody.appendChild(tr);
   });
 }
 btnVerNotifs?.addEventListener('click', () => { setTimeout(cargarLogNotifs, 250); });
+// ---- Modal Detalle Notificaciones (historial) ----
+const modalNotif = document.getElementById('modal-notif-detalle');
+const cerrarModalNotifDetalle = document.getElementById('cerrarModalNotifDetalle');
+cerrarModalNotifDetalle?.addEventListener('click', ()=>{ if(modalNotif) modalNotif.style.display='none'; });
+if(modalNotif){
+  modalNotif.addEventListener('click', (e)=>{
+    if(e.target === modalNotif){ modalNotif.style.display='none'; }
+  });
+}
+
+function abrirModalNotifDetalle(item){
+  if(!modalNotif) return;
+  const elFecha = document.getElementById('notif_det_fecha');
+  const elTipo = document.getElementById('notif_det_tipo');
+  const elEnv = document.getElementById('notif_det_enviados');
+  const elMsg = document.getElementById('notif_det_mensaje');
+  const elFiltLeg = document.getElementById('notif_det_filtros_legible');
+  const elFiltJson = document.getElementById('notif_det_filtros_json');
+
+  const fecha = item.created_at ? new Date(item.created_at).toLocaleString() : '';
+  if(elFecha) elFecha.textContent = fecha || '--';
+  if(elTipo) elTipo.textContent = item.tipo || '--';
+  if(elEnv) elEnv.textContent = String(item.enviados ?? 0);
+  if(elMsg) elMsg.textContent = item.mensaje || '';
+
+  const filtros = (item.filtros && (typeof item.filtros === 'object' ? item.filtros : safeParseJSON(item.filtros))) || {};
+  if(elFiltLeg){
+    elFiltLeg.innerHTML = '';
+    const map = filtroEtiquetas();
+    const keys = Object.keys(filtros).filter(k => filtros[k] !== undefined && filtros[k] !== null && filtros[k] !== '');
+    if(!keys.length){ elFiltLeg.textContent = '—'; }
+    else{
+      keys.forEach(k => {
+        const val = filtros[k];
+        const div = document.createElement('span');
+        div.style.background = '#eef2ff';
+        div.style.border = '1px solid #e5e7eb';
+        div.style.borderRadius = '9999px';
+        div.style.padding = '4px 8px';
+        div.style.fontSize = '0.85rem';
+        div.textContent = `${map[k] || k}: ${String(val)}`;
+        elFiltLeg.appendChild(div);
+      });
+    }
+  }
+  if(elFiltJson){
+    try{ elFiltJson.textContent = JSON.stringify(filtros || {}, null, 2); }
+    catch{ elFiltJson.textContent = '{}'; }
+  }
+
+  modalNotif.style.display = 'flex';
+}
+
+function filtroEtiquetas(){
+  return {
+    provincia: 'Provincia',
+    localidad: 'Localidad',
+    barrio: 'Barrio',
+    grupo: 'Grupo sanguíneo',
+    estado: 'Estado',
+    apto: 'Solo aptos',
+    campania_id: 'Campaña'
+  };
+}
+
+function safeParseJSON(x){
+  try{ return JSON.parse(x); } catch{ return {}; }
+}
