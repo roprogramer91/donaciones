@@ -301,14 +301,27 @@ module.exports.getNotificacionesCentro = async function(req, res){
   try{
     const centroId = obtenerCentroIdDeRequest(req);
     if(!centroId) return res.status(400).json({ error: 'centro_id no especificado' });
-    const { rows } = await db.query(
-      `SELECT id, tipo, mensaje, COALESCE(leida, FALSE) AS leida, created_at
-       FROM notificaciones
-       WHERE centro_id = $1
-       ORDER BY id DESC
-       LIMIT 30`,
-      [centroId]
+
+    // Detectar esquema flexible de la tabla notificaciones
+    const { rows: colsRows } = await db.query(
+      "SELECT column_name FROM information_schema.columns WHERE table_name='notificaciones'"
     );
+    const cols = new Set(colsRows.map(r => r.column_name));
+    if(!cols.has('centro_id')){
+      // Si no existe centro_id, no hay notificaciones por centro
+      return res.json([]);
+    }
+    const selTipo = cols.has('tipo') ? 'tipo' : (cols.has('estado') ? "estado as tipo" : "'aviso'::text as tipo");
+    const selLeida = cols.has('leida') ? 'leida' : (cols.has('estado') ? "CASE WHEN estado='leida' THEN TRUE ELSE FALSE END AS leida" : 'FALSE as leida');
+    const selCreated = cols.has('created_at') ? 'created_at' : (cols.has('fecha_envio') ? 'fecha_envio as created_at' : 'NOW() as created_at');
+    const orderBy = cols.has('created_at') ? 'created_at' : (cols.has('fecha_envio') ? 'fecha_envio' : 'id');
+
+    const sql = `SELECT id, ${selTipo}, mensaje, ${selLeida}, ${selCreated}
+                 FROM notificaciones
+                 WHERE centro_id = $1
+                 ORDER BY ${orderBy} DESC
+                 LIMIT 30`;
+    const { rows } = await db.query(sql, [centroId]);
     res.json(rows);
   }catch(e){
     console.error('Error al obtener notificaciones del centro:', e);
