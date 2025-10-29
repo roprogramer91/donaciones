@@ -99,6 +99,7 @@ modalInscripciones?.addEventListener('click', (e)=>{ if(e.target === modalInscri
 async function cargarNotificacionesCentro(){
   try{
     const res = await fetch(`${API_BASE_URL}/api/centro/notificaciones`, { headers: authHeaders({ 'X-Centro-Id': getCentroId() }) });
+    if(res.status === 404){ renderNotifsCentro([]); return; }
     if(!res.ok) throw new Error('notifs centro');
     const data = await res.json();
     renderNotifsCentro(Array.isArray(data)?data:[]);
