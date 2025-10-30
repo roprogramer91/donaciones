@@ -1,0 +1,142 @@
+/* ==========================================================
+   Botones reutilizables - Donante
+   Define la base, variantes y comportamientos visuales 
+   para todos los botones del panel del donante.
+   ========================================================== */
+
+/* ==========================================================
+   Base general para todos los botones
+   ========================================================== */
+.btn {
+  display: inline-block;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 0.6rem;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+  transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.15s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==========================================================
+   Variante principal (acciones destacadas)
+   Ejemplo: Confirmar, Asistir, Guardar
+   ========================================================== */
+.btn-primario {
+  background: #c11515;
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(193, 21, 21, 0.25);
+}
+
+.btn-primario:hover {
+  background: #a50f0f;
+}
+
+.btn-primario:active {
+  background: #870c0c;
+}
+
+/* ==========================================================
+   Variante secundaria (acciones neutras)
+   Ejemplo: Cerrar, Cancelar, Volver
+   ========================================================== */
+.btn-secundario {
+  background: #eee;
+  color: #a70c0c;
+  border: 1px solid #ddd;
+}
+
+.btn-secundario:hover {
+  background: #f8caca;
+}
+
+.btn-secundario:active {
+  background: #f3b8b8;
+}
+
+/* ==========================================================
+   Variante tipo enlace (acciones informativas)
+   Ejemplo: Ver más, Ayuda, Detalles
+   ========================================================== */
+.btn-link {
+  background: transparent;
+  color: #a70c0c;
+  text-decoration: underline;
+  font-size: 0.95rem;
+  border: none;
+  padding: 0.4rem 0.8rem;
+}
+
+.btn-link:hover {
+  color: #c11515;
+  text-decoration: none;
+}
+
+/* ==========================================================
+   Botones de contexto específico
+   ========================================================== */
+
+/* Botón positivo (acciones confirmadas o afirmativas)
+   Ejemplo: Sí, continuar / Guardar cambios */
+.btn-positivo {
+  background: #198754;
+  color: #fff;
+}
+
+.btn-positivo:hover {
+  background: #157347;
+}
+
+.btn-positivo:active {
+  background: #115c3a;
+}
+
+/* Botón de advertencia (acciones de riesgo o alerta)
+   Ejemplo: Eliminar, Restablecer, Cancelar acción crítica */
+.btn-advertencia {
+  background: #ffc107;
+  color: #333;
+}
+
+.btn-advertencia:hover {
+  background: #e0a800;
+}
+
+.btn-advertencia:active {
+  background: #c69500;
+}
+
+/* ==========================================================
+   Tamaños opcionales (para modularidad)
+   ========================================================== */
+.btn-sm {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.9rem;
+}
+
+.btn-lg {
+  font-size: 1.15rem;
+  padding: 0.8rem 1.6rem;
+}
+
+/* ==========================================================
+   Fin de buttons.css
+   ========================================================== */

@@ -2,7 +2,15 @@ import { API_BASE_URL } from "../config.js";
 
 const estadoApto = document.getElementById("estado-apto");
 
-// Elementos
+/**
+ * ---------------------------------------------------------------------------
+ * Configuración inicial y referencias del DOM
+ * ---------------------------------------------------------------------------
+ * - Se valida la existencia del token para asegurar sesión.
+ * - Se obtienen referencias a elementos del dashboard que se actualizarán
+ *   dinámicamente según la información de la API.
+ */
+
 const token = localStorage.getItem("token");
 if (!token) window.location.href = "../../index.html";
 
@@ -23,6 +31,17 @@ const grupoSangre = document.getElementById("grupo-sangre");
 const ultimaDonacion = document.getElementById("ultima-donacion");
 const diasApto = document.getElementById("dias-apto");
 
+/**
+ * ---------------------------------------------------------------------------
+ * Panel principal
+ * ---------------------------------------------------------------------------
+ * Obtiene el perfil del donante y actualiza:
+ *  - Estado de aptitud (apto/no apto).
+ *  - Saludo y datos personales.
+ *  - Listado de campañas (disponibles, mis inscripciones, próxima).
+ * Manejo de errores con mensaje visible y detalle en consola.
+ */
+
 async function cargarPanel() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/donantes/perfil`, {
@@ -37,9 +56,9 @@ async function cargarPanel() {
     if (!res.ok) throw new Error("Error al obtener perfil");
 
     const donante = await res.json();
-    console.log(donante); //SOLO PARA DEBUGGING
+    console.log(donante); // SOLO PARA DEBUGGING
 
-    // Mostrar estado de aptitud
+    // Estado de aptitud del donante (basado en días restantes)
     let dias = donante.dias_restantes;
     if (dias !== undefined && dias !== null) {
       if (dias === 0) {
@@ -54,54 +73,66 @@ async function cargarPanel() {
       estadoApto.className = "estado-apto";
     }
 
-    // Mostrar saludo
+    // Saludo y datos personales
     bienvenida.textContent = `Hola, ${donante.nombre || "Donante"}!`;
-    // Mostrar datos principales
     grupoSangre.textContent = donante.grupo_sanguineo || "--";
     ultimaDonacion.textContent = donante.fecha_ultima_donacion
       ? new Date(donante.fecha_ultima_donacion).toLocaleDateString()
       : "--/--/----";
-    diasApto.textContent = donante.dias_restantes !== undefined;
     diasApto.textContent =
       donante.dias_restantes !== undefined
         ? `${donante.dias_restantes} días`
         : "-- días";
 
-    // Cargar campañas por localidad y mis inscripciones
+    // Carga inicial de datos del panel
     await cargarCampanias(token);
     await cargarNotificaciones();
     await cargarProximaInscripcion(token);
+
+    // Mostrar contenido del dashboard cuando todo está listo
     loader.style.display = "none";
     contenidoPrivado.style.display = "block";
   } catch (e) {
-    console.error(
-      "ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Error detallado en cargarPanel():",
-      e
-    );
+    console.error("⚠️ Error detallado en cargarPanel():", e);
 
     loader.innerHTML = `
     <p style="color:red;">
       Error al cargar datos.<br>
       <strong>Detalles:</strong> ${e.message || "Error desconocido"}<br>
-      Revisa la consola para mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡s informaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n.
+      Revisa la consola para más información.
     </p>`;
   }
 }
 
-// BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de perfil
+/**
+ * ---------------------------------------------------------------------------
+ * Navegación interna básica
+ * ---------------------------------------------------------------------------
+ * Botones de acceso directo a secciones del sitio del donante.
+ */
+
+// Botón de perfil
 document.getElementById("btn-perfil").addEventListener("click", () => {
   window.location.href = "perfil-donante.html";
 });
 
-// BotÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de logout
+// Botón de logout
 logoutBtn.addEventListener("click", () => {
   localStorage.removeItem("token");
   window.location.href = "../../index.html";
 });
 
+// Inicio del panel
 cargarPanel();
 
-// ---------------- CampaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±as disponibles -----------------
+/**
+ * ---------------------------------------------------------------------------
+ * Campañas disponibles
+ * ---------------------------------------------------------------------------
+ * Obtiene la lista de campañas según la localización del donante y renderiza
+ * tarjetas con su estado (activa/futura) y si el usuario ya se inscribió.
+ */
+
 const campaniasList = document.getElementById("campaniasList");
 const modal = document.getElementById("modalCampania");
 const btnCerrarModal = document.getElementById("btnCerrarModal");
@@ -111,9 +142,16 @@ const confirmDlg = document.getElementById("confirmCancel");
 const confirmMsg = document.getElementById("confirmCancelMsg");
 const confirmYes = document.getElementById("btnCancelYes");
 const confirmNo = document.getElementById("btnCancelNo");
+
+
+// FIX: Cerrar los modales al iniciar
+if (modal && modal.open) modal.close();
+if (confirmDlg && confirmDlg.open) confirmDlg.close();
+
 let campaniaSeleccionada = null;
 let proximaSeleccionada = null;
 
+// Cierre del modal de campaña
 btnCerrarModal?.addEventListener("click", () => {
   modal.style.display = "none";
   campaniaSeleccionada = null;
@@ -124,36 +162,38 @@ async function cargarCampanias(tok) {
     const res = await fetch(`${API_BASE_URL}/api/donantes/campanias`, {
       headers: { Authorization: "Bearer " + tok },
     });
-    if (!res.ok)
-      throw new Error(
-        "Error al obtener campaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±as"
-      );
+    if (!res.ok) throw new Error("Error al obtener campañas");
     const data = await res.json();
     const lista = data.campanias || [];
     renderCampanias(lista);
   } catch (err) {
-    console.error(
-      "Error al cargar campaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±as:",
-      err
-    );
+    console.error("Error al cargar campañas:", err);
     if (campaniasList)
-      campaniasList.innerHTML =
-        "<em>No se pudieron cargar las campaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±as</em>";
+      campaniasList.innerHTML = "<em>No se pudieron cargar las campañas</em>";
   }
 }
 
+/**
+ * Renderiza la lista de campañas disponibles ordenadas por prioridad:
+ * 1) Inscripto primero.
+ * 2) Luego activas.
+ * 3) Luego futuras (por fecha de inicio).
+ */
 function renderCampanias(campanias) {
   if (!campaniasList) return;
   const items = (campanias || []).slice();
-  // Orden: inscripto primero, luego activas, luego futuras por fecha
+
   const rankEstado = (s) => (s === "activa" ? 0 : s === "futura" ? 1 : 2);
+
   items.sort((a, b) => {
     const ra = a.ya_inscripto ? 0 : 1;
     const rb = b.ya_inscripto ? 0 : 1;
     if (ra !== rb) return ra - rb;
-    const ea = rankEstado(a.estado_calculado),
-      eb = rankEstado(b.estado_calculado);
+
+    const ea = rankEstado(a.estado_calculado);
+    const eb = rankEstado(b.estado_calculado);
     if (ea !== eb) return ea - eb;
+
     const da = a.fecha_inicio ? new Date(a.fecha_inicio) : null;
     const db = b.fecha_inicio ? new Date(b.fecha_inicio) : null;
     if (da && db) return da - db;
@@ -161,28 +201,35 @@ function renderCampanias(campanias) {
     if (!da && db) return 1;
     return 0;
   });
+
   if (items.length === 0) {
     campaniasList.innerHTML =
-      "<em>No hay campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±as activas o futuras cerca.</em>";
+      "<em>No hay campañas activas o futuras cerca.</em>";
     return;
   }
+
   campaniasList.innerHTML = "";
   items.forEach((c) => {
     const card = document.createElement("div");
     card.className = "campania-card";
+
     const img = document.createElement("img");
     img.src = c.imagen_url || "https://placehold.co/64x64/EEE/AAA?text=Img";
-    img.alt = c.nombre || "CampaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±a";
+    img.alt = c.nombre || "Campaña";
+
     const info = document.createElement("div");
     info.className = "campania-info";
+
     const strong = document.createElement("strong");
-    strong.textContent =
-      c.nombre || "CampaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±a";
+    strong.textContent = c.nombre || "Campaña";
+
     const p = document.createElement("p");
     p.textContent = c.descripcion || "";
+
     const tag = document.createElement("span");
     tag.style.cssText =
       "display:inline-block;margin-top:4px;margin-right:6px;padding:2px 8px;border-radius:10px;font-size:0.78rem;background:#eee;color:#555;";
+
     if (c.estado_calculado === "activa") {
       tag.textContent = "Activa";
       tag.style.background = "#d4f5d7";
@@ -190,9 +237,9 @@ function renderCampanias(campanias) {
     } else if (c.estado_calculado === "futura") {
       const dias =
         typeof c.dias_para_inicio === "number" && c.dias_para_inicio > 0
-          ? ` (en ${c.dias_para_inicio} dias)`
+          ? ` (en ${c.dias_para_inicio} días)`
           : "";
-      tag.textContent = "Proxima" + dias;
+      tag.textContent = "Próxima" + dias;
       tag.style.background = "#e7f0ff";
       tag.style.color = "#0a58ca";
     }
@@ -209,40 +256,52 @@ function renderCampanias(campanias) {
       tagIns.style.background = "#fff3cd";
       tagIns.style.color = "#946200";
     }
+
     const btn = document.createElement("button");
     btn.textContent = "Ver";
     btn.className = "btn-secundario";
     btn.addEventListener("click", () => abrirModalCampania(c));
+
     info.appendChild(strong);
     info.appendChild(p);
     info.appendChild(tag);
     info.appendChild(tagIns);
     info.appendChild(btn);
+
     card.appendChild(img);
     card.appendChild(info);
     campaniasList.appendChild(card);
   });
 }
 
+/**
+ * Abre el modal con el detalle de la campaña seleccionada y permite:
+ * - Inscribirse (si es inscribible).
+ * - Cancelar la inscripción (si ya está inscripto).
+ */
 function abrirModalCampania(c) {
   campaniaSeleccionada = c;
-  document.getElementById("modalTitulo").textContent =
-    c.nombre || "CampaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±a";
+
+  document.getElementById("modalTitulo").textContent = c.nombre || "Campaña";
   document.getElementById("modalDescripcion").textContent = c.descripcion || "";
+
   const lugar = `${c.localidad_nombre || ""}${
     c.barrio_nombre ? " - " + c.barrio_nombre : ""
   }`;
   document.getElementById("modalLugar").textContent = lugar.trim();
+
   if (c.ya_inscripto === true) {
     btnAsistir.disabled = true;
     btnAsistir.textContent = "Inscripto";
+
     if (btnCancelar) {
       btnCancelar.style.display = "inline-block";
       btnCancelar.disabled = false;
       btnCancelar.onclick = () => {
         if (confirmMsg)
-          confirmMsg.textContent = `ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿Cancelar tu inscripciÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n a "${c.nombre}"?`;
+          confirmMsg.textContent = `¿Cancelar tu inscripción a "${c.nombre}"?`;
         confirmDlg.style.display = "flex";
+
         confirmYes.onclick = async () => {
           try {
             const res = await fetch(
@@ -253,23 +312,18 @@ function abrirModalCampania(c) {
               }
             );
             if (!res.ok) throw new Error(await res.text());
-            showToast("InscripciÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n cancelada", "success");
+            showToast("Inscripción cancelada", "success");
             confirmDlg.style.display = "none";
             modal.style.display = "none";
             await cargarCampanias(token);
             await cargarNotificaciones();
             await cargarProximaInscripcion(token);
           } catch (er) {
-            console.error(
-              "Error al cancelar inscripciÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n:",
-              er
-            );
-            showToast(
-              "No se pudo cancelar la inscripciÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n",
-              "error"
-            );
+            console.error("Error al cancelar inscripción:", er);
+            showToast("No se pudo cancelar la inscripción", "error");
           }
         };
+
         confirmNo.onclick = () => {
           confirmDlg.style.display = "none";
         };
@@ -283,9 +337,11 @@ function abrirModalCampania(c) {
       btnCancelar.onclick = null;
     }
   }
+
   modal.style.display = "flex";
 }
 
+// Acción de inscripción a una campaña desde el modal
 btnAsistir?.addEventListener("click", async () => {
   if (!campaniaSeleccionada) return;
   try {
@@ -300,11 +356,10 @@ btnAsistir?.addEventListener("click", async () => {
       const t = await res.text();
       throw new Error(t || "Error al inscribirse");
     }
-    alert(
-      "InscripciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n registrada. ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡Gracias por participar!"
-    );
+    alert("Inscripción registrada. ¡Gracias por participar!");
     modal.style.display = "none";
-    // refrescar listados y proxima
+
+    // Refrescar listados y próxima campaña inscripta
     await cargarCampanias(token);
     await cargarNotificaciones();
     await cargarProximaInscripcion(token);
@@ -314,18 +369,29 @@ btnAsistir?.addEventListener("click", async () => {
   }
 });
 
-// -------- Mis CampaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±as (inscripciones del donante) ---------
+/**
+ * ---------------------------------------------------------------------------
+ * Mis campañas (inscripciones del donante)
+ * ---------------------------------------------------------------------------
+ * Renderiza una sección adicional con las campañas a las que el donante
+ * ya está inscripto, permitiendo abrir el modal con su detalle.
+ */
+
 function ensureMisCampaniasContainer() {
   if (document.getElementById("misCampaniasList"))
     return document.getElementById("misCampaniasList");
+
   const section = document.querySelector(".dashboard-campanias");
   if (!section) return null;
+
   const hr = document.createElement("hr");
   const h2 = document.createElement("h2");
-  h2.textContent = "Mis campaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±as";
+  h2.textContent = "Mis campañas";
+
   const div = document.createElement("div");
   div.className = "campanias-list";
   div.id = "misCampaniasList";
+
   section.appendChild(hr);
   section.appendChild(h2);
   section.appendChild(div);
@@ -336,6 +402,7 @@ async function cargarMisCampanias(tok) {
   try {
     const listEl = ensureMisCampaniasContainer();
     if (!listEl) return;
+
     const res = await fetch(`${API_BASE_URL}/api/donantes/inscripciones`, {
       headers: { Authorization: "Bearer " + tok },
     });
@@ -343,32 +410,37 @@ async function cargarMisCampanias(tok) {
     const data = await res.json();
     renderMisCampanias(data || [], listEl);
   } catch (e) {
-    console.error(
-      "Error al cargar mis campaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±as:",
-      e
-    );
+    console.error("Error al cargar mis campañas:", e);
   }
 }
 
+/**
+ * Renderiza la lista de campañas donde el donante ya está inscripto.
+ */
 function renderMisCampanias(campanias, container) {
   if (!container) return;
+
   if (!campanias || campanias.length === 0) {
     container.innerHTML =
-      "<em>TodavÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­a no te inscribiste a campaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±as.</em>";
+      "<em>Todavía no te inscribiste a campañas.</em>";
     return;
   }
+
   container.innerHTML = "";
   campanias.forEach((c) => {
     const card = document.createElement("div");
     card.className = "campania-card";
+
     const img = document.createElement("img");
     img.src = c.imagen_url || "https://placehold.co/64x64/EEE/AAA?text=Img";
-    img.alt = c.nombre || "CampaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±a";
+    img.alt = c.nombre || "Campaña";
+
     const info = document.createElement("div");
     info.className = "campania-info";
+
     const strong = document.createElement("strong");
-    strong.textContent =
-      c.nombre || "CampaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±a";
+    strong.textContent = c.nombre || "Campaña";
+
     const p = document.createElement("p");
     const fecha = c.fecha_inicio
       ? new Date(c.fecha_inicio).toLocaleDateString()
@@ -376,22 +448,32 @@ function renderMisCampanias(campanias, container) {
     p.textContent = fecha
       ? `Te inscribiste. Fecha de inicio: ${fecha}`
       : "Te inscribiste.";
+
     const btn = document.createElement("button");
     btn.textContent = "Ver";
     btn.className = "btn-secundario";
     btn.addEventListener("click", () =>
       abrirModalCampania({ ...c, ya_inscripto: true })
     );
+
     info.appendChild(strong);
     info.appendChild(p);
     info.appendChild(btn);
+
     card.appendChild(img);
     card.appendChild(info);
     container.appendChild(card);
   });
 }
 
-// -------- PrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³xima campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a inscripta (aside) ---------
+/**
+ * ---------------------------------------------------------------------------
+ * Próxima campaña inscripta (aside)
+ * ---------------------------------------------------------------------------
+ * Calcula, a partir de “mis inscripciones”, cuál es la campaña activa más
+ * cercana o la próxima futura, y actualiza el panel lateral con acceso directo.
+ */
+
 async function cargarProximaInscripcion(tok) {
   try {
     const res = await fetch(`${API_BASE_URL}/api/donantes/inscripciones`, {
@@ -407,6 +489,7 @@ async function cargarProximaInscripcion(tok) {
       today.getMonth(),
       today.getDate()
     );
+
     const esActiva = (c) => {
       const fi = c.fecha_inicio ? new Date(c.fecha_inicio) : null;
       const ff = c.fecha_fin ? new Date(c.fecha_fin) : null;
@@ -414,12 +497,15 @@ async function cargarProximaInscripcion(tok) {
     };
 
     let prox = null;
+
+    // Preferir campañas activas (ordenadas por fecha de inicio)
     const activas = lista.filter(esActiva);
     if (activas.length > 0) {
       prox = activas.sort(
         (a, b) => new Date(a.fecha_inicio) - new Date(b.fecha_inicio)
       )[0];
     } else {
+      // Si no hay activas, usar la futura más próxima
       const futuras = lista.filter(
         (c) => c.fecha_inicio && new Date(c.fecha_inicio) > hoy
       );
@@ -434,29 +520,161 @@ async function cargarProximaInscripcion(tok) {
       const fecha = prox.fecha_inicio
         ? new Date(prox.fecha_inicio).toLocaleDateString()
         : "";
-      span.textContent = `Tu prÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³xima campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a: ${
-        prox.nombre
-      }${fecha ? " (" + fecha + ")" : ""}`;
+      span.textContent = `Tu próxima campaña: ${prox.nombre}${
+        fecha ? " (" + fecha + ")" : ""
+      }`;
       btnProxima.disabled = false;
       btnProxima.textContent = "Ver";
       btnProxima.onclick = () =>
         abrirModalCampania({ ...prox, ya_inscripto: true });
     } else if (span && btnProxima) {
       span.textContent =
-        "AÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºn no te inscribiste a campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±as prÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³ximas.";
+        "Aún no te inscribiste a campañas próximas.";
       btnProxima.disabled = true;
       btnProxima.textContent = "Muy pronto!";
       btnProxima.onclick = null;
     }
   } catch (e) {
-    console.error(
-      "Error al calcular prÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³xima campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a inscripta:",
-      e
-    );
+    console.error("Error al calcular próxima campaña inscripta:", e);
   }
 }
 
-// Toast minimal
+/**
+ * ---------------------------------------------------------------------------
+ * Notificaciones
+ * ---------------------------------------------------------------------------
+ * Carga y muestra notificaciones del donante, con soporte para marcar como
+ * leídas y badge de cantidad no leída. Si una notificación está asociada a
+ * una campaña, permite abrir su modal directamente.
+ */
+
+// Toggle del dropdown de notificaciones
+btnNotif?.addEventListener("click", async (e) => {
+  e.stopPropagation();
+  const open = notifDropdown.style.display === "block";
+  notifDropdown.style.display = open ? "none" : "block";
+  if (!open) {
+    await cargarNotificaciones();
+  }
+});
+
+// Cierre del dropdown al hacer click fuera
+document.addEventListener("click", (e) => {
+  if (notifDropdown && notifDropdown.style.display === "block") {
+    const within =
+      notifDropdown.contains(e.target) || btnNotif.contains(e.target);
+    if (!within) notifDropdown.style.display = "none";
+  }
+});
+
+// Carga de notificaciones desde la API
+async function cargarNotificaciones() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/donantes/notificaciones`, {
+      headers: { Authorization: "Bearer " + token },
+    });
+    if (!res.ok) throw new Error("No se pudieron cargar notificaciones");
+    const lista = await res.json();
+    renderNotificaciones(lista);
+    actualizarBadgeNotificaciones(lista);
+  } catch (err) {
+    console.error("Error al cargar notificaciones:", err);
+  }
+}
+
+/**
+ * Renderiza cada notificación:
+ * - Muestra mensaje y fecha relativa (time-ago).
+ * - Al click, marca como leída y, si tiene campaña asociada, abre su modal.
+ */
+function renderNotificaciones(lista) {
+  notifList.innerHTML = "";
+  if (!lista || lista.length === 0) {
+    notifEmpty.style.display = "block";
+    return;
+  }
+  notifEmpty.style.display = "none";
+
+  lista.forEach((n) => {
+    const li = document.createElement("li");
+    li.className = "notif-item" + (!n.leida ? " unread" : "");
+
+    const text = document.createElement("div");
+    text.textContent =
+      n.mensaje || (n.tipo ? n.tipo.replace("_", " ") : "Notificación");
+
+    const meta = document.createElement("div");
+    meta.style.fontSize = "0.78rem";
+    meta.style.color = "#666";
+    if (n.created_at) meta.textContent = timeAgo(n.created_at);
+
+    li.addEventListener("click", async () => {
+      try {
+        await fetch(
+          `${API_BASE_URL}/api/donantes/notificaciones/${n.id}/leida`,
+          {
+            method: "POST",
+            headers: { Authorization: "Bearer " + token },
+          }
+        );
+        notifDropdown.style.display = "none";
+
+        // Actualizar badge (decrementando en 1 si estaba no leída)
+        if (notifBadge && notifBadge.style.display !== "none") {
+          const current = parseInt(notifBadge.textContent || "0", 10) || 0;
+          const next = Math.max(0, current - (n.leida ? 0 : 1));
+          if (next > 0) {
+            notifBadge.textContent = String(next);
+          } else {
+            notifBadge.style.display = "none";
+          }
+        }
+
+        // Si la notificación refiere a una campaña, abrir su modal
+        if (n.campania_id) {
+          abrirModalCampania({
+            id: n.campania_id,
+            nombre: n.mensaje,
+            ya_inscripto: true,
+          });
+        }
+      } catch {
+        // Silencioso: si falla marcar como leída, no rompe la UI.
+      }
+    });
+
+    li.appendChild(text);
+    if (meta.textContent) li.appendChild(meta);
+    notifList.appendChild(li);
+  });
+}
+
+/**
+ * Actualiza el badge de notificaciones no leídas.
+ */
+function actualizarBadgeNotificaciones(lista) {
+  try {
+    const unread = (lista || []).filter((n) => !n.leida).length;
+    if (unread > 0) {
+      notifBadge.textContent = String(unread);
+      notifBadge.style.display = "inline-block";
+    } else {
+      notifBadge.style.display = "none";
+    }
+  } catch {
+    // Silencioso
+  }
+}
+
+/**
+ * ---------------------------------------------------------------------------
+ * Utilidades de interfaz
+ * ---------------------------------------------------------------------------
+ * - showToast: notificaciones breves en pantalla.
+ * - timeAgo: representación humana de fechas recientes.
+ */
+
+// Toast minimal (éxito/error/info)
 function showToast(msg, type = "info") {
   let el = document.getElementById("toast-msg");
   if (!el) {
@@ -483,105 +701,7 @@ function showToast(msg, type = "info") {
   }, 2000);
 }
 
-// ----- Notificaciones ------
-btnNotif?.addEventListener("click", async (e) => {
-  e.stopPropagation();
-  const open = notifDropdown.style.display === "block";
-  notifDropdown.style.display = open ? "none" : "block";
-  if (!open) {
-    await cargarNotificaciones();
-  }
-});
-
-document.addEventListener("click", (e) => {
-  if (notifDropdown && notifDropdown.style.display === "block") {
-    const within =
-      notifDropdown.contains(e.target) || btnNotif.contains(e.target);
-    if (!within) notifDropdown.style.display = "none";
-  }
-});
-
-async function cargarNotificaciones() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/donantes/notificaciones`, {
-      headers: { Authorization: "Bearer " + token },
-    });
-    if (!res.ok) throw new Error("No se pudieron cargar notificaciones");
-    const lista = await res.json();
-    renderNotificaciones(lista);
-    actualizarBadgeNotificaciones(lista);
-  } catch (err) {
-    console.error("Error al cargar notificaciones:", err);
-  }
-}
-
-function renderNotificaciones(lista) {
-  notifList.innerHTML = "";
-  if (!lista || lista.length === 0) {
-    notifEmpty.style.display = "block";
-    return;
-  }
-  notifEmpty.style.display = "none";
-  lista.forEach((n) => {
-    const li = document.createElement("li");
-    li.className = "notif-item" + (!n.leida ? " unread" : "");
-
-    const text = document.createElement("div");
-    text.textContent =
-      n.mensaje || (n.tipo ? n.tipo.replace("_", " ") : "NotificaciÃƒÂ³n");
-    const meta = document.createElement("div");
-    meta.style.fontSize = "0.78rem";
-    meta.style.color = "#666";
-    if (n.created_at) meta.textContent = timeAgo(n.created_at);
-    li.addEventListener("click", async () => {
-      try {
-        await fetch(
-          `${API_BASE_URL}/api/donantes/notificaciones/${n.id}/leida`,
-          {
-            method: "POST",
-            headers: { Authorization: "Bearer " + token },
-          }
-        );
-        notifDropdown.style.display = "none";
-        // Actualizar badge
-        if (notifBadge && notifBadge.style.display !== "none") {
-          const current = parseInt(notifBadge.textContent || "0", 10) || 0;
-          const next = Math.max(0, current - (n.leida ? 0 : 1));
-          if (next > 0) {
-            notifBadge.textContent = String(next);
-          } else {
-            notifBadge.style.display = "none";
-          }
-        }
-        if (n.campania_id) {
-          // abre modal si hay campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a asociada
-          abrirModalCampania({
-            id: n.campania_id,
-            nombre: n.mensaje,
-            ya_inscripto: true,
-          });
-        }
-      } catch {}
-    });
-    li.appendChild(text);
-    if (meta.textContent) li.appendChild(meta);
-    notifList.appendChild(li);
-  });
-}
-
-function actualizarBadgeNotificaciones(lista) {
-  try {
-    const unread = (lista || []).filter((n) => !n.leida).length;
-    if (unread > 0) {
-      notifBadge.textContent = String(unread);
-      notifBadge.style.display = "inline-block";
-    } else {
-      notifBadge.style.display = "none";
-    }
-  } catch {}
-}
-
-// timeago simple
+// Formato de tiempo relativo (ej.: "hace 5 min", "ayer", o fecha/hora)
 function timeAgo(dateInput) {
   try {
     const d = new Date(dateInput);

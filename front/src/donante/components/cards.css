@@ -1,0 +1,151 @@
+/* ==========================================================
+   Módulo: Tarjetas de Campañas (Cards)
+   Define el diseño visual de las campañas en el panel del donante.
+   ========================================================== */
+
+/* === Contenedor general de la sección de campañas === */
+.dashboard-campanias {
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 2px 16px #efefef;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* === Listado de campañas === */
+.campanias-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ==========================================================
+   Tarjeta individual de campaña
+   ========================================================== */
+.campania-card {
+  display: flex;
+  gap: 1.2rem;
+  align-items: flex-start;
+  background: #f7f5f5;
+  border-radius: 1rem;
+  padding: 1rem 1.3rem;
+  box-shadow: 0 1px 4px #eee;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.campania-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px #e9e9e9;
+}
+
+/* === Imagen de la campaña === */
+.campania-card img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 0.7rem;
+}
+
+/* === Contenedor de información dentro de la card === */
+.campania-info {
+  flex: 1;
+}
+
+.campania-info strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 1.12rem;
+  color: #a70c0c;
+  letter-spacing: 0.2px;
+}
+
+.campania-info p {
+  font-size: 0.95rem;
+  color: #444;
+  margin: 0.3rem 0 0;
+  line-height: 1.4;
+}
+
+/* ==========================================================
+   Etiquetas dinámicas (Activa, Inscripto, Próxima, etc.)
+   ========================================================== */
+.campania-tag {
+  display: inline-block;
+  margin-top: 4px;
+  margin-right: 6px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: #eee;
+  color: #555;
+}
+
+/* Estados específicos */
+.campania-tag.activa {
+  background: #d4f5d7;
+  color: #1b7e20;
+}
+
+.campania-tag.futura {
+  background: #e7f0ff;
+  color: #0a58ca;
+}
+
+.campania-tag.inscripto {
+  background: #d4f5d7;
+  color: #1b7e20;
+}
+
+.campania-tag.no-inscripto {
+  background: #fff3cd;
+  color: #946200;
+}
+
+/* ==========================================================
+   Botón dentro de las cards (Ver / Asistir)
+   ========================================================== */
+.campania-card .btn-secundario {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  padding: 0.35rem 1rem;
+}
+
+/* ==========================================================
+   Diseño responsivo (pantallas pequeñas)
+   ========================================================== */
+@media (max-width: 550px) {
+  .dashboard-campanias {
+    padding: 1.2rem 1rem;
+    border-radius: 1rem;
+  }
+
+  .campania-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.8rem 0.6rem;
+  }
+
+  .campania-card img {
+    width: 54px;
+    height: 54px;
+  }
+
+  .campania-info strong {
+    font-size: 1rem;
+  }
+
+  .campania-info p {
+    font-size: 0.9rem;
+  }
+}
+
+/* ==========================================================
+   Fin de cards.css
+   ========================================================== */
