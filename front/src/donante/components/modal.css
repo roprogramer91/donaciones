@@ -15,7 +15,9 @@ dialog {
 }
 
 dialog[open] {
-  display: flex; /* Se muestra solo cuando JS activa .showModal() */
+  display: flex; /* Se muestra solo cuando el modal está abierto */
+  align-items: center;
+  justify-content: center;
 }
 
 
@@ -38,9 +40,7 @@ dialog {
   padding: 0;
   background: transparent;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* OJO: no forzar display aquí para que no quede siempre visible */
   -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
   z-index: 50;
