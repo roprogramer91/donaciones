@@ -47,27 +47,37 @@ const CentrosController = {
   }
   ,
 
-  async obtenerResumen(req, res) {
-    try {
-      const centroId = obtenerCentroIdDeRequest(req);
-      if (!centroId) return res.status(400).json({ error: 'centro_id no especificado' });
+async obtenerResumen(req, res) {
+  try {
+    // Lee el ID desde el header o desde el cuerpo si llega por POST
+    const centroId = req.headers["x-centro-id"] || req.body?.centro_id;
+    if (!centroId) {
+      return res.status(400).json({ error: "centro_id no especificado" });
+    }
 
-      // Donantes: totales y aptos hoy, y aptos por grupo
-      const donantes = await Donante.obtenerTodos();
-      const hoy = new Date();
-      let donantesAptos = 0;
-      const grupos = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
-      const aptosPorGrupo = Object.fromEntries(grupos.map(g => [g, 0]));
-      donantes.forEach(d => {
-        const sexo = d.sexo || 'M';
-        const { apto } = calcularAptoYRestante(d.fecha_ultima_donacion, sexo, hoy);
-        if (apto) {
-          donantesAptos++;
-          if (d.grupo_sanguineo && aptosPorGrupo.hasOwnProperty(d.grupo_sanguineo)) {
-            aptosPorGrupo[d.grupo_sanguineo] += 1;
-          }
+    // Donantes: totales y aptos hoy, y aptos por grupo
+    const donantes = await Donante.obtenerTodos();
+    const hoy = new Date();
+    let donantesAptos = 0;
+    const grupos = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+    const aptosPorGrupo = Object.fromEntries(grupos.map((g) => [g, 0]));
+
+    donantes.forEach((d) => {
+      const sexo = d.sexo || "M";
+      const { apto } = calcularAptoYRestante(d.fecha_ultima_donacion, sexo, hoy);
+      if (apto) {
+        donantesAptos++;
+        if (d.grupo_sanguineo && aptosPorGrupo.hasOwnProperty(d.grupo_sanguineo)) {
+          aptosPorGrupo[d.grupo_sanguineo] += 1;
         }
-      });
+      }
+    });
+
+    // Resto de tu lógica…
+
+
+    
+
 
       // Campañas del centro
       const campanias = await CampaniasModel.obtenerPorCentro(centroId);

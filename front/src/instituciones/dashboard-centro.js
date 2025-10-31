@@ -11,10 +11,12 @@
 /* === IMPORTACIONES DE MÓDULOS === */
 import { abrirModal, cerrarModal } from "./components/modales/modalBase.js";
 import { cargarCampanias } from "./components/campanias.js";
+import { cargarResumen } from "./components/resumenCentro.js";
+import { mostrarPopup } from "./components/popup.js";
 
 /* === EVENTO PRINCIPAL === */
 document.addEventListener("DOMContentLoaded", () => {
-  /* === 1️⃣ REFERENCIAS A ELEMENTOS CLAVE === */
+  /* === REFERENCIAS A ELEMENTOS CLAVE === */
   const loader = document.getElementById("loader-centro");
   const contenido = document.getElementById("contenido-centro");
 
@@ -36,7 +38,10 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     if (loader) loader.style.display = "none";
     if (contenido) contenido.classList.remove("oculto");
-  }, 600);
+
+    // ✅ Cargar el resumen inicial del centro
+    cargarResumen();
+  }, 800);
 
   /* ==========================================================
      3️⃣ CAMBIO DE SECCIONES
@@ -53,9 +58,12 @@ document.addEventListener("DOMContentLoaded", () => {
      4️⃣ EVENTOS DE NAVEGACIÓN (SIDEBAR)
      Asocia los botones del panel con sus secciones
   =========================================================== */
-const btnVerResumen = document.getElementById("btn-ver-resumen");
+  const btnVerResumen = document.getElementById("btn-ver-resumen");
   if (btnVerResumen)
-    btnVerResumen.addEventListener("click", () => mostrarSeccion(seccionResumen));
+    btnVerResumen.addEventListener("click", () => {
+      mostrarSeccion(seccionResumen);
+      cargarResumen();
+    });
 
   if (btnVerDonantes)
     btnVerDonantes.addEventListener("click", () => mostrarSeccion(seccionDonantes));

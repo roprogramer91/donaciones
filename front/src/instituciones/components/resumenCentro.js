@@ -7,7 +7,6 @@
 // ============================================================
 
 import { API_BASE_URL } from "../../config.js";
-import { authHeaders, getCentroId } from "../dashboard-centro.js";
 
 // ============================================================
 // FUNCIÓN PRINCIPAL
@@ -19,20 +18,28 @@ import { authHeaders, getCentroId } from "../dashboard-centro.js";
  */
 export async function cargarResumen() {
   try {
+    const token = localStorage.getItem("token");
+    const centroId = localStorage.getItem("centroId") || 1; // 👈 según cómo lo guardes
+
     const res = await fetch(`${API_BASE_URL}/api/centro/summary`, {
-      headers: authHeaders({ "X-Centro-Id": getCentroId() }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // opcional, no lo necesita ahora
+        "X-Centro-Id": centroId, // 👈 este es el que usa el back
+      },
     });
 
     if (!res.ok) throw new Error("Error al obtener el resumen del centro");
     const resumen = await res.json();
 
-    // --- Render de los datos en los elementos HTML ---
     actualizarResumenUI(resumen);
   } catch (error) {
     console.error("Error al cargar resumen del centro:", error);
     mostrarErrorResumen();
   }
 }
+
+
 
 // ============================================================
 // FUNCIONES AUXILIARES
