@@ -36,7 +36,7 @@ async function getBarrioById(req, res) {
 async function getBarriosByLocalidad(req, res) {
   const { id } = req.params;
   try {
-    const barrios = await BarriosModel.getBarriosByLocalidadId(id);
+    const barrios = await barriosModel.getBarriosByLocalidadId(id);
     res.json(barrios);
   } catch (error) {
     console.error('Error al obtener barrios por localidad:', error.message);
