@@ -40,7 +40,7 @@ async function getBarriosByLocalidad(req, res) {
     res.json(barrios);
   } catch (error) {
     console.error('Error al obtener barrios por localidad:', error.message);
-    res.status(500).json({ error: 'Error al obtener barrio por localidad' });
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 }
 
@@ -48,5 +48,5 @@ async function getBarriosByLocalidad(req, res) {
 module.exports = {
   getBarrios,
   getBarrioById,
-  getBarriosByLocalidad
+  getBarriosByLocalidad,
 };

@@ -4,6 +4,7 @@
 =========================================================== */
 
 import { API_BASE_URL } from "../../config.js";
+import { abrirModal, cerrarModal } from "./modales/modalBase.js";
 
 /* === FUNCIÓN PRINCIPAL === */
 export async function cargarCampanias() {
@@ -78,10 +79,7 @@ export async function cargarCampanias() {
 
     /* === ASOCIAR EVENTO AL BOTÓN DE NUEVA CAMPAÑA === */
     const btnNueva = document.getElementById("btnNuevaCampania");
-    if (btnNueva) {
-    btnNueva.addEventListener("click", abrirModalNuevaCampania);
-    }
-
+    if (btnNueva) btnNueva.addEventListener("click", abrirModalNuevaCampania);
 
   } catch (error) {
     console.error("❌ Error al cargar campañas:", error);
@@ -100,104 +98,150 @@ function formatearFecha(fecha) {
   });
 }
 
-
-import { abrirModal, cerrarModal } from "./modales/modalBase.js";
-
 /* === FUNCIÓN: ABRIR MODAL DE NUEVA CAMPAÑA === */
 function abrirModalNuevaCampania() {
-abrirModal(`
-  <h3>Nueva Campaña</h3>
-  <form id="formNuevaCampania" class="form-campania">
-    <label>Nombre</label>
-    <input type="text" id="nombre" name="nombre" required />
+  abrirModal(`
+    <h3>Nueva Campaña</h3>
+    <form id="formNuevaCampania" class="form-campania">
+      <label>Nombre</label>
+      <input type="text" id="nombre" name="nombre" required />
 
-    <label>Descripción</label>
-    <textarea id="descripcion" name="descripcion" rows="3" required></textarea>
+      <label>Descripción</label>
+      <textarea id="descripcion" name="descripcion" rows="3" required></textarea>
 
-    <label>URL de imagen</label>
-    <input type="url" id="imagen_url" name="imagen_url" placeholder="https://..." required />
+      <label>URL de imagen</label>
+      <input type="url" id="imagen_url" name="imagen_url" placeholder="https://..." required />
 
-    <label>Provincia</label>
-    <select id="provincia_id" name="provincia_id" required>
-      <option value="">Seleccionar...</option>
-    </select>
+      <label>Provincia</label>
+      <select id="provincia_id" name="provincia_id" required>
+        <option value="">Seleccionar...</option>
+      </select>
 
-    <label>Localidad</label>
-    <select id="localidad_id" name="localidad_id" disabled required>
-      <option value="">Seleccionar...</option>
-    </select>
+      <label>Localidad</label>
+      <select id="localidad_id" name="localidad_id" disabled required>
+        <option value="">Seleccionar...</option>
+      </select>
 
-    <label>Barrio</label>
-    <select id="barrio_id" name="barrio_id" disabled required>
-      <option value="">Seleccionar...</option>
-    </select>
+      <label>Barrio</label>
+      <select id="barrio_id" name="barrio_id" disabled required>
+        <option value="">Seleccionar...</option>
+      </select>
 
-    <label>Fecha de inicio</label>
-    <input type="date" id="fecha_inicio" name="fecha_inicio" required />
+      <label>Fecha de inicio</label>
+      <input type="date" id="fecha_inicio" name="fecha_inicio" required />
 
-    <label>Fecha de fin</label>
-    <input type="date" id="fecha_fin" name="fecha_fin" required />
+      <label>Fecha de fin</label>
+      <input type="date" id="fecha_fin" name="fecha_fin" required />
 
-    <div class="modal-buttons">
-      <button type="submit" class="btn-accion-centro">Guardar</button>
-      <button type="button" id="btnCancelarModal" class="btn-secundario">Cancelar</button>
-    </div>
-  </form>
-`);
+      <div class="modal-buttons">
+        <button type="submit" class="btn-accion-centro">Guardar</button>
+        <button type="button" id="btnCancelarModal" class="btn-secundario">Cancelar</button>
+      </div>
+    </form>
+  `);
 
-const selectProvincia = document.getElementById("provincia_id");
-const selectLocalidad = document.getElementById("localidad_id");
-const selectBarrio = document.getElementById("barrio_id");
-
-/* === Cargar provincias al abrir modal === */
-cargarProvincias();
-
-/* === Eventos encadenados === */
-selectProvincia.addEventListener("change", async () => {
-  const idProvincia = selectProvincia.value;
-  selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
-  selectLocalidad.disabled = true;
-  selectBarrio.innerHTML = '<option value="">Seleccionar...</option>';
-  selectBarrio.disabled = true;
-
-  if (idProvincia) {
-    await cargarLocalidades(idProvincia);
-  }
-});
-
-selectLocalidad.addEventListener("change", async () => {
-  const idLocalidad = selectLocalidad.value;
-  selectBarrio.innerHTML = '<option value="">Seleccionar...</option>';
-  selectBarrio.disabled = true;
-
-  if (idLocalidad) {
-    await cargarBarrios(idLocalidad);
-  }
-});
-
-
-
-  /* === ASOCIAR EVENTOS === */
+  // === Referencias ===
   const form = document.getElementById("formNuevaCampania");
   const btnCancelar = document.getElementById("btnCancelarModal");
+  const selectProvincia = document.getElementById("provincia_id");
+  const selectLocalidad = document.getElementById("localidad_id");
+  const selectBarrio = document.getElementById("barrio_id");
 
+  // === Cargar provincias ===
+  cargarProvincias();
+
+  // === Eventos encadenados ===
+  selectProvincia.addEventListener("change", async () => {
+    const idProvincia = selectProvincia.value;
+    limpiarSelect(selectLocalidad);
+    limpiarSelect(selectBarrio);
+    selectLocalidad.disabled = true;
+    selectBarrio.disabled = true;
+    if (idProvincia) await cargarLocalidades(idProvincia);
+  });
+
+  selectLocalidad.addEventListener("change", async () => {
+    const idLocalidad = selectLocalidad.value;
+    limpiarSelect(selectBarrio);
+    selectBarrio.disabled = true;
+    if (idLocalidad) await cargarBarrios(idLocalidad);
+  });
+
+  // === Botones ===
   if (btnCancelar) btnCancelar.addEventListener("click", cerrarModal);
-  if (form) {
+  if (form)
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       await guardarNuevaCampania();
     });
+}
+
+/* === FUNCIONES AUXILIARES === */
+function limpiarSelect(select) {
+  select.innerHTML = '<option value="">Seleccionar...</option>';
+}
+
+/* === CARGA DE DATOS === */
+async function cargarProvincias() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/provincias`);
+    const provincias = await res.json();
+    const select = document.getElementById("provincia_id");
+    limpiarSelect(select);
+    provincias.forEach((p) => {
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = p.nombre;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.error("Error al cargar provincias:", err);
   }
 }
 
+async function cargarLocalidades(provinciaId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/localidades/provincia/${provinciaId}`);
+    const localidades = await res.json();
+    const select = document.getElementById("localidad_id");
+    limpiarSelect(select);
+    localidades.forEach((l) => {
+      const opt = document.createElement("option");
+      opt.value = l.id;
+      opt.textContent = l.nombre;
+      select.appendChild(opt);
+    });
+    select.disabled = false;
+  } catch (err) {
+    console.error("Error al cargar localidades:", err);
+  }
+}
 
+async function cargarBarrios(localidadId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/barrios/localidad/${localidadId}`);
+    const barrios = await res.json();
+    const select = document.getElementById("barrio_id");
+    limpiarSelect(select);
+    barrios.forEach((b) => {
+      const opt = document.createElement("option");
+      opt.value = b.id;
+      opt.textContent = b.nombre;
+      select.appendChild(opt);
+    });
+    select.disabled = false;
+  } catch (err) {
+    console.error("Error al cargar barrios:", err);
+  }
+}
+
+/* === GUARDAR CAMPAÑA === */
 async function guardarNuevaCampania() {
   const token = localStorage.getItem("token");
   const form = document.getElementById("formNuevaCampania");
 
-  // Extraer datos del formulario
   const datos = {
-    centro_id: 1, // ⚠️ Temporal: reemplazar por el centro real del usuario logueado
+    centro_id: 1, // ⚠️ temporal
     nombre: form.nombre.value.trim(),
     descripcion: form.descripcion.value.trim(),
     imagen_url: form.imagen_url.value.trim(),
@@ -221,67 +265,9 @@ async function guardarNuevaCampania() {
 
     alert("✅ Campaña creada correctamente.");
     cerrarModal();
-    cargarCampanias(); // recarga la tabla sin salir
+    cargarCampanias();
   } catch (err) {
     console.error(err);
     alert("❌ No se pudo crear la campaña. Intente nuevamente.");
-  }
-}
-
-/* === Cargar provincias === */
-async function cargarProvincias() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/provincias`);
-    const provincias = await res.json();
-    const select = document.getElementById("provincia_id");
-
-    provincias.forEach((p) => {
-      const opt = document.createElement("option");
-      opt.value = p.id;
-      opt.textContent = p.nombre;
-      select.appendChild(opt);
-    });
-  } catch (err) {
-    console.error("Error al cargar provincias:", err);
-  }
-}
-
-/* === Cargar localidades según provincia === */
-async function cargarLocalidades(provinciaId) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/localidades?provincia_id=${provinciaId}`);
-    const localidades = await res.json();
-    const select = document.getElementById("localidad_id");
-
-    localidades.forEach((l) => {
-      const opt = document.createElement("option");
-      opt.value = l.id;
-      opt.textContent = l.nombre;
-      select.appendChild(opt);
-    });
-
-    select.disabled = false;
-  } catch (err) {
-    console.error("Error al cargar localidades:", err);
-  }
-}
-
-/* === Cargar barrios según localidad === */
-async function cargarBarrios(localidadId) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/barrios?localidad_id=${localidadId}`);
-    const barrios = await res.json();
-    const select = document.getElementById("barrio_id");
-
-    barrios.forEach((b) => {
-      const opt = document.createElement("option");
-      opt.value = b.id;
-      opt.textContent = b.nombre;
-      select.appendChild(opt);
-    });
-
-    select.disabled = false;
-  } catch (err) {
-    console.error("Error al cargar barrios:", err);
   }
 }
