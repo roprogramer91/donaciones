@@ -4,16 +4,20 @@
 // campaña específica desde el panel del centro de hemoterapia.
 // ============================================================
 
-import { API_BASE_URL } from "../../config.js";
-import { authHeaders, mostrarMensaje } from "../dashboard-centro.js";
+import { API_BASE_URL } from "../../../config.js";
+import { authHeaders, mostrarMensaje } from "../../dashboard-centro.js";
 
 // ============================================================
 // ELEMENTOS BASE
 // ============================================================
 
 const modalInscripciones = document.getElementById("modal-inscripciones");
-const cerrarModalInscripciones = document.getElementById("cerrarModalInscripciones");
-const tituloModalInscripciones = document.getElementById("titulo-modal-inscripciones");
+const cerrarModalInscripciones = document.getElementById(
+  "cerrarModalInscripciones"
+);
+const tituloModalInscripciones = document.getElementById(
+  "titulo-modal-inscripciones"
+);
 const tablaInscripciones = document.querySelector("#tabla-inscripciones tbody");
 
 // ============================================================
@@ -28,7 +32,8 @@ export function inicializarModalInscripciones() {
   });
 
   modalInscripciones.addEventListener("click", (e) => {
-    if (e.target === modalInscripciones) modalInscripciones.style.display = "none";
+    if (e.target === modalInscripciones)
+      modalInscripciones.style.display = "none";
   });
 }
 
@@ -42,9 +47,12 @@ export async function abrirModalInscripciones(campaniaId, campaniaNombre = "") {
     tituloModalInscripciones.textContent = `Inscripciones - ${campaniaNombre}`;
     tablaInscripciones.innerHTML = `<tr><td colspan="4">Cargando inscripciones...</td></tr>`;
 
-    const res = await fetch(`${API_BASE_URL}/api/campanias/${campaniaId}/inscripciones`, {
-      headers: authHeaders(),
-    });
+    const res = await fetch(
+      `${API_BASE_URL}/api/campanias/${campaniaId}/inscripciones`,
+      {
+        headers: authHeaders(),
+      }
+    );
 
     if (!res.ok) throw new Error("No se pudieron obtener las inscripciones");
 

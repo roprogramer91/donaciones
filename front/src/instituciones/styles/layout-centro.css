@@ -1,0 +1,245 @@
+/* ============================================================
+   LAYOUT CENTRO DE HEMOTERAPIA
+   Solo define estructura, espaciado y colores generales.
+   (Los botones, modales y componentes visuales están separados)
+============================================================ */
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  margin: 0;
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+.oculto {
+  display: none !important;
+}
+
+/* ============================================================
+   LOADER INICIAL
+============================================================ */
+.loader-centro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 1rem;
+  color: #0f172a;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #cbd5e1;
+  border-top-color: #0a58ca;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================
+   HEADER PRINCIPAL
+============================================================ */
+.dashboard-centro-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0a58ca;
+  color: #fff;
+  padding: 1rem 2rem;
+}
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.icon-btn img {
+  width: 22px;
+  height: 22px;
+  filter: invert(1);
+}
+
+/* Badge de notificaciones */
+.badge-notif {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 9999px;
+  padding: 0 6px;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  display: none;
+}
+
+/* ============================================================
+   ESTRUCTURA PRINCIPAL (LAYOUT)
+============================================================ */
+.dashboard-centro-layout {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  min-height: calc(100vh - 70px);
+}
+
+/* ============================================================
+   SIDEBAR IZQUIERDO
+============================================================ */
+.dashboard-centro-sidebar {
+  width: 220px;
+  background: #e9efff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-centro-sidebar h3 {
+  color: #0a58ca;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+/* ============================================================
+   CONTENIDO PRINCIPAL
+============================================================ */
+.dashboard-centro-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ============================================================
+   RESUMEN GENERAL
+============================================================ */
+.dashboard-centro-resumen {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.resumen-card {
+  background: #f9fafc;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.resumen-card b {
+  font-size: 1.3rem;
+  color: #0a58ca;
+}
+
+.resumen-label {
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+/* ============================================================
+   TABLAS Y FILTROS
+============================================================ */
+.filtros-donantes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.filtros-donantes select,
+.filtros-donantes input {
+  padding: 0.4rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.check-apto {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.tabla-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th,
+td {
+  padding: 0.6rem;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+th {
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* ============================================================
+   DROPDOWN DE NOTIFICACIONES
+============================================================ */
+.dropdown-notif-centro {
+  display: none;
+  position: fixed;
+  top: 60px;
+  right: 16px;
+  width: 320px;
+  max-height: 60vh;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 120;
+}
+
+.dropdown-header {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  font-weight: 600;
+  color: #334155;
+}
+
+.lista-notif-centro {
+  display: flex;
+  flex-direction: column;
+}
