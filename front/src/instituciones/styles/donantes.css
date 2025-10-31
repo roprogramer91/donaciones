@@ -1,0 +1,121 @@
+/* ==========================================================
+   ESTILOS: SECCIÓN DONANTES REGISTRADOS
+   ========================================================== */
+
+/* ====== CONTENEDOR PRINCIPAL ====== */
+#seccion-donantes {
+  padding: 1.5rem;
+  background-color: #f9fafc;
+  border-radius: 8px;
+}
+
+/* ====== FILTROS SUPERIORES ====== */
+#seccion-donantes .filtros-donantes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+#seccion-donantes select,
+#seccion-donantes input {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+#seccion-donantes button {
+  padding: 0.5rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+#btn-aplicar-filtro {
+  background-color: #2563eb;
+  color: white;
+}
+
+#btn-aplicar-filtro:hover {
+  background-color: #1e40af;
+}
+
+#btn-limpiar-filtro {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+#btn-limpiar-filtro:hover {
+  background-color: #d1d5db;
+}
+
+#btn-exportar-csv {
+  background-color: #16a34a;
+  color: white;
+}
+
+#btn-exportar-csv:hover {
+  background-color: #15803d;
+}
+
+/* ====== CONTADOR ====== */
+#conteo-donantes {
+  margin-left: auto;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* ====== TABLA ====== */
+#tabla-donantes {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+#tabla-donantes thead {
+  background-color: #2563eb;
+  color: white;
+  text-align: left;
+}
+
+#tabla-donantes th,
+#tabla-donantes td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+#tabla-donantes tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* ====== ENLACES ====== */
+.link-inscripciones {
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link-inscripciones:hover {
+  color: #1e3a8a;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 768px) {
+  #seccion-donantes .filtros-donantes {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #tabla-donantes th,
+  #tabla-donantes td {
+    font-size: 0.85rem;
+    padding: 0.6rem;
+  }
+}

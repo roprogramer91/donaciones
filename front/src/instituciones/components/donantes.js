@@ -5,12 +5,8 @@
 // ============================================================
 
 import { API_BASE_URL } from "../../config.js";
-import {
-  authHeaders,
-  getCentroId,
-  toggleSeccion,
-  mostrarMensaje,
-} from "../dashboard-centro.js";
+import { toggleSeccion } from "../dashboard-centro.js";
+
 
 // ============================================================
 // VARIABLES Y ELEMENTOS BASE
@@ -54,16 +50,23 @@ export function inicializarDonantes() {
   btnLimpiarFiltro?.addEventListener("click", limpiarFiltros);
 }
 
+
 // ============================================================
 // CARGA DE DONANTES CON FILTROS
 // ============================================================
-
 async function cargarDonantes() {
   try {
     const params = construirParametros();
+    const token = localStorage.getItem("token");
+
     const res = await fetch(
       `${API_BASE_URL}/api/donantes/filtro?${params.toString()}`,
-      { headers: authHeaders({ "X-Centro-Id": getCentroId() }) }
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // ✅ solo token
+        },
+      }
     );
 
     if (!res.ok) throw new Error("Error al obtener donantes");
@@ -73,11 +76,12 @@ async function cargarDonantes() {
     actualizarConteoYExport();
     renderDonantes(data);
   } catch (err) {
-    console.error("Error al cargar donantes:", err);
+    console.error("❌ Error al cargar donantes:", err);
     tablaBody.innerHTML = `<tr><td colspan="8">Error al cargar donantes</td></tr>`;
     mostrarMensaje("Error al cargar donantes", "error");
   }
 }
+
 
 /**
  * Construye los parámetros de búsqueda desde los filtros activos.

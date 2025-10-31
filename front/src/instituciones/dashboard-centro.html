@@ -15,6 +15,8 @@
     <link rel="stylesheet" href="./styles/buttons.css" />
     <link rel="stylesheet" href="./styles/campanias.css" />
     <link rel="stylesheet" href="./styles/popup.css" />
+    <link rel="stylesheet" href="./styles/donantes.css" />
+
   </head>
 
   <body>
@@ -114,70 +116,80 @@
               <div id="resumen-grupos" class="resumen-grupos"></div>
             </section>
 
-            <!-- ==========================================================
-                 SECCIÓN: DONANTES
-            =========================================================== -->
-            <section id="seccion-donantes" class="dashboard-centro-seccion oculto">
-              <h3>Donantes registrados</h3>
+ <!-- ==========================================================
+     SECCIÓN: DONANTES REGISTRADOS
+=========================================================== -->
+<section id="seccion-donantes" class="oculto">
+  <h2>Donantes registrados</h2>
 
-              <div class="filtros-donantes">
-                <select id="filtro-grupo">
-                  <option value="">Todos los grupos</option>
-                  <option value="A+">A+</option>
-                  <option value="A-">A-</option>
-                  <option value="B+">B+</option>
-                  <option value="B-">B-</option>
-                  <option value="AB+">AB+</option>
-                  <option value="AB-">AB-</option>
-                  <option value="O+">O+</option>
-                  <option value="O-">O-</option>
-                </select>
+  <!-- 🔹 FILTROS -->
+  <div class="filtros-donantes">
+    <select id="filtro-grupo">
+      <option value="">Todos los grupos</option>
+      <option value="A+">A+</option>
+      <option value="A-">A-</option>
+      <option value="B+">B+</option>
+      <option value="B-">B-</option>
+      <option value="AB+">AB+</option>
+      <option value="AB-">AB-</option>
+      <option value="O+">O+</option>
+      <option value="O-">O-</option>
+    </select>
 
-                <select id="filtro-provincia">
-                  <option value="">Todas las provincias</option>
-                </select>
+    <select id="filtro-provincia">
+      <option value="">Todas las provincias</option>
+    </select>
 
-                <select id="filtro-localidad" disabled>
-                  <option value="">Todas las localidades</option>
-                </select>
+    <select id="filtro-localidad" disabled>
+      <option value="">Todas las localidades</option>
+    </select>
 
-                <select id="filtro-barrio">
-                  <option value="">Todos los barrios</option>
-                </select>
+    <select id="filtro-barrio">
+      <option value="">Todos los barrios</option>
+    </select>
 
-                <label class="check-apto">
-                  <input type="checkbox" id="filtro-apto" /> Solo aptos
-                </label>
+    <label>
+      <input type="checkbox" id="filtro-apto" />
+      Solo aptos
+    </label>
 
-                <input id="filtro-edad-min" type="number" min="18" max="99" placeholder="Edad min" />
-                <input id="filtro-edad-max" type="number" min="18" max="99" placeholder="Edad max" />
-                <input id="filtro-dias-rest-max" type="number" min="0" placeholder="Días rest. ≤" />
+    <input type="number" id="filtro-edad-min" placeholder="Edad mín" min="18" />
+    <input type="number" id="filtro-edad-max" placeholder="Edad máx" max="65" />
+    <input type="number" id="filtro-dias-rest-max" placeholder="Días rest. ≤" />
 
-                <button id="btn-aplicar-filtro" class="btn-accion-centro">Filtrar</button>
-                <button id="btn-limpiar-filtro" class="btn-accion-centro btn-secundario">Limpiar</button>
-                <button id="btn-exportar-csv" class="btn-accion-centro btn-excel" disabled>Exportar CSV</button>
+    <button id="btn-aplicar-filtro">Filtrar</button>
+    <button id="btn-limpiar-filtro">Limpiar</button>
+    <button id="btn-exportar-csv">Exportar CSV</button>
 
-                <span id="conteo-donantes" class="conteo-donantes">0 resultados</span>
-              </div>
+    <span id="conteo-donantes">0 resultados</span>
+  </div>
 
-              <div class="tabla-wrapper">
-                <table id="tabla-donantes">
-                  <thead>
-                    <tr>
-                      <th>Nombre</th>
-                      <th>Grupo</th>
-                      <th>Provincia</th>
-                      <th>Localidad</th>
-                      <th>Teléfono</th>
-                      <th>Campaña</th>
-                      <th>Apto</th>
-                      <th>Días restantes</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </section>
+  <!-- 🔹 TABLA -->
+  <div class="tabla-donantes-container">
+    <table id="tabla-donantes">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Grupo</th>
+          <th>Provincia</th>
+          <th>Localidad</th>
+          <th>Teléfono</th>
+          <th>Campaña</th>
+          <th>Apto</th>
+          <th>Días restantes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="8" style="text-align:center; color:#888;">
+            Cargando donantes...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
 
             <!-- ==========================================================
                  SECCIONES DINÁMICAS

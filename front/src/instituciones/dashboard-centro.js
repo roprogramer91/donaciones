@@ -13,6 +13,35 @@ import { abrirModal, cerrarModal } from "./components/modales/modalBase.js";
 import { cargarCampanias } from "./components/campanias.js";
 import { cargarResumen } from "./components/resumenCentro.js";
 import { mostrarPopup } from "./components/popup.js";
+import { inicializarDonantes } from "./components/donantes.js";
+
+/* ==========================================================
+   🔁 FUNCIÓN GLOBAL: TOGGLE DE SECCIONES
+   Exportada para que otros módulos (como donantes.js) puedan usarla
+========================================================== */
+export function toggleSeccion(nombre) {
+  const secciones = document.querySelectorAll(
+    ".dashboard-centro-resumen, #seccion-donantes, #seccion-campanias, #seccion-notifs"
+  );
+
+  let visible = false;
+
+  secciones.forEach((sec) => {
+    const id = sec.id || sec.classList[0];
+    const esActiva =
+      id.includes(nombre) ||
+      (nombre === "resumen" && sec.classList.contains("dashboard-centro-resumen"));
+
+    if (esActiva) {
+      sec.classList.remove("oculto");
+      visible = true;
+    } else {
+      sec.classList.add("oculto");
+    }
+  });
+
+  return visible;
+}
 
 /* === EVENTO PRINCIPAL === */
 document.addEventListener("DOMContentLoaded", () => {
@@ -66,7 +95,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   if (btnVerDonantes)
-    btnVerDonantes.addEventListener("click", () => mostrarSeccion(seccionDonantes));
+    btnVerDonantes.addEventListener("click", () => {
+      mostrarSeccion(seccionDonantes);
+      console.log("🩸 Botón 'Ver Donantes' clickeado");
+    });
 
   if (btnVerCampanias)
     btnVerCampanias.addEventListener("click", () => {
@@ -91,7 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `);
 
-      // Vincula el botón de cerrar dentro del modal
       const btnCerrar = document.getElementById("btnCerrarModal");
       if (btnCerrar) btnCerrar.addEventListener("click", cerrarModal);
     });
@@ -109,7 +140,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   /* ==========================================================
-     7️⃣ DEBUG Y CONFIRMACIÓN DE CARGA
+     7️⃣ INICIALIZAR MÓDULOS SECUNDARIOS
+     (Debe ir al final para asegurar que el DOM esté listo)
+  =========================================================== */
+  inicializarDonantes();
+
+  /* ==========================================================
+     8️⃣ DEBUG Y CONFIRMACIÓN DE CARGA
   =========================================================== */
   console.log("✅ dashboard-centro.js cargado y funcionando correctamente.");
   console.log("ModalBase encontrado:", document.getElementById("modal-base"));
