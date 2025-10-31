@@ -1,40 +1,93 @@
+/* ==========================================================
+   ESTILOS DE BOTONES GLOBALES
+   Aplican a todos los botones del panel Centro.
+   Los tipos definidos son:
+   - Primario (acción principal, azul)
+   - Secundario (neutral o cancelar)
+   - Excel (acciones de exportación)
+=========================================================== */
+
+/* === BASE GENERAL DE BOTONES ===
+   Estilos comunes a todos los botones del panel
+=========================================================== */
 .btn-accion-centro {
-  background: #0a58ca;
-  color: white;
+  display: inline-block;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
   border: none;
   border-radius: 8px;
-  padding: 0.6rem 1rem;
   cursor: pointer;
-  font-weight: 500;
-  transition: 0.2s ease;
+  transition: all 0.2s ease;
+  background-color: var(--color-azul);
+  color: #fff;
+  box-shadow: var(--sombra-suave);
 }
 
 .btn-accion-centro:hover {
-  background: #084bb5;
+  background-color: var(--color-azul-oscuro);
+  transform: translateY(-1px);
 }
 
-.btn-cancelar {
-  background: #dc2626;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  cursor: pointer;
+.btn-accion-centro:active {
+  transform: translateY(0);
 }
 
-.btn-cancelar:hover {
-  background: #b91c1c;
-}
-
+/* === VARIANTE SECUNDARIA ===
+   Se usa para acciones no destructivas o cancelar
+=========================================================== */
 .btn-secundario {
-  background: #64748b;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  cursor: pointer;
+  background-color: #e9ecf3;
+  color: var(--color-texto);
 }
 
 .btn-secundario:hover {
-  background: #475569;
+  background-color: #dce0e9;
+  color: var(--color-azul-oscuro);
+}
+
+/* === VARIANTE EXCEL ===
+   Botones dedicados a exportaciones o descargas de datos
+=========================================================== */
+.btn-excel {
+  background-color: #1b9448;
+  color: #fff;
+}
+
+.btn-excel:hover {
+  background-color: #137a3a;
+}
+
+/* === VARIANTE CANCELAR (MODALES) ===
+   Para botones que cierran o revierten una acción
+=========================================================== */
+.btn-cancelar {
+  background-color: var(--color-error);
+  color: #fff;
+}
+
+.btn-cancelar:hover {
+  background-color: #b62333;
+}
+
+/* === ESTADO DESHABILITADO ===
+   Se usa para botones no disponibles temporalmente
+=========================================================== */
+.btn-accion-centro:disabled,
+.btn-secundario:disabled,
+.btn-excel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* === PEQUEÑAS ADAPTACIONES RESPONSIVE ===
+   Ajusta tamaño y padding en pantallas chicas
+=========================================================== */
+@media (max-width: 700px) {
+  .btn-accion-centro {
+    font-size: 0.8rem;
+    padding: 8px 10px;
+    border-radius: 6px;
+  }
 }

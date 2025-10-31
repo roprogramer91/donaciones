@@ -7,7 +7,7 @@
 
     <!-- ==========================================================
          ESTILOS GLOBALES DEL PANEL
-         Se cargan en orden de jerarquía: estilos base, modales y botones
+         Se cargan en orden jerárquico: estilos base, layout, modales y botones
     =========================================================== -->
     <link rel="stylesheet" href="./styles/dashboard-centro.css" />
     <link rel="stylesheet" href="./styles/layout-centro.css" />
@@ -17,22 +17,25 @@
 
   <body>
     <div class="dashboard-centro-wrapper">
-      /* === LOADER INICIAL ===
-         Se muestra mientras se cargan los datos del centro desde el backend
-      =========================================================== */
+      <!-- ==========================================================
+           LOADER INICIAL
+           Se muestra mientras se cargan los datos del centro desde el backend
+      =========================================================== -->
       <div id="loader-centro" class="loader-centro">
         <div class="spinner"></div>
         <span>Cargando el panel...</span>
       </div>
 
-      /* === CONTENIDO PRINCIPAL DEL PANEL ===
-         Todo el contenido se oculta por defecto hasta que termina el loader
-      =========================================================== */
+      <!-- ==========================================================
+           CONTENIDO PRINCIPAL DEL PANEL
+           Se oculta por defecto hasta que finaliza el proceso de carga inicial
+      =========================================================== -->
       <div id="contenido-centro" class="contenido-centro oculto">
 
-        /* === HEADER PRINCIPAL ===
-           Contiene el nombre del centro y los botones de acciones globales
-        =========================================================== */
+        <!-- ==========================================================
+             HEADER PRINCIPAL
+             Contiene el nombre del centro y los botones de acciones globales
+        =========================================================== -->
         <header class="dashboard-centro-header">
           <div class="centro-nombre" id="bienvenida-centro">
             ¡Bienvenido, Centro de Hemoterapia!
@@ -63,9 +66,10 @@
           </div>
         </header>
 
-        /* === LAYOUT PRINCIPAL (SIDEBAR + CONTENIDO) ===
-           El aside contiene las acciones rápidas y el main cambia de vista según el botón activo
-        =========================================================== */
+        <!-- ==========================================================
+             LAYOUT PRINCIPAL (SIDEBAR + CONTENIDO)
+             Sidebar con acciones rápidas y main con vistas dinámicas
+        =========================================================== -->
         <div class="dashboard-centro-layout">
           <aside class="dashboard-centro-sidebar">
             <h3>Acciones rápidas</h3>
@@ -81,9 +85,10 @@
           </aside>
 
           <main class="dashboard-centro-main">
-            /* === SECCIÓN: RESUMEN GENERAL ===
-               Se muestra al iniciar el panel, con métricas globales y datos clave
-            =========================================================== */
+            <!-- ==========================================================
+                 SECCIÓN: RESUMEN GENERAL
+                 Muestra métricas globales del centro al iniciar el panel
+            =========================================================== -->
             <section class="dashboard-centro-resumen">
               <h2>Resumen general</h2>
 
@@ -117,9 +122,10 @@
               <div id="resumen-grupos" class="resumen-grupos"></div>
             </section>
 
-            /* === SECCIÓN: DONANTES ===
-               Tabla de donantes filtrable y exportable
-            =========================================================== */
+            <!-- ==========================================================
+                 SECCIÓN: DONANTES
+                 Tabla filtrable, exportable y con posibilidad de abrir modales
+            =========================================================== -->
             <section id="seccion-donantes" class="dashboard-centro-seccion oculto">
               <h3>Donantes registrados</h3>
 
@@ -182,18 +188,20 @@
               </div>
             </section>
 
-            /* === SECCIONES VACÍAS DINÁMICAS ===
-               Contenedores que se llenarán con componentes JS (campañas y notificaciones)
-            =========================================================== */
+            <!-- ==========================================================
+                 SECCIONES VACÍAS DINÁMICAS
+                 Contenedores que se llenarán con componentes JS
+            =========================================================== -->
             <section id="seccion-campanias" class="dashboard-centro-seccion oculto"></section>
             <section id="seccion-notifs" class="dashboard-centro-seccion oculto"></section>
           </main>
         </div>
 
-        /* === MODAL BASE ===
-           Modal genérico reutilizable para cualquier contenido dinámico
-           Su contenido se inserta mediante JS desde la carpeta /components/modales/
-        =========================================================== */
+        <!-- ==========================================================
+             MODAL BASE
+             Modal genérico reutilizable para cualquier contenido dinámico
+             Su contenido se genera desde /components/modales/
+        =========================================================== -->
         <dialog id="modal-base" class="modal-overlay">
           <div id="modal-content" class="modal-content"></div>
         </dialog>
@@ -201,14 +209,16 @@
       </div> <!-- cierre de contenido-centro -->
     </div> <!-- cierre wrapper -->
 
-    /* === SCRIPTS PRINCIPALES ===
-       dashboard-centro.js coordina los módulos dentro de /components/
-    =========================================================== */
+    <!-- ==========================================================
+         SCRIPTS PRINCIPALES
+         dashboard-centro.js coordina los módulos del panel
+    =========================================================== -->
     <script type="module" src="./dashboard-centro.js"></script>
 
-    /* === DROPDOWN DE NOTIFICACIONES ===
-       Menú flotante desplegable controlado desde notificaciones.js
-    =========================================================== */
+    <!-- ==========================================================
+         DROPDOWN DE NOTIFICACIONES
+         Menú flotante desplegable controlado desde notificaciones.js
+    =========================================================== -->
     <div id="dropdown-notif-centro" class="dropdown-notif-centro">
       <div class="dropdown-header">Notificaciones</div>
       <div id="lista-notif-centro" class="lista-notif-centro"></div>

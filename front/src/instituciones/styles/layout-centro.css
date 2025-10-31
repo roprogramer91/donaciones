@@ -1,245 +1,126 @@
-/* ============================================================
-   LAYOUT CENTRO DE HEMOTERAPIA
-   Solo define estructura, espaciado y colores generales.
-   (Los botones, modales y componentes visuales están separados)
-============================================================ */
+/* ==========================================================
+   LAYOUT PRINCIPAL DEL PANEL CENTRO
+   Define la estructura general: sidebar, main y su adaptación
+   a distintos tamaños de pantalla.
+   No maneja colores de botones ni tipografía global.
+=========================================================== */
 
-body {
-  font-family: "Segoe UI", sans-serif;
-  margin: 0;
-  background: #f8fafc;
-  color: #1e293b;
+/* === CONTENEDOR PRINCIPAL ===
+   Distribuye sidebar (izquierda) y main (derecha)
+=========================================================== */
+.dashboard-centro-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: calc(100vh - 60px); /* resta el header */
+  background-color: var(--color-secundario);
 }
 
-.oculto {
-  display: none !important;
-}
-
-/* ============================================================
-   LOADER INICIAL
-============================================================ */
-.loader-centro {
+/* === SIDEBAR IZQUIERDO ===
+   Muestra acciones rápidas o menús secundarios
+=========================================================== */
+.dashboard-centro-sidebar {
+  background-color: #f8f9fc;
+  border-right: 1px solid var(--color-gris-borde);
+  padding: 24px 16px;
+  box-shadow: inset -1px 0 0 var(--color-gris-borde);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  gap: 1rem;
-  color: #0f172a;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #cbd5e1;
-  border-top-color: #0a58ca;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ============================================================
-   HEADER PRINCIPAL
-============================================================ */
-.dashboard-centro-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #0a58ca;
-  color: #fff;
-  padding: 1rem 2rem;
-}
-
-.header-icons {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.icon-btn img {
-  width: 22px;
-  height: 22px;
-  filter: invert(1);
-}
-
-/* Badge de notificaciones */
-.badge-notif {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  background: #ef4444;
-  color: #fff;
-  border-radius: 9999px;
-  padding: 0 6px;
-  font-size: 0.7rem;
-  line-height: 1.2;
-  display: none;
-}
-
-/* ============================================================
-   ESTRUCTURA PRINCIPAL (LAYOUT)
-============================================================ */
-.dashboard-centro-layout {
-  display: flex;
-  gap: 2rem;
-  padding: 2rem;
-  min-height: calc(100vh - 70px);
-}
-
-/* ============================================================
-   SIDEBAR IZQUIERDO
-============================================================ */
-.dashboard-centro-sidebar {
-  width: 220px;
-  background: #e9efff;
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  gap: 16px;
 }
 
 .dashboard-centro-sidebar h3 {
-  color: #0a58ca;
-  margin-bottom: 1rem;
   font-size: 1rem;
-}
-
-/* ============================================================
-   CONTENIDO PRINCIPAL
-============================================================ */
-.dashboard-centro-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-/* ============================================================
-   RESUMEN GENERAL
-============================================================ */
-.dashboard-centro-resumen {
-  background: #fff;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.resumen-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.resumen-card {
-  background: #f9fafc;
-  border-radius: 12px;
-  padding: 1rem;
+  font-weight: 600;
+  color: var(--color-azul);
+  margin-bottom: 10px;
   text-align: center;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.resumen-card b {
-  font-size: 1.3rem;
-  color: #0a58ca;
-}
-
-.resumen-label {
-  font-size: 0.9rem;
-  color: #475569;
-}
-
-/* ============================================================
-   TABLAS Y FILTROS
-============================================================ */
-.filtros-donantes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.filtros-donantes select,
-.filtros-donantes input {
-  padding: 0.4rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 0.9rem;
-}
-
-.check-apto {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.tabla-wrapper {
-  overflow-x: auto;
-}
-
-table {
+/* === BOTONES DENTRO DEL SIDEBAR ===
+   Estilo limpio que se apoya en buttons.css
+=========================================================== */
+.dashboard-centro-sidebar .btn-accion-centro {
   width: 100%;
-  border-collapse: collapse;
-  background: #fff;
+  text-align: center;
   border-radius: 8px;
-  overflow: hidden;
+  font-size: 0.95rem;
 }
 
-th,
-td {
-  padding: 0.6rem;
-  border-bottom: 1px solid #e2e8f0;
-  text-align: left;
-  font-size: 0.9rem;
+/* === CONTENIDO PRINCIPAL ===
+   Área central del panel donde se muestran las secciones
+=========================================================== */
+.dashboard-centro-main {
+  background-color: var(--color-fondo);
+  padding-bottom: 40px;
+  overflow-y: auto;
+  max-height: calc(100vh - 60px);
 }
 
-th {
-  background: #f1f5f9;
-  color: #0f172a;
-  font-weight: 600;
+/* === SCROLL PERSONALIZADO ===
+   Mejora el aspecto de la barra de desplazamiento en main
+=========================================================== */
+.dashboard-centro-main::-webkit-scrollbar {
+  width: 8px;
 }
 
-tbody tr:hover {
-  background: #f8fafc;
+.dashboard-centro-main::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
-/* ============================================================
-   DROPDOWN DE NOTIFICACIONES
-============================================================ */
-.dropdown-notif-centro {
+.dashboard-centro-main::-webkit-scrollbar-thumb {
+  background-color: var(--color-azul);
+  border-radius: 4px;
+}
+
+/* === EFECTO VISUAL EN PANTALLAS GRANDES ===
+   Le da un sutil realce al main frente al sidebar
+=========================================================== */
+.dashboard-centro-main {
+  box-shadow: inset 0 0 0 1px rgba(240, 240, 240, 0.4);
+}
+
+/* === RESPONSIVE (TABLET / MOBILE) ===
+   Reorganiza el layout para pantallas pequeñas
+=========================================================== */
+@media (max-width: 900px) {
+  .dashboard-centro-layout {
+    grid-template-columns: 200px 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .dashboard-centro-layout {
+    grid-template-columns: 1fr; /* Sidebar arriba */
+  }
+
+  .dashboard-centro-sidebar {
+    flex-direction: row;
+    justify-content: space-around;
+    border-right: none;
+    border-bottom: 1px solid var(--color-gris-borde);
+    box-shadow: none;
+    padding: 12px 8px;
+    background-color: #f5f7fb;
+  }
+
+  .dashboard-centro-sidebar h3 {
+    display: none; /* Ocultamos el título para ahorrar espacio */
+  }
+
+  .dashboard-centro-main {
+    padding: 16px;
+    max-height: none;
+  }
+
+  .dashboard-centro-sidebar .btn-accion-centro {
+    font-size: 0.85rem;
+    padding: 8px 6px;
+  }
+}
+
+/* === CLASE DE APOYO (UTILIDAD) ===
+   Permite ocultar el sidebar en versiones futuras (colapsable)
+=========================================================== */
+.sidebar-oculto {
   display: none;
-  position: fixed;
-  top: 60px;
-  right: 16px;
-  width: 320px;
-  max-height: 60vh;
-  overflow: auto;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  z-index: 120;
-}
-
-.dropdown-header {
-  padding: 10px 12px;
-  border-bottom: 1px solid #f1f5f9;
-  font-weight: 600;
-  color: #334155;
-}
-
-.lista-notif-centro {
-  display: flex;
-  flex-direction: column;
 }

@@ -1,209 +1,80 @@
 /* ==========================================================
-   Panel Centro de Hemoterapia - Tema Azul (como Donantes)
-   ========================================================== */
+   ESTILOS GLOBALES DEL PANEL
+   Archivo principal: define colores, fuentes, loader, header,
+   tarjetas de resumen y estados visuales generales.
+   Complementa a layout-centro.css y buttons.css
+=========================================================== */
 
-body {
-  font-family: "Poppins", "Segoe UI", sans-serif;
-  margin: 0;
-  background: #f8fafc;
-  color: #1e293b;
+/* === VARIABLES GLOBALES ===
+   Se definen colores y tipografías base para mantener coherencia
+=========================================================== */
+:root {
+  --color-fondo: #ffffff;
+  --color-secundario: #f4f6fa;
+  --color-texto: #1e1e2d;
+  --color-azul: #2d6cdf;
+  --color-azul-oscuro: #1f4fb2;
+  --color-gris-borde: #dfe3ec;
+  --color-exito: #28a745;
+  --color-error: #dc3545;
+  --sombra-suave: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --fuente-principal: "Poppins", "Segoe UI", sans-serif;
 }
 
-/* ==========================================================
-   CONTENEDOR PRINCIPAL
-   ========================================================== */
+/* === RESET BÁSICO ===
+   Quita márgenes y define tipografía base
+=========================================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--fuente-principal);
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* === ENVOLTORIO PRINCIPAL DEL DASHBOARD ===
+   Define estructura base y comportamiento general
+=========================================================== */
 .dashboard-centro-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
-/* ==========================================================
-   HEADER
-   ========================================================== */
-.dashboard-centro-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #0a58ca;
-  color: #fff;
-  padding: 1rem 2rem;
-  font-weight: 500;
-}
-
-.header-icons {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.3rem;
-  border-radius: 50%;
-  transition: background 0.2s ease;
-}
-
-.icon-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.icon-btn img {
-  width: 22px;
-  height: 22px;
-  filter: invert(1);
-}
-
-/* Utilidades pequeñas (evitar inline-styles) */
-.pos-rel { position: relative; }
-.ml-auto { margin-left: auto; }
-.badge-notif {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  background: #ef4444;
-  color: #fff;
-  border-radius: 9999px;
-  padding: 0 6px;
-  font-size: 0.7rem;
-  line-height: 1.2;
-  display: none;
-}
-
-/* ==========================================================
-   LAYOUT PRINCIPAL (SIDEBAR + CONTENIDO)
-   ========================================================== */
-.dashboard-centro-layout {
-  display: flex;
-  flex: 1;
-  min-height: calc(100vh - 70px);
-}
-
-/* ===== SIDEBAR IZQUIERDO ===== */
-.dashboard-centro-sidebar {
-  width: 240px;
-  background: #eaf2ff;
-  border-right: 1px solid #cfe0ff;
-  padding: 1.5rem 1rem;
+/* === LOADER INICIAL ===
+   Spinner centrado mostrado mientras se cargan datos
+=========================================================== */
+.loader-centro {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: var(--color-fondo);
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
 }
 
-.dashboard-centro-sidebar h3 {
-  font-size: 1rem;
-  color: #0a58ca;
-  margin-bottom: 1rem;
-  font-weight: 600;
-}
-
-.dashboard-centro-sidebar .btn-accion-centro {
-  width: 100%;
-  text-align: left;
-  padding: 0.6rem 0.9rem;
-  background: #0a58ca;
-  color: #fff;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: background 0.25s ease;
-}
-
-.dashboard-centro-sidebar .btn-accion-centro:hover {
-  background: #0846a5;
-}
-
-/* ===== CONTENIDO PRINCIPAL ===== */
-.dashboard-centro-main {
-  flex: 1;
-  padding: 2rem;
-}
-
-/* ==========================================================
-   SECCIÓN RESUMEN
-   ========================================================== */
-.dashboard-centro-resumen h2 {
-  margin-top: 0;
-  font-weight: 600;
-  color: #0a58ca;
-}
-
-.resumen-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.resumen-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  text-align: center;
-}
-
-.resumen-label {
-  font-size: 0.9rem;
-  color: #475569;
-  display: block;
-  margin-bottom: 0.2rem;
-}
-
-/* ==========================================================
-   SECCIONES GENERALES
-   ========================================================== */
-.dashboard-centro-seccion {
-  margin-top: 2rem;
-  background: #fff;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-/* ==========================================================
-   TABLAS
-   ========================================================== */
-.tabla-wrapper {
-  overflow-x: auto;
-  margin-top: 1rem;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  padding: 0.7rem 0.8rem;
-  border-bottom: 1px solid #e2e8f0;
-  text-align: left;
-}
-
-th {
-  background: #eff6ff;
-  color: #0a58ca;
-  font-weight: 600;
-}
-
-tr:hover td {
-  background: #eaf2ff;
-}
-
-/* ==========================================================
-   SPINNER / LOADER
-   ========================================================== */
-.spinner {
+.loader-centro .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #e2e8f0;
-  border-top-color: #0a58ca;
+  border: 4px solid var(--color-gris-borde);
+  border-top: 4px solid var(--color-azul);
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+.loader-centro span {
+  margin-top: 12px;
+  color: var(--color-azul);
+  font-weight: 500;
 }
 
 @keyframes spin {
@@ -212,82 +83,204 @@ tr:hover td {
   }
 }
 
-#loader-centro {
+/* === ESTADO: OCULTO ===
+   Se aplica a elementos que deben esconderse dinámicamente
+=========================================================== */
+.oculto {
+  display: none !important;
+}
+
+/* === HEADER PRINCIPAL ===
+   Barra superior con nombre del centro e íconos de acción
+=========================================================== */
+.dashboard-centro-header {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-azul);
+  color: white;
+  padding: 14px 28px;
+  box-shadow: var(--sombra-suave);
+}
+
+.dashboard-centro-header .centro-nombre {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* === BOTONES DE ÍCONOS DEL HEADER ===
+   Usan íconos SVG con badge opcional para notificaciones
+=========================================================== */
+.icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  padding: 4px;
+  transition: transform 0.1s ease;
+}
+
+.icon-btn:hover {
+  transform: scale(1.1);
+}
+
+.icon-btn img {
+  width: 22px;
+  height: 22px;
+  filter: brightness(0) invert(1);
+}
+
+.badge-notif {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background-color: #ff4757;
+  color: white;
+  font-size: 0.65rem;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  gap: 1rem;
-  color: #0f172a;
 }
 
-/* ==========================================================
-   BOTONES GENERALES
-   ========================================================== */
-.btn-accion-centro {
-  background: #0a58ca;
-  color: #fff;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: background 0.25s ease;
+/* === SECCIÓN RESUMEN GENERAL ===
+   Tarjetas con estadísticas y grid de grupos sanguíneos
+=========================================================== */
+.dashboard-centro-resumen {
+  padding: 20px 28px;
 }
 
-.btn-accion-centro:hover {
-  background: #0846a5;
+.dashboard-centro-resumen h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 18px;
+  color: var(--color-azul);
 }
 
-.btn-cancelar {
-  background: #e2e8f0;
-  color: #0a58ca;
-  border: 1px solid #cbd5e1;
-  padding: 0.6rem 1.2rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
-.btn-cancelar:hover {
-  background: #dbeafe;
+.resumen-card {
+  background-color: var(--color-secundario);
+  border: 1px solid var(--color-gris-borde);
+  border-radius: 10px;
+  padding: 18px;
+  text-align: center;
+  box-shadow: var(--sombra-suave);
+  transition: transform 0.2s ease;
 }
 
-/* ==========================================================
-   RESPONSIVE DESIGN
-   ========================================================== */
-@media (max-width: 950px) {
-  .dashboard-centro-layout {
+.resumen-card:hover {
+  transform: translateY(-3px);
+}
+
+.resumen-label {
+  display: block;
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.resumen-card b {
+  font-size: 1.3rem;
+  color: var(--color-azul-oscuro);
+}
+
+/* === GRID DE GRUPOS SANGUÍNEOS ===
+   Mini tarjetas con conteo por grupo
+=========================================================== */
+.resumen-grupos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.resumen-grupos span {
+  background-color: var(--color-secundario);
+  border: 1px solid var(--color-gris-borde);
+  border-radius: 50px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  color: var(--color-azul-oscuro);
+  box-shadow: var(--sombra-suave);
+}
+
+/* === SECCIONES GENERALES DEL MAIN ===
+   Define espaciados y encabezados de cada módulo
+=========================================================== */
+.dashboard-centro-seccion {
+  padding: 20px 28px;
+  background-color: var(--color-fondo);
+}
+
+.dashboard-centro-seccion h3 {
+  color: var(--color-azul);
+  font-size: 1.1rem;
+  margin-bottom: 18px;
+  font-weight: 600;
+}
+
+/* === TABLAS BASE ===
+   Estilo limpio y moderno con bordes suaves
+=========================================================== */
+.tabla-wrapper {
+  overflow-x: auto;
+  border-radius: 10px;
+  box-shadow: var(--sombra-suave);
+  background-color: var(--color-secundario);
+}
+
+#tabla-donantes {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+#tabla-donantes th {
+  background-color: var(--color-azul);
+  color: white;
+  padding: 10px;
+  text-align: left;
+  font-weight: 500;
+}
+
+#tabla-donantes td {
+  padding: 10px;
+  border-bottom: 1px solid var(--color-gris-borde);
+  color: #333;
+}
+
+#tabla-donantes tr:hover {
+  background-color: #eef3ff;
+}
+
+/* === RESPONSIVE ===
+   Adaptaciones básicas para pantallas menores
+=========================================================== */
+@media (max-width: 768px) {
+  .dashboard-centro-header {
     flex-direction: column;
-  }
-
-  .dashboard-centro-sidebar {
-    width: 100%;
-    flex-direction: row;
-    justify-content: center;
-    gap: 1rem;
-    border-right: none;
-    border-bottom: 1px solid #cfe0ff;
-  }
-
-  .dashboard-centro-sidebar .btn-accion-centro {
+    gap: 10px;
     text-align: center;
-    flex: 1;
-  }
-}
-
-@media (max-width: 600px) {
-  .dashboard-centro-main {
-    padding: 1rem;
   }
 
   .resumen-grid {
     grid-template-columns: 1fr 1fr;
   }
+
+  .dashboard-centro-seccion {
+    padding: 16px;
+  }
 }
-
-/* Utilidades layout para formularios (sin inline styles) */
-.fila-flex-wrap{ display:flex; gap:.6rem; flex-wrap:wrap; }
-.fila-flex-center{ display:flex; gap:.6rem; align-items:center; }
-.dropdown-notif-centro{ display:none; position:fixed; top:60px; right:16px; width:320px; max-height:60vh; overflow:auto; background:#fff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.12); z-index:120; }
-
