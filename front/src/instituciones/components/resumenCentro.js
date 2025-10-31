@@ -24,8 +24,8 @@ export async function cargarResumen() {
     const res = await fetch(`${API_BASE_URL}/api/centro/summary`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // opcional, no lo necesita ahora
-        "X-Centro-Id": centroId, // 👈 este es el que usa el back
+        Authorization: `Bearer ${token}`, 
+        "X-Centro-Id": centroId, 
       },
     });
 
