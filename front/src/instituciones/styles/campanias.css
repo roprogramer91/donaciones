@@ -125,3 +125,33 @@
     font-size: 0.8rem;
   }
 }
+
+/* === FORMULARIO DENTRO DEL MODAL === */
+.form-campania {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-campania input,
+.form-campania select,
+.form-campania textarea {
+  width: 100%;
+  border: 1px solid var(--color-gris-borde);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 0.9rem;
+}
+
+.form-campania label {
+  font-weight: 500;
+  color: #444;
+  margin-top: 4px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
