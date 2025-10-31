@@ -1,0 +1,40 @@
+.btn-accion-centro {
+  background: #0a58ca;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s ease;
+}
+
+.btn-accion-centro:hover {
+  background: #084bb5;
+}
+
+.btn-cancelar {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+}
+
+.btn-cancelar:hover {
+  background: #b91c1c;
+}
+
+.btn-secundario {
+  background: #64748b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+}
+
+.btn-secundario:hover {
+  background: #475569;
+}

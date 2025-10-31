@@ -18,15 +18,15 @@
       </div>
 
       <!-- Contenido principal (se muestra al finalizar la inicialización) -->
-      <div id="contenido-centro" style="display: none">
+      <div id="contenido-centro">
         <!-- Header superior -->
         <header class="dashboard-centro-header">
           <div class="centro-nombre" id="bienvenida-centro">¡Bienvenido, Centro de Hemoterapia!</div>
           <div class="header-icons">
             <!-- Campana del centro (no bloqueante). Si más adelante se usa, ya está listo. -->
-            <button class="icon-btn" id="btn-notif-centro" title="Notificaciones" style="position: relative">
+            <button class="icon-btn pos-rel" id="btn-notif-centro" title="Notificaciones">
               <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/bell.svg" alt="Notificaciones" />
-              <span id="badge-notif-centro" style="position:absolute; top:2px; right:2px; background:#ef4444; color:#fff; border-radius:9999px; padding:0 6px; font-size:0.7rem; line-height:1.2; display:none;">0</span>
+              <span id="badge-notif-centro" class="badge-notif">0</span>
             </button>
             <button class="icon-btn" id="btn-perfil" title="Perfil">
               <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/user.svg" alt="Perfil" />
@@ -63,7 +63,7 @@
             </section>
 
             <!-- Donantes (components/donantes.js) -->
-            <section id="seccion-donantes" class="dashboard-centro-seccion" style="display: none">
+            <section id="seccion-donantes" class="dashboard-centro-seccion">
               <h3>Donantes registrados</h3>
               <div class="filtros-donantes">
                 <select id="filtro-grupo">
@@ -77,9 +77,9 @@
                 <select id="filtro-localidad" disabled><option value="">Todas las localidades</option></select>
                 <select id="filtro-barrio"><option value="">Todos los barrios</option></select>
                 <label style="display:flex;align-items:center;gap:0.3rem;"><input type="checkbox" id="filtro-apto" /> Solo aptos</label>
-                <input id="filtro-edad-min" type="number" min="18" max="99" placeholder="Edad min" style="width:110px;" />
-                <input id="filtro-edad-max" type="number" min="18" max="99" placeholder="Edad max" style="width:110px;" />
-                <input id="filtro-dias-rest-max" type="number" min="0" placeholder="Días rest. máx" style="width:120px;" />
+                <input id="filtro-edad-min" type="number" min="18" max="99" placeholder="Edad min" />
+                <input id="filtro-edad-max" type="number" min="18" max="99" placeholder="Edad max" />
+                <input id="filtro-dias-rest-max" type="number" min="0" placeholder="Días rest. máx" />
                 <button id="btn-aplicar-filtro">Filtrar</button>
                 <button id="btn-limpiar-filtro" class="btn-accion-centro" style="background:#6b7280">Limpiar</button>
                 <button id="btn-exportar-csv" class="btn-accion-centro" style="background:#059669" disabled>Exportar CSV</button>
@@ -105,7 +105,7 @@
             </section>
 
             <!-- Campañas (components/campanias.js) -->
-            <section id="seccion-campanias" class="dashboard-centro-seccion" style="display: none">
+            <section id="seccion-campanias" class="dashboard-centro-seccion">
               <h3>Campañas de donación</h3>
               <div class="acciones-campanias">
                 <button id="btn-nueva-campania" class="btn-accion-centro">+ Nueva campaña</button>
@@ -127,7 +127,7 @@
             </section>
 
             <!-- Notificaciones (components/notificaciones.js) -->
-            <section id="seccion-notifs" class="dashboard-centro-seccion" style="display: none">
+            <section id="seccion-notifs" class="dashboard-centro-seccion">
               <h3>Notificaciones a donantes</h3>
               <div class="card-notifs">
                 <div class="notifs-form">
@@ -144,7 +144,7 @@
                   <label>Campaña (opcional)
                     <select id="notif_campania_sel"><option value="">Seleccionar campaña...</option></select>
                   </label>
-                  <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+                  <div class="fila-flex-wrap">
                     <select id="f_notif_provincia" style="min-width:200px;"><option value="">Todas las provincias</option></select>
                     <select id="f_notif_localidad" disabled style="min-width:200px;"><option value="">Todas las localidades</option></select>
                     <select id="f_notif_grupo">
@@ -156,11 +156,11 @@
                     </select>
                     <label style="display:flex;align-items:center;gap:0.3rem;"><input type="checkbox" id="f_notif_apto" /> Solo aptos</label>
                   </div>
-                  <div style="display:flex; gap:0.6rem; align-items:center;">
+                  <div class="fila-flex-center">
                     <button id="btn-enviar-notif" class="btn-accion-centro">Enviar notificación</button>
                     <button id="btn-felicitaciones-hoy" class="btn-accion-centro" style="background:#0a58ca;">Felicitaciones de hoy</button>
                     <button id="btn-preview-felicitaciones" class="btn-accion-centro" style="background:#6b7280;">Previsualizar felicitaciones</button>
-                    <span id="notif-centro-badge" style="margin-left:auto; color:#374151;">Alcance: 0</span>
+                    <span id="notif-centro-badge" class="ml-auto">Alcance: 0</span>
                   </div>
                   <div id="notif-centro-mensaje" style="color:#555"></div>
                 </div>
@@ -179,7 +179,7 @@
         </div>
 
         <!-- Modal Perfil del Centro (components/perfilCentro.js) -->
-        <div id="modal-perfil" class="modal-overlay" style="display: none;">
+        <div id="modal-perfil" class="modal-overlay">
           <div class="modal-content">
             <h3>Perfil del Centro</h3>
             <form id="form-perfil">
@@ -196,7 +196,7 @@
         </div>
 
         <!-- Modal Nueva/Editar Campaña (components/campanias.js) -->
-        <div id="modal-campania" class="modal-overlay" style="display: none;">
+        <div id="modal-campania" class="modal-overlay">
           <div class="modal-content">
             <h3>Nueva Campaña</h3>
             <form id="form-campania">
@@ -220,8 +220,8 @@
         </div>
 
         <!-- Modal Inscripciones (components/modalInscripciones.js) -->
-        <div id="modal-inscripciones" class="modal-overlay" style="display:none;">
-          <div class="modal-content" style="max-width:520px;">
+        <div id="modal-inscripciones" class="modal-overlay">
+          <div class="modal-content">
             <h3 id="titulo-modal-inscripciones">Inscripciones</h3>
             <div class="tabla-wrapper">
               <table id="tabla-inscripciones" style="width:100%; border-collapse:collapse;">
@@ -236,7 +236,7 @@
         </div>
 
         <!-- Dropdown de notificaciones del header (opcional) -->
-        <div id="dropdown-notif-centro" style="display:none; position:fixed; top:60px; right:16px; width:320px; max-height:60vh; overflow:auto; background:#fff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.12); z-index:120;">
+        <div id="dropdown-notif-centro" class="dropdown-notif-centro">
           <div style="padding:10px 12px; border-bottom:1px solid #f1f5f9; font-weight:600; color:#334155;">Notificaciones</div>
           <div id="lista-notif-centro" style="display:flex; flex-direction:column;"></div>
         </div>

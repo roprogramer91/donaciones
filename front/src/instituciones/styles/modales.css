@@ -1,0 +1,47 @@
+.modal-overlay {
+  border: none;
+  padding: 0;
+  margin: auto;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 600px;
+  margin: 5% auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: #0f172a;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.modal-inscripciones {
+  border: none;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+#tabla-inscripciones {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#tabla-inscripciones th,
+#tabla-inscripciones td {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.6rem;
+  text-align: left;
+}
