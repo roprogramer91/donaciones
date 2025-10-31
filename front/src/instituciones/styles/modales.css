@@ -4,33 +4,40 @@
    Diseño: limpio, claro, con fondo difuminado y sombras suaves.
 =========================================================== */
 
-/* === OVERLAY DEL MODAL ===
-   Fondo semitransparente que oscurece la interfaz principal
+/* === OVERLAY NATIVO DEL <dialog> ===
+   Se aplica sobre el pseudo-elemento ::backdrop
 =========================================================== */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
+#modal-base::backdrop {
   background: rgba(30, 30, 30, 0.45);
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 3000;
-  border: none;
-  padding: 20px;
 }
 
-/* === CONTENEDOR DEL CONTENIDO ===
-   Caja blanca principal con sombra y borde redondeado
+/* === ESTILO GENERAL DEL DIALOG ===
+   El propio elemento <dialog> actúa como contenedor del overlay.
+   No debe tener display:flex, se maneja con showModal().
+=========================================================== */
+.modal-overlay {
+  border: none;
+  background: transparent;
+  padding: 0;
+  width: 100%;
+  height: auto;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+/* === CONTENEDOR INTERNO DEL CONTENIDO ===
+   Caja blanca con sombra y bordes redondeados
 =========================================================== */
 .modal-content {
   background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   max-width: 520px;
-  width: 100%;
+  width: 90%;
   padding: 24px 28px;
+  margin: auto;
   position: relative;
   animation: modalFadeIn 0.25s ease;
 }
@@ -49,9 +56,7 @@
   }
 }
 
-/* === ENCABEZADO DE MODAL ===
-   Título principal del cuadro de diálogo
-=========================================================== */
+/* === ENCABEZADO DE MODAL === */
 .modal-content h3,
 .modal-content h4 {
   font-size: 1.2rem;
@@ -61,9 +66,7 @@
   text-align: left;
 }
 
-/* === FORMULARIOS DENTRO DE MODALES ===
-   Estilo coherente con los demás inputs del sistema
-=========================================================== */
+/* === FORMULARIOS E INPUTS === */
 .modal-content form {
   display: flex;
   flex-direction: column;
@@ -96,9 +99,7 @@
   background-color: #fff;
 }
 
-/* === BOTONES DEL MODAL ===
-   Contenedor inferior con acciones principales y secundarias
-=========================================================== */
+/* === BOTONES DEL MODAL === */
 .modal-buttons {
   display: flex;
   justify-content: flex-end;
@@ -106,9 +107,7 @@
   margin-top: 20px;
 }
 
-/* === VARIANTES DE MODALES ===
-   (Preparado para posibles futuros tamaños)
-=========================================================== */
+/* === VARIANTES DE TAMAÑO === */
 .modal-content.small {
   max-width: 400px;
 }
@@ -117,9 +116,7 @@
   max-width: 700px;
 }
 
-/* === ESTILO DE TABLAS DENTRO DE MODALES ===
-   Por ejemplo, modal de inscripciones de donantes
-=========================================================== */
+/* === TABLAS DENTRO DE MODALES === */
 .modal-content table {
   width: 100%;
   border-collapse: collapse;
@@ -144,9 +141,7 @@
   background-color: #eef3ff;
 }
 
-/* === RESPONSIVE ===
-   Adaptación visual en pantallas pequeñas
-=========================================================== */
+/* === RESPONSIVE === */
 @media (max-width: 600px) {
   .modal-content {
     padding: 18px;
@@ -163,9 +158,22 @@
 }
 
 /* === ESTADO INICIAL DEL MODAL BASE ===
-   Se mantiene oculto hasta que el JS lo active
+   Usa el atributo [hidden] en lugar de display:none fijo
 =========================================================== */
-#modal-base {
-  display: none;
-  visibility: hidden;
+#modal-base[hidden] {
+  display: none !important;
+}
+
+#btnCerrarModal {
+  background-color: var(--color-azul);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#btnCerrarModal:hover {
+  background-color: var(--color-azul-oscuro);
 }
