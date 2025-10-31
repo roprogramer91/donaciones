@@ -73,5 +73,32 @@ if (modalBase) {
   });
 }
 
+
+/* ==========================================================
+   MODAL DE MENSAJE REUTILIZABLE (éxito / error / advertencia)
+=========================================================== */
+export function mostrarModalMensaje(mensaje, tipo = "info", duracion = 2000) {
+  const icono =
+    tipo === "exito"
+      ? "✅"
+      : tipo === "error"
+      ? "❌"
+      : tipo === "advertencia"
+      ? "⚠️"
+      : "ℹ️";
+
+  abrirModal(`
+    <div class="modal-mensaje ${tipo}">
+      <p class="modal-mensaje-texto">${icono} ${mensaje}</p>
+    </div>
+  `);
+
+  // Se cierra automáticamente después de la duración indicada
+  setTimeout(() => cerrarModal(), duracion);
+}
+
+
+
+
 /* === LOG DE INICIALIZACIÓN === */
 console.log("✅ modalBase.js inicializado correctamente.");

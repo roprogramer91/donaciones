@@ -14,14 +14,13 @@
     <link rel="stylesheet" href="./styles/modales.css" />
     <link rel="stylesheet" href="./styles/buttons.css" />
     <link rel="stylesheet" href="./styles/campanias.css" />
-
+    <link rel="stylesheet" href="./styles/popup.css" />
   </head>
 
   <body>
     <div class="dashboard-centro-wrapper">
       <!-- ==========================================================
            LOADER INICIAL
-           Se muestra mientras se cargan los datos del centro desde el backend
       =========================================================== -->
       <div id="loader-centro" class="loader-centro">
         <div class="spinner"></div>
@@ -30,13 +29,11 @@
 
       <!-- ==========================================================
            CONTENIDO PRINCIPAL DEL PANEL
-           Se oculta por defecto hasta que finaliza el proceso de carga inicial
       =========================================================== -->
       <div id="contenido-centro" class="contenido-centro oculto">
 
         <!-- ==========================================================
              HEADER PRINCIPAL
-             Contiene el nombre del centro y los botones de acciones globales
         =========================================================== -->
         <header class="dashboard-centro-header">
           <div class="centro-nombre" id="bienvenida-centro">
@@ -70,29 +67,19 @@
 
         <!-- ==========================================================
              LAYOUT PRINCIPAL (SIDEBAR + CONTENIDO)
-             Sidebar con acciones rápidas y main con vistas dinámicas
         =========================================================== -->
         <div class="dashboard-centro-layout">
           <aside class="dashboard-centro-sidebar">
             <h3>Acciones rápidas</h3>
-            <button class="btn-accion-centro" id="btn-ver-resumen">
-              Ver resumen
-            </button>
-            <button class="btn-accion-centro" id="btn-ver-donantes">
-              Ver donantes
-            </button>
-            <button class="btn-accion-centro" id="btn-ver-campanias">
-              Gestionar campañas
-            </button>
-            <button class="btn-accion-centro" id="btn-ver-notifs">
-              Notificaciones a donantes
-            </button>
+            <button class="btn-accion-centro" id="btn-ver-resumen">Ver resumen</button>
+            <button class="btn-accion-centro" id="btn-ver-donantes">Ver donantes</button>
+            <button class="btn-accion-centro" id="btn-ver-campanias">Gestionar campañas</button>
+            <button class="btn-accion-centro" id="btn-ver-notifs">Notificaciones a donantes</button>
           </aside>
 
           <main class="dashboard-centro-main">
             <!-- ==========================================================
                  SECCIÓN: RESUMEN GENERAL
-                 Muestra métricas globales del centro al iniciar el panel
             =========================================================== -->
             <section class="dashboard-centro-resumen">
               <h2>Resumen general</h2>
@@ -129,7 +116,6 @@
 
             <!-- ==========================================================
                  SECCIÓN: DONANTES
-                 Tabla filtrable, exportable y con posibilidad de abrir modales
             =========================================================== -->
             <section id="seccion-donantes" class="dashboard-centro-seccion oculto">
               <h3>Donantes registrados</h3>
@@ -194,8 +180,7 @@
             </section>
 
             <!-- ==========================================================
-                 SECCIONES VACÍAS DINÁMICAS
-                 Contenedores que se llenarán con componentes JS
+                 SECCIONES DINÁMICAS
             =========================================================== -->
             <section id="seccion-campanias" class="dashboard-centro-seccion oculto"></section>
             <section id="seccion-notifs" class="dashboard-centro-seccion oculto"></section>
@@ -204,10 +189,12 @@
 
         <!-- ==========================================================
              MODAL BASE
-             Modal genérico reutilizable para cualquier contenido dinámico
-             Su contenido se genera desde /components/modales/
         =========================================================== -->
         <dialog id="modal-base" class="modal-overlay">
+          <!-- 
+            ⚙️ Este div es el contenedor del contenido dinámico.
+            Cuando el modal sea "Nueva campaña", se le agrega la clase .large desde JS
+          -->
           <div id="modal-content" class="modal-content"></div>
         </dialog>
 
@@ -216,17 +203,33 @@
 
     <!-- ==========================================================
          SCRIPTS PRINCIPALES
-         dashboard-centro.js coordina los módulos del panel
     =========================================================== -->
     <script type="module" src="./dashboard-centro.js"></script>
 
     <!-- ==========================================================
          DROPDOWN DE NOTIFICACIONES
-         Menú flotante desplegable controlado desde notificaciones.js
     =========================================================== -->
     <div id="dropdown-notif-centro" class="dropdown-notif-centro">
       <div class="dropdown-header">Notificaciones</div>
       <div id="lista-notif-centro" class="lista-notif-centro"></div>
     </div>
+
+    <!-- ==========================================================
+         SCRIPT OPCIONAL PARA MODALES GRANDES
+         (podés mover esto a modalBase.js si querés)
+    =========================================================== -->
+    <script>
+      // Ejemplo: aplicar tamaño grande al abrir "Nueva campaña"
+      document.addEventListener("openNuevaCampania", () => {
+        const modalContent = document.getElementById("modal-content");
+        modalContent.classList.add("large");
+      });
+
+      // Si querés resetearlo en otros modales:
+      document.addEventListener("closeModalBase", () => {
+        const modalContent = document.getElementById("modal-content");
+        modalContent.classList.remove("large");
+      });
+    </script>
   </body>
 </html>

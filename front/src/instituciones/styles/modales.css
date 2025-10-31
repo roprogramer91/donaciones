@@ -4,73 +4,101 @@
    Diseño: limpio, claro, con fondo difuminado y sombras suaves.
 =========================================================== */
 
-/* === OVERLAY NATIVO DEL <dialog> ===
-   Se aplica sobre el pseudo-elemento ::backdrop
-=========================================================== */
-#modal-base::backdrop {
+/* === OVERLAY DEL DIALOG === */
+#modal-base::backdrop,
+dialog::backdrop {
   background: rgba(30, 30, 30, 0.45);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  animation: backdropFade 0.25s ease;
 }
 
-/* === ESTILO GENERAL DEL DIALOG ===
-   El propio elemento <dialog> actúa como contenedor del overlay.
-   No debe tener display:flex, se maneja con showModal().
-=========================================================== */
+/* === ANIMACIÓN DEL BACKDROP === */
+@keyframes backdropFade {
+  from {
+    background: rgba(30, 30, 30, 0);
+  }
+  to {
+    background: rgba(30, 30, 30, 0.45);
+  }
+}
+
+/* === CONTENEDOR DEL MODAL === */
 .modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30, 30, 30, 0.45);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  z-index: 3000;
   border: none;
-  background: transparent;
   padding: 0;
-  width: 100%;
-  height: auto;
-  max-width: none;
-  box-sizing: border-box;
 }
 
-/* === CONTENEDOR INTERNO DEL CONTENIDO ===
-   Caja blanca con sombra y bordes redondeados
-=========================================================== */
+/* === CONTENIDO DEL MODAL === */
 .modal-content {
   background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  max-width: 520px;
+  border-radius: 14px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
   width: 90%;
-  padding: 24px 28px;
-  margin: auto;
+  max-width: 520px;
+  padding: 28px 32px;
+  margin: 0 auto;
+  text-align: left;
   position: relative;
   animation: modalFadeIn 0.25s ease;
+
+  /* proporciones y scroll */
+  max-height: 80vh;        /* no ocupa toda la pantalla */
+  overflow-y: auto;        /* scroll interno si es largo */
+  overflow-x: hidden;
 }
 
-/* === ANIMACIÓN DE ENTRADA ===
-   Efecto suave al abrir el modal
-=========================================================== */
+/* === VARIANTES DE TAMAÑO === */
+.modal-content.small {
+  max-width: 400px;
+}
+
+.modal-content.medium {
+  max-width: 600px;
+}
+
+/* === FIX DEFINITIVO: MODAL GRANDE === */
+.modal-content.large {
+  width: 800px !important;        /* ancho real */
+  max-width: 90vw !important;     /* adaptable a pantallas chicas */
+}
+
+/* === ANIMACIÓN DE ENTRADA === */
 @keyframes modalFadeIn {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: scale(0.95) translateY(-10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
   }
 }
 
-/* === ENCABEZADO DE MODAL === */
+/* === TITULOS === */
 .modal-content h3,
 .modal-content h4 {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 600;
   color: var(--color-azul);
   margin-bottom: 16px;
   text-align: left;
 }
 
-/* === FORMULARIOS E INPUTS === */
+/* === FORMULARIOS === */
 .modal-content form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .modal-content label {
@@ -99,7 +127,7 @@
   background-color: #fff;
 }
 
-/* === BOTONES DEL MODAL === */
+/* === BOTONES === */
 .modal-buttons {
   display: flex;
   justify-content: flex-end;
@@ -107,16 +135,7 @@
   margin-top: 20px;
 }
 
-/* === VARIANTES DE TAMAÑO === */
-.modal-content.small {
-  max-width: 400px;
-}
-
-.modal-content.large {
-  max-width: 700px;
-}
-
-/* === TABLAS DENTRO DE MODALES === */
+/* === TABLAS === */
 .modal-content table {
   width: 100%;
   border-collapse: collapse;
@@ -141,29 +160,7 @@
   background-color: #eef3ff;
 }
 
-/* === RESPONSIVE === */
-@media (max-width: 600px) {
-  .modal-content {
-    padding: 18px;
-    max-width: 95%;
-  }
-
-  .modal-buttons {
-    flex-direction: column;
-  }
-
-  .modal-buttons button {
-    width: 100%;
-  }
-}
-
-/* === ESTADO INICIAL DEL MODAL BASE ===
-   Usa el atributo [hidden] en lugar de display:none fijo
-=========================================================== */
-#modal-base[hidden] {
-  display: none !important;
-}
-
+/* === BOTÓN CERRAR === */
 #btnCerrarModal {
   background-color: var(--color-azul);
   color: #fff;
@@ -176,4 +173,67 @@
 
 #btnCerrarModal:hover {
   background-color: var(--color-azul-oscuro);
+}
+
+/* === EFECTO ZOOM SUAVE (moderno y opcional) === */
+.modal-content {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+dialog[open] .modal-content {
+  transform: scale(1);
+  opacity: 1;
+}
+dialog:not([open]) .modal-content {
+  transform: scale(0.95);
+  opacity: 0;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 600px) {
+  .modal-content {
+    padding: 18px;
+    max-width: 95%;
+    max-height: 85vh;
+  }
+
+  .modal-buttons {
+    flex-direction: column;
+  }
+
+  .modal-buttons button {
+    width: 100%;
+  }
+}
+
+/* === CENTRADO PERFECTO DEL <dialog> === */
+dialog.modal-campania,
+dialog.modal-confirm,
+#modal-base {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  border: none;
+  padding: 0;
+  background: transparent;
+  z-index: 3500;
+}
+
+/* === ESCONDER CUANDO NO ESTÁ ACTIVO === */
+#modal-base[hidden],
+#modal-base:not([open]) {
+  display: none !important;
+}
+
+/* === SCROLL PERSONALIZADO === */
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-content::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.25);
+  border-radius: 3px;
+}
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.4);
 }
