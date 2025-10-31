@@ -33,7 +33,20 @@ async function getBarrioById(req, res) {
   }
 }
 
+async function getBarriosByLocalidad(req, res) {
+  const { id } = req.params;
+  try {
+    const barrios = await BarriosModel.getBarriosByLocalidadId(id);
+    res.json(barrios);
+  } catch (error) {
+    console.error('Error al obtener barrios por localidad:', error.message);
+    res.status(500).json({ error: 'Error al obtener barrio por localidad' });
+  }
+}
+
+
 module.exports = {
   getBarrios,
-  getBarrioById
+  getBarrioById,
+  getBarriosByLocalidad
 };
