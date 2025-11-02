@@ -1,4 +1,5 @@
 const CampaniasModel = require('../models/campanias.model');
+const Notificaciones = require('../models/notificaciones.model');
 
 const CampaniasController = {
   async obtenerCampanias(req, res) {
@@ -90,6 +91,16 @@ const CampaniasController = {
         fecha_inicio,
         fecha_fin,
       });
+      // Notificar a donantes de la localidad (no bloqueante)
+      try {
+        await Notificaciones.createForDonantesByLocalidad(nueva.localidad_id, {
+          tipo: 'campania_nueva',
+          mensaje: `Nueva campaña: ${nueva.nombre}`,
+          campania_id: nueva.id
+        });
+      } catch (e) {
+        console.error('No se pudieron generar notificaciones para donantes:', e.message);
+      }
       res.status(201).json(nueva);
     } catch (error) {
       console.error('Error al crear campaña:', error);
@@ -116,6 +127,17 @@ const CampaniasController = {
     } catch (error) {
       console.error('Error al eliminar campaña:', error);
       res.status(500).json({ error: 'Error al eliminar campaña' });
+    }
+  },
+
+  async obtenerInscriptos(req, res) {
+    try {
+      const { id } = req.params;
+      const inscriptos = await CampaniasModel.listarInscriptosDeCampania(id);
+      res.json(inscriptos);
+    } catch (error) {
+      console.error('Error al listar inscriptos de campaña:', error);
+      res.status(500).json({ error: 'Error al listar inscriptos' });
     }
   }
 };

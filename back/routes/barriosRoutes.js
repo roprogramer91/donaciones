@@ -8,4 +8,7 @@ router.get('/', barriosController.getBarrios);
 // Obtener barrio por ID
 router.get('/:id', barriosController.getBarrioById);
 
+// Obtener barrios por localidad
+router.get('/localidad/:id', barriosController.getBarriosByLocalidad);
+
 module.exports = router;

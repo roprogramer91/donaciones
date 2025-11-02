@@ -1,8 +1,22 @@
-// config.js
+// front/src/config.js
 
-export const API_BASE_URL = "http://localhost:3000"; // Para desarrollo BACK
-export const AUTH_URL = 'http://localhost:5000'; // Para desarrollo AUTH
+// cambiar variable segun el entorno
+const ENV = window.location.hostname.includes("localhost") ? "development" : "production";
 
+// URLs por entorno
+const CONFIG = {
+  development: {
+    API_BASE_URL: "https://donaciones-back-dev-entorno.up.railway.app",
+    AUTH_URL: "http://localhost:5000",
+  },
+  production: {
+    API_BASE_URL: "https://donaciones-back-prod.up.railway.app",
+    AUTH_URL: "https://donaciones-auth-service-production.up.railway.app",
+  },
+};
 
-//export const API_BASE_URL = 'https://donacion-backend.vercel.app'; // Para prduccion BACK
-//export const AUTH_URL = 'https://donacion-backend.vercel.app'; /// Para producción AUTH
+// Exportar las URLs dependiendo del entorno detectado
+export const API_BASE_URL = CONFIG[ENV].API_BASE_URL;
+export const AUTH_URL = CONFIG[ENV].AUTH_URL;
+
+console.log(`🧩 Modo: ${ENV.toUpperCase()} — API: ${API_BASE_URL}`);

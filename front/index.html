@@ -22,10 +22,7 @@
       </div>
 
       <!-- BOTÓN DE LOGIN CON GOOGLE -->
-      <a
-        href="http://localhost:5000/auth/google?redirect_to=http://localhost:5500"
-        class="login-btn-google"
-      >
+      <a id="googleLoginLink" href="#" class="login-btn-google">
         <img
           src="https://www.svgrepo.com/show/475656/google-color.svg"
           alt="Google"
@@ -81,7 +78,20 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="./src/estadisticas.js"></script>
     <script type="module" src="./src/auth.js"></script>
-    <script type="module" src="./src/config.js"></script>
+    <script type="module">
+      import { AUTH_URL } from './src/config.js';
+      const link = document.getElementById('googleLoginLink');
+      if (link) {
+        const returnTo = `${location.origin}/front/index.html`;
+        const url = `${AUTH_URL}/auth/google?redirect_to=${encodeURIComponent(returnTo)}`;
+        link.setAttribute('href', url);
+        link.addEventListener('click', (e) => {
+          // Fuerza navegación de nivel superior (evita previews embebidos)
+          e.preventDefault();
+          window.location.href = url;
+        });
+      }
+    </script>
 
 
   </body>

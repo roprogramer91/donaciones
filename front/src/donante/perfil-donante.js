@@ -8,6 +8,11 @@ const form = document.getElementById('perfil-form');
 const mensaje = document.getElementById('perfil-mensaje');
 const logoutBtn = document.getElementById('logoutBtn');
 const btnDashboard = document.getElementById('btn-dashboard');
+const btnMostrarBaja = document.getElementById('btnMostrarBaja');
+const bajaForm = document.getElementById('bajaForm');
+const btnConfirmBaja = document.getElementById('btnConfirmBaja');
+const btnCancelarBaja = document.getElementById('btnCancelarBaja');
+const bajaMensaje = document.getElementById('bajaMensaje');
 
 // 1. Cargar datos
 async function cargarPerfil() {
@@ -43,7 +48,7 @@ form.addEventListener('submit', async e => {
   };
   try {
     const res = await fetch(`${API_BASE_URL}/api/donantes/perfil`, {
-      method: 'PUT', // o PATCH según tu backend
+      method: 'PUT', 
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + token
@@ -67,3 +72,40 @@ btnDashboard.addEventListener('click', () => {
 });
 
 cargarPerfil();
+
+// Zona de baja
+btnMostrarBaja?.addEventListener('click', () => {
+  bajaForm.style.display = 'block';
+});
+
+btnCancelarBaja?.addEventListener('click', (e) => {
+  e.preventDefault();
+  bajaForm.style.display = 'none';
+  bajaMensaje.textContent = '';
+});
+
+btnConfirmBaja?.addEventListener('click', async (e) => {
+  e.preventDefault();
+  const dni = document.getElementById('dniConfirm')?.value?.trim();
+  if (!dni) { bajaMensaje.textContent = 'Ingresá tu DNI para confirmar.'; return; }
+
+  const seguro = window.confirm('¿Estás seguro de darte de baja? Esta acción es irreversible.');
+  if (!seguro) return;
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/donantes/baja`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ dni })
+    });
+    const txt = await res.text();
+    if (!res.ok) throw new Error(txt || 'No se pudo realizar la baja');
+    // Baja exitosa: cerrar sesión y volver al inicio
+    localStorage.removeItem('token');
+    alert('Baja realizada. Gracias por participar.');
+    window.location.href = '../../index.html';
+  } catch (err) {
+    console.error('Error en baja:', err);
+    bajaMensaje.textContent = 'Error: ' + (err.message || 'No se pudo realizar la baja');
+  }
+});

@@ -1,236 +1,313 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel Centro de Hemoterapia</title>
-  <link rel="stylesheet" href="dashboard-centro.css">
-</head>
-<body>
-  <div class="dashboard-centro-wrapper">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel Centro de Hemoterapia</title>
 
-    <!-- Loader -->
-    <div id="loader-centro">
-      <div class="spinner"></div>
-      <span>Cargando el panel...</span>
-    </div>
+    <!-- ==========================================================
+         ESTILOS GLOBALES DEL PANEL
+         Se cargan en orden jerárquico: estilos base, layout, modales y botones
+    =========================================================== -->
+    <link rel="stylesheet" href="./styles/dashboard-centro.css" />
+    <link rel="stylesheet" href="./styles/layout-centro.css" />
+    <link rel="stylesheet" href="./styles/modales.css" />
+    <link rel="stylesheet" href="./styles/buttons.css" />
+    <link rel="stylesheet" href="./styles/campanias.css" />
+    <link rel="stylesheet" href="./styles/popup.css" />
+    <link rel="stylesheet" href="./styles/donantes.css" />
+    <link rel="stylesheet" href="./styles/notificaciones.css" />
+  </head>
 
-    <!-- Contenido principal -->
-    <div id="contenido-centro" style="display: none;">
-      <!-- HEADER -->
-      <header class="dashboard-centro-header">
-        <div class="centro-nombre" id="bienvenida-centro">¡Bienvenido, Centro de Hemoterapia!</div>
-        <div class="header-icons">
-          <button class="icon-btn" id="btn-perfil" title="Perfil">
-            <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/user.svg" alt="Perfil" />
-          </button>
-          <button class="icon-btn" id="logoutBtn" title="Cerrar sesión">
-            <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/log-out.svg" alt="Salir" />
-          </button>
-        </div>
-      </header>
+  <body>
+    <div class="dashboard-centro-wrapper">
+      <!-- ==========================================================
+           LOADER INICIAL
+      =========================================================== -->
+      <div id="loader-centro" class="loader-centro">
+        <div class="spinner"></div>
+        <span>Cargando el panel...</span>
+      </div>
 
-      <!-- MAIN -->
-      <main class="dashboard-centro-main">
+      <!-- ==========================================================
+           CONTENIDO PRINCIPAL DEL PANEL
+      =========================================================== -->
+      <div id="contenido-centro" class="contenido-centro oculto">
+        <!-- ==========================================================
+             HEADER PRINCIPAL
+        =========================================================== -->
+        <header class="dashboard-centro-header">
+          <div class="centro-nombre" id="bienvenida-centro">
+            ¡Bienvenido, Centro de Hemoterapia!
+          </div>
 
-        <!-- RESUMEN RÁPIDO -->
-        <section class="dashboard-centro-resumen">
-  <h2>Resumen</h2>
-  <div class="resumen-grid">
-    <div class="resumen-card">
-      <span class="resumen-label">Donantes aptos hoy</span>
-      <b id="donantes-activos">--</b>
-    </div>
-    <div class="resumen-card">
-      <span class="resumen-label">Campanias activas</span>
-      <b id="campanias-activas">--</b>
-    </div>
-    <div class="resumen-card">
-      <span class="resumen-label">Proximas 14 dias</span>
-      <b id="campanias-proximas">--</b>
-    </div>
-    <div class="resumen-card">
-      <span class="resumen-label">Total donantes</span>
-      <b id="donantes-totales">--</b>
-    </div>
-    <div class="resumen-card">
-      <span class="resumen-label">Campanias finalizadas</span>
-      <b id="campanias-finalizadas">--</b>
-    </div>
-    <div class="resumen-card">
-      <span class="resumen-label">Siguiente campaña</span>
-      <b id="campania-siguiente">--</b>
-    </div>
-  </div>
-  <div id="resumen-grupos" style="margin-top:0.8rem; display:flex; flex-wrap:wrap; gap:0.5rem; color:#4b5563;"></div>
-</section>
+          <div class="header-icons">
+            <button class="icon-btn" id="btn-notif-centro" title="Notificaciones">
+              <img
+                src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/bell.svg"
+                alt="Notificaciones"
+              />
+              <span id="badge-notif-centro" class="badge-notif">0</span>
+            </button>
 
-        <!-- ACCIONES PRINCIPALES -->
-        <section class="dashboard-centro-acciones">
-          <h3>Acciones rápidas</h3>
-          <div class="acciones-lista">
+            <button class="icon-btn" id="btn-perfil" title="Perfil">
+              <img
+                src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/user.svg"
+                alt="Perfil"
+              />
+            </button>
+
+            <button class="icon-btn" id="logoutBtn" title="Cerrar sesión">
+              <img
+                src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/log-out.svg"
+                alt="Salir"
+              />
+            </button>
+          </div>
+        </header>
+
+        <!-- ==========================================================
+             LAYOUT PRINCIPAL (SIDEBAR + CONTENIDO)
+        =========================================================== -->
+        <div class="dashboard-centro-layout">
+          <aside class="dashboard-centro-sidebar">
+            <h3>Acciones rápidas</h3>
+            <button class="btn-accion-centro" id="btn-ver-resumen">Ver resumen</button>
             <button class="btn-accion-centro" id="btn-ver-donantes">Ver donantes</button>
-            
             <button class="btn-accion-centro" id="btn-ver-campanias">Gestionar campañas</button>
-            <!-- Agregá más botones según avances -->
-          </div>
-        </section>
+            <button class="btn-accion-centro" id="btn-ver-notifs">Notificaciones a donantes</button>
+          </aside>
 
-        <!--  SECCIÓN DONANTES -->
-        <section id="seccion-donantes" class="dashboard-centro-seccion" style="display: none;">
-          <h3>Donantes registrados</h3>
+          <main class="dashboard-centro-main">
+            <!-- ==========================================================
+                 SECCIÓN: RESUMEN GENERAL
+            =========================================================== -->
+            <section class="dashboard-centro-resumen">
+              <h2>Resumen general</h2>
 
-          <div class="filtros-donantes">
-            <select id="filtro-grupo">
-              <option value="">Todos los grupos</option>
-              <option value="A+">A+</option>
-              <option value="A-">A-</option>
-              <option value="B+">B+</option>
-              <option value="B-">B-</option>
-              <option value="AB+">AB+</option>
-              <option value="AB-">AB-</option>
-              <option value="O+">O+</option>
-              <option value="O-">O-</option>
-            </select>
-            <select id="filtro-provincia">
-              <option value="">Todas las provincias</option>
-            </select>
-            <select id="filtro-localidad" disabled>
-              <option value="">Todas las localidades</option>
-            </select>
-            <select id="filtro-barrio">
-              <option value="">Todos los barrios</option>
-            </select>
-            <label style="display:flex;align-items:center;gap:0.3rem;">
-              <input type="checkbox" id="filtro-apto" /> Solo aptos
-            </label>
-            <input id="filtro-edad-min" type="number" min="18" max="99" placeholder="Edad min" style="width:110px;" />
-            <input id="filtro-edad-max" type="number" min="18" max="99" placeholder="Edad max" style="width:110px;" />            <input id="filtro-dias-rest-max" type="number" min="0" placeholder="Días rest. ≤" style="width:120px;" />
-            <button id="btn-aplicar-filtro">Filtrar</button>
-            <button id="btn-limpiar-filtro" class="btn-accion-centro" style="background:#6b7280">Limpiar</button>
-            <button id="btn-exportar-csv" class="btn-accion-centro" style="background:#059669" disabled>Exportar CSV</button>
-            <span id="conteo-donantes" style="margin-left:0.5rem;color:#4b5563;">0 resultados</span>
-          </div>
+              <div class="resumen-grid">
+                <div class="resumen-card">
+                  <span class="resumen-label">Donantes aptos hoy</span>
+                  <b id="donantes-activos">--</b>
+                </div>
+                <div class="resumen-card">
+                  <span class="resumen-label">Campañas activas</span>
+                  <b id="campanias-activas">--</b>
+                </div>
+                <div class="resumen-card">
+                  <span class="resumen-label">Próximas 14 días</span>
+                  <b id="campanias-proximas">--</b>
+                </div>
+                <div class="resumen-card">
+                  <span class="resumen-label">Total donantes</span>
+                  <b id="donantes-totales">--</b>
+                </div>
+                <div class="resumen-card">
+                  <span class="resumen-label">Campañas finalizadas</span>
+                  <b id="campanias-finalizadas">--</b>
+                </div>
+                <div class="resumen-card">
+                  <span class="resumen-label">Siguiente campaña</span>
+                  <b id="campania-siguiente">--</b>
+                </div>
+              </div>
 
-          <div class="tabla-wrapper">
-            <table id="tabla-donantes">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Grupo</th>
-                  <th>Provincia</th>
-                  <th>Localidad</th>
-                  <th>Teléfono</th>
-                  <th>Apto</th>
-                  <th>Días restantes</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </section>
+              <div id="resumen-grupos" class="resumen-grupos"></div>
+            </section>
 
-                <!-- SECCIÓN CAMPAÑAS -->
-        <section id="seccion-campanias" class="dashboard-centro-seccion" style="display: none;">
-          <h3>Campañas de donación</h3>
+            <!-- ==========================================================
+                 SECCIÓN: DONANTES REGISTRADOS
+            =========================================================== -->
+            <section id="seccion-donantes" class="oculto">
+              <h2>Donantes registrados</h2>
 
-          <div class="acciones-campanias">
-            <button id="btn-nueva-campania" class="btn-accion-centro">+ Nueva campaña</button>
-          </div>
+              <!-- 🔹 FILTROS -->
+              <div class="filtros-donantes">
+                <input
+                  type="text"
+                  id="filtro-busqueda"
+                  placeholder="Buscar por nombre o email..."
+                  style="flex: 1; min-width: 220px"
+                />
 
-          <div class="tabla-wrapper">
-            <table id="tabla-campanias">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Fecha</th>
-                  <th>Localidad</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </section>
+                <select id="filtro-grupo">
+                  <option value="">Todos los grupos</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
 
-  </main>
+                <select id="filtro-provincia">
+                  <option value="">Todas las provincias</option>
+                </select>
 
-      <!-- MODAL PERFIL CENTRO -->
-      <div id="modal-perfil" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-          <h3>Perfil del Centro</h3>
-          <form id="form-perfil">
-            <label>Nombre</label>
-            <input type="text" id="perfil_nombre" required>
+                <select id="filtro-localidad" disabled>
+                  <option value="">Todas las localidades</option>
+                </select>
 
-            <label>Dirección</label>
-            <input type="text" id="perfil_direccion">
+                <select id="filtro-barrio">
+                  <option value="">Todos los barrios</option>
+                </select>
 
-            <label>Teléfono</label>
-            <input type="text" id="perfil_telefono">
+                <label>
+                  <input type="checkbox" id="filtro-apto" />
+                  Solo aptos
+                </label>
 
-            <label>Email</label>
-            <input type="email" id="perfil_email">
+                <input type="number" id="filtro-edad-min" placeholder="Edad mín" min="18" />
+                <input type="number" id="filtro-edad-max" placeholder="Edad máx" max="65" />
+                <input type="number" id="filtro-dias-rest-max" placeholder="Días rest. ≤" min="0" />
 
-            <div class="modal-buttons">
-              <button type="submit" class="btn-accion-centro">Guardar</button>
-              <button type="button" id="cerrarModalPerfil" class="btn-cancelar">Cancelar</button>
-            </div>
-          </form>
+                <button id="btn-aplicar-filtro">Filtrar</button>
+                <button id="btn-limpiar-filtro">Limpiar</button>
+                <button id="btn-exportar-csv">Exportar CSV</button>
+              </div>
+
+              <!-- 🔹 TABLA -->
+              <div class="tabla-donantes-container">
+                <table id="tabla-donantes">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Grupo</th>
+                      <th>Provincia</th>
+                      <th>Localidad</th>
+                      <th>Teléfono</th>
+                      <th>Campaña</th>
+                      <th>Apto</th>
+                      <th>Días restantes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td colspan="8" style="text-align:center; color:#888;">
+                        Cargando donantes...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- 🔹 PAGINACIÓN -->
+              <div class="paginacion-donantes">
+                <button id="btn-prev" disabled>&lt; Anterior</button>
+                <span id="paginacion-info">Página 1 de 1</span>
+                <button id="btn-next" disabled>Siguiente &gt;</button>
+                <span id="conteo-donantes">0 resultados</span>
+              </div>
+
+              <!-- ==========================================================
+                   SECCIÓN: ENVÍO DE NOTIFICACIONES (plegable)
+              =========================================================== -->
+              <div id="notificaciones-donantes" class="notif-donantes-container">
+                <div id="toggle-notif" class="notif-toggle">
+                  ✉️ Enviar notificaciones
+                </div>
+
+                <div id="notif-panel" class="notif-panel oculto">
+                  <div class="form-notificaciones">
+                    <label for="tipo-notif">Tipo de notificación:</label>
+                    <select id="tipo-notif">
+                      <option value="general">📢 General</option>
+                      <option value="felicitacion">🎉 Felicitación por cumpleaños</option>
+                    </select>
+
+                    <label for="destinatario-notif">Enviar a:</label>
+                    <select id="destinatario-notif">
+                      <option value="todos">Todos los donantes</option>
+                      <option value="filtrados">Solo los filtrados</option>
+                      <option value="aptos">Solo los aptos</option>
+                    </select>
+
+                    <label for="mensaje-notif">Mensaje:</label>
+                    <textarea
+                      id="mensaje-notif"
+                      rows="4"
+                      placeholder="Escribí el mensaje que recibirán los donantes..."
+                    ></textarea>
+
+                    <div class="botones-notif">
+                      <button id="btn-preview">👁️ Vista previa</button>
+                      <button id="btn-enviar">📨 Enviar</button>
+                    </div>
+
+                    <div id="preview-container" class="preview-oculto">
+                      <div id="preview-contenido" class="preview-contenido"></div>
+                    </div>
+                  </div>
+
+                  <!-- HISTORIAL -->
+                  <h4>Historial de notificaciones</h4>
+                  <div class="tabla-notif-container">
+                    <table id="tabla-log-notif">
+                      <thead>
+                        <tr>
+                          <th>Fecha</th>
+                          <th>Tipo</th>
+                          <th>Enviados</th>
+                          <th>Mensaje</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr><td colspan="4">Sin registros</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ==========================================================
+                 SECCIONES DINÁMICAS RESTANTES
+            =========================================================== -->
+            <section id="seccion-campanias" class="dashboard-centro-seccion oculto"></section>
+            <section id="seccion-notifs" class="dashboard-centro-seccion oculto">
+              <h2>Historial de notificaciones</h2>
+              <p>Próximamente se mostrará aquí el historial general de notificaciones enviadas por el centro.</p>
+            </section>
+          </main>
         </div>
-      </div>
 
-      <!-- MODAL NUEVA CAMPAÑA -->
-      <div id="modal-campania" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-          <h3>Nueva Campaña</h3>
-          <form id="form-campania">
-            <label>Nombre</label>
-            <input type="text" id="nombre" required>
+        <!-- ==========================================================
+             MODAL BASE
+        =========================================================== -->
+        <dialog id="modal-base" class="modal-overlay">
+          <div id="modal-content" class="modal-content"></div>
+        </dialog>
+      </div> <!-- cierre de contenido-centro -->
+    </div> <!-- cierre wrapper -->
 
-            <label>Descripción</label>
-            <textarea id="descripcion" rows="3" required></textarea>
+    <!-- ==========================================================
+         SCRIPTS PRINCIPALES
+    =========================================================== -->
+    <script type="module" src="./dashboard-centro.js"></script>
 
-            <label>URL de Imagen</label>
-            <input type="url" id="imagen_url" placeholder="https://..." required>
-
-            <label for="provincia_id">Provincia</label>
-            <select id="provincia_id" required>
-              <option value="">Seleccionar provincia...</option>
-            </select>
-
-            <label for="localidad_id">Localidad</label>
-            <select id="localidad_id" required disabled>
-              <option value="">Seleccionar localidad...</option>
-            </select>
-
-            <label for="barrio_id">Barrio</label>
-            <select id="barrio_id" required>
-              <option value="">Seleccionar barrio...</option>
-            </select>
-
-            <label>Fecha de inicio</label>
-            <input type="date" id="fecha_inicio" required>
-
-            <label>Fecha de fin</label>
-            <input type="date" id="fecha_fin" required>
-
-            <div class="modal-buttons">
-              <button type="submit" class="btn-accion-centro">Guardar</button>
-              <button type="button" id="cerrarModal" class="btn-cancelar">Cancelar</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-
+    <!-- ==========================================================
+         DROPDOWN DE NOTIFICACIONES
+    =========================================================== -->
+    <div id="dropdown-notif-centro" class="dropdown-notif-centro">
+      <div class="dropdown-header">Notificaciones</div>
+      <div id="lista-notif-centro" class="lista-notif-centro"></div>
     </div>
-  </div>
 
-  <script type="module" src="dashboard-centro.js"></script>
-</body>
+    <!-- ==========================================================
+         SCRIPT OPCIONAL PARA MODALES GRANDES
+    =========================================================== -->
+    <script>
+      document.addEventListener("openNuevaCampania", () => {
+        const modalContent = document.getElementById("modal-content");
+        modalContent.classList.add("large");
+      });
+
+      document.addEventListener("closeModalBase", () => {
+        const modalContent = document.getElementById("modal-content");
+        modalContent.classList.remove("large");
+      });
+    </script>
+  </body>
 </html>
-
-
-

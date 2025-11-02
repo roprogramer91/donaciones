@@ -1,0 +1,144 @@
+/* ==========================================================
+   Modales - Donante
+   Controla la apariencia general de los modales, incluyendo
+   los de detalle de campaña y confirmación de cancelación.
+   ========================================================== */
+
+   /* ==========================================================
+   Estado inicial de los modales (ocultos)
+   ========================================================== */
+dialog {
+  display: none; /* Todos los modales inician ocultos */
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+dialog[open] {
+  display: flex; /* Se muestra solo cuando el modal está abierto */
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* ==========================================================
+   Tipografía global del modal
+   (Corrige el bug donde el texto del <dialog> no hereda la fuente)
+   ========================================================== */
+dialog,
+dialog * {
+  font-family: 'Poppins', Arial, sans-serif !important;
+  color: #222;
+  letter-spacing: 0.2px;
+}
+
+/* ==========================================================
+   Contenedor principal del modal
+   ========================================================== */
+dialog {
+  border: none;
+  padding: 0;
+  background: transparent;
+  inset: 0;
+  /* OJO: no forzar display aquí para que no quede siempre visible */
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  z-index: 50;
+}
+
+/* ==========================================================
+   Contenido interno del modal
+   ========================================================== */
+.modal-content {
+  background: #fff;
+  border-radius: 0.8rem;
+  padding: 1.2rem 1.4rem;
+  width: 90%;
+  max-width: 520px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  animation: modalFade 0.25s ease-out;
+}
+
+/* Animación de aparición suave */
+@keyframes modalFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================
+   Textos y títulos dentro del modal
+   ========================================================== */
+.modal-content h3,
+.modal-content h4 {
+  margin-top: 0;
+  color: #b11010;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.modal-content p {
+  margin: 0.4rem 0;
+  line-height: 1.5;
+  color: #444;
+}
+
+/* Lugar o ubicación en el modal de campaña */
+.modal-lugar {
+  font-size: 0.95rem;
+  color: #666;
+}
+
+/* ==========================================================
+   Zona de botones en el pie del modal
+   ========================================================== */
+.modal-buttons {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+/* ==========================================================
+   Estados especiales de los modales
+   ========================================================== */
+
+/* Modal principal (detalle de campaña) */
+.modal-campania {
+  z-index: 50;
+}
+
+/* Modal de confirmación de cancelación */
+.modal-confirm {
+  z-index: 60;
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+/* ==========================================================
+   Diseño responsive
+   ========================================================== */
+@media (max-width: 600px) {
+  .modal-content {
+    width: 94%;
+    padding: 1rem 1.1rem;
+  }
+
+  .modal-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .modal-buttons button {
+    width: 100%;
+  }
+}
+
+/* ==========================================================
+   Fin de modal.css
+   ========================================================== */

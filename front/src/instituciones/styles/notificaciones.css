@@ -1,0 +1,207 @@
+/* ==========================================================
+   ESTILOS - SECCIÓN NOTIFICACIONES A DONANTES
+   Autor: Ro
+   Integrado con dashboard-centro
+=========================================================== */
+
+/* === CONTENEDOR PRINCIPAL === */
+.notif-donantes-container {
+  margin-top: 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* === TOGGLE (CABECERA PLEGABLE) === */
+.notif-toggle {
+  background: linear-gradient(90deg, #2563eb, #1e40af);
+  color: #fff;
+  padding: 1rem 1.2rem;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: 0.25s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.notif-toggle::after {
+  content: "▼";
+  font-size: 0.9rem;
+  margin-left: 0.6rem;
+  transition: transform 0.3s ease;
+  opacity: 0.9;
+}
+
+.notif-toggle.activo::after {
+  transform: rotate(-180deg);
+}
+
+.notif-toggle:hover {
+  background: linear-gradient(90deg, #1d4ed8, #1e3a8a);
+  box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* === PANEL PLEGABLE === */
+.notif-panel {
+  padding: 1.5rem;
+  background: #f9fafb;
+  max-height: 2000px;
+  opacity: 1;
+  transition: all 0.45s ease;
+}
+
+.notif-panel.oculto {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0 1.5rem;
+}
+
+/* === FORMULARIO DE NOTIFICACIONES === */
+.form-notificaciones {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  background: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+}
+
+.form-notificaciones label {
+  font-weight: 600;
+  color: #333;
+}
+
+.form-notificaciones select,
+.form-notificaciones input,
+.form-notificaciones textarea {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.6rem;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease;
+}
+
+.form-notificaciones select:focus,
+.form-notificaciones textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+/* === BOTONES === */
+.botones-notif {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.botones-notif button {
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+#btn-preview {
+  background-color: #facc15;
+  color: #000;
+}
+
+#btn-preview:hover {
+  background-color: #eab308;
+}
+
+#btn-enviar {
+  background-color: #2563eb;
+  color: #fff;
+}
+
+#btn-enviar:hover {
+  background-color: #1d4ed8;
+}
+
+/* === PREVIEW === */
+#preview-container {
+  background-color: #f8fafc;
+  border-left: 4px solid #2563eb;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 0.8rem;
+  animation: fadeIn 0.4s ease;
+}
+
+.preview-oculto {
+  display: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === TABLA HISTORIAL === */
+.tabla-notif-container {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.04);
+}
+
+.tabla-notif-container table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.tabla-notif-container th {
+  background-color: #2563eb;
+  color: white;
+  padding: 0.6rem;
+  text-align: left;
+  letter-spacing: 0.3px;
+}
+
+.tabla-notif-container td {
+  padding: 0.6rem;
+  border-bottom: 1px solid #eee;
+  color: #333;
+}
+
+.tabla-notif-container tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.tabla-notif-container td:nth-child(2) {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.tabla-notif-container td:nth-child(3) {
+  color: #2563eb;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* === ANIMACIÓN GENERAL === */
+.notif-donantes-container,
+.form-notificaciones,
+.tabla-notif-container {
+  animation: fadeIn 0.5s ease;
+}

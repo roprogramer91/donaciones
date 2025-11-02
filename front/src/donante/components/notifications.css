@@ -1,0 +1,180 @@
+/* ==========================================================
+   Módulo: Notificaciones - Donante
+   Controla el estilo del ícono, badge y menú desplegable
+   del sistema de notificaciones en el panel del donante.
+   ========================================================== */
+
+/* ==========================================================
+   Botón del ícono de notificación
+   ========================================================== */
+#btn-notif {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+#btn-notif:hover {
+  background: #f8caca;
+  transform: scale(1.05);
+}
+
+#btn-notif img {
+  width: 22px;
+  height: 22px;
+}
+
+/* ==========================================================
+   Badge rojo (cantidad de notificaciones)
+   ========================================================== */
+#notifBadge {
+  display: none;
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  background: #d00;
+  color: #fff;
+  border-radius: 999px;
+  padding: 0 6px;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  min-width: 18px;
+  text-align: center;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+/* ==========================================================
+   Dropdown principal (contenedor)
+   ========================================================== */
+#notifDropdown {
+  display: none;
+  position: absolute;
+  right: 10px;
+  top: 54px;
+  width: 300px;
+  max-height: 320px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 0.6rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+  z-index: 40;
+  cursor: default;
+  animation: dropdownFade 0.25s ease;
+  font-family: 'Poppins', Arial, sans-serif;
+}
+
+/* Encabezado del dropdown */
+#notifDropdown > .notif-header {
+  padding: 0.6rem 0.8rem;
+  font-weight: 600;
+  border-bottom: 1px solid #f1f1f1;
+  color: #c11515;
+  background: #fff8f8;
+  border-top-left-radius: 0.6rem;
+  border-top-right-radius: 0.6rem;
+}
+
+/* Mensaje cuando no hay notificaciones */
+#notifEmpty {
+  display: none;
+  padding: 0.8rem;
+  color: #777;
+  text-align: center;
+  font-style: italic;
+}
+
+/* ==========================================================
+   Listado de notificaciones individuales
+   ========================================================== */
+.notif-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.notif-item {
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid #f3f3f3;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.notif-item:hover {
+  background: #f1f7ff;
+}
+
+.notif-item.unread {
+  background: #f6fbff !important;
+  font-weight: 600;
+}
+
+.notif-item:nth-child(even) {
+  background: #fafafa;
+}
+
+/* Contenedor de texto dentro del ítem */
+.notif-item div {
+  display: block;
+  color: #333;
+}
+
+/* Fecha o metadatos dentro del ítem */
+.notif-item div:last-child {
+  font-size: 0.78rem;
+  color: #666;
+  margin-top: 0.2rem;
+}
+
+/* ==========================================================
+   Animación de aparición del dropdown
+   ========================================================== */
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================
+   Scrollbar personalizada (solo para la lista)
+   ========================================================== */
+#notifDropdown::-webkit-scrollbar {
+  width: 8px;
+}
+
+#notifDropdown::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 6px;
+}
+
+#notifDropdown::-webkit-scrollbar-thumb:hover {
+  background: #ccc;
+}
+
+/* ==========================================================
+   Responsive
+   ========================================================== */
+@media (max-width: 550px) {
+  #notifDropdown {
+    right: 0;
+    left: 0;
+    margin: 0 auto;
+    width: 90%;
+  }
+}
+
+/* ==========================================================
+   Fin de notifications.css
+   ========================================================== */

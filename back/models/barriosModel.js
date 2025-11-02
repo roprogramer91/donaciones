@@ -18,6 +18,9 @@ async function getBarrioById(id) {
   return rows[0];
 }
 
+
+
+
 module.exports = {
   getAllBarrios,
   getBarriosByLocalidadId,

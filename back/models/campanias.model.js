@@ -5,6 +5,7 @@ const CampaniasModel = {
   async obtenerTodas() {
     const query = `
       SELECT 
+        c.centro_id,
         c.id,
         c.nombre,
         c.descripcion,
@@ -29,6 +30,7 @@ const CampaniasModel = {
   async obtenerPorId(id) {
     const query = `
       SELECT 
+        c.centro_id,
         c.id,
         c.nombre,
         c.descripcion,
@@ -111,5 +113,100 @@ CampaniasModel.obtenerPorCentro = async function (centroId) {
     ORDER BY c.fecha_inicio NULLS LAST, c.id DESC;
   `;
   const { rows } = await pool.query(query, [centroId]);
+  return rows;
+};
+
+// Campañas por localidad (sin estado calculado)
+CampaniasModel.obtenerPorLocalidad = async function (localidadId) {
+  const query = `
+    SELECT 
+      c.centro_id,
+      c.id,
+      c.nombre,
+      c.descripcion,
+      c.imagen_url,
+      c.fecha_inicio,
+      c.fecha_fin,
+      c.estado,
+      c.localidad_id,
+      c.barrio_id,
+      l.provincia_id AS provincia_id,
+      l.nombre AS localidad_nombre,
+      b.nombre AS barrio_nombre
+    FROM campanias c
+    LEFT JOIN localidades l ON c.localidad_id = l.id
+    LEFT JOIN barrios b ON c.barrio_id = b.id
+    WHERE c.localidad_id = $1
+    ORDER BY c.fecha_inicio NULLS LAST, c.id DESC;
+  `;
+  const { rows } = await pool.query(query, [localidadId]);
+  return rows;
+};
+
+// Inscribir donante a campaña (crea tabla si no existe)
+CampaniasModel.inscribirDonante = async function (campaniaId, usuarioId) {
+  // Insertar relación (idempotente). La tabla se crea por migraciones.
+  const insert = await pool.query(
+    `INSERT INTO campanias_donantes (campania_id, usuario_id)
+     VALUES ($1, $2)
+     ON CONFLICT (campania_id, usuario_id) DO UPDATE SET created_at = NOW()
+     RETURNING *;`,
+    [campaniaId, usuarioId]
+  );
+
+  // Intentar notificar; si falla, no bloquear
+  try {
+    const camp = await CampaniasModel.obtenerPorId(campaniaId);
+    const centroId = camp ? camp.centro_id : null;
+    if (centroId) {
+      try { await pool.query(`INSERT INTO notificaciones (centro_id, tipo, mensaje) VALUES ($1,$2,$3);`, [centroId, 'inscripcion', `Usuario ${usuarioId} se inscribió en campaña ${campaniaId}`]); } catch {}
+    }
+    try {
+      const Notificaciones = require('./notificaciones.model');
+      await Notificaciones.createForUsuario(usuarioId, { tipo: 'inscripcion', mensaje: `Te inscribiste a "${camp?.nombre || 'una campaña'}"`, campania_id: campaniaId });
+    } catch {}
+  } catch (_) {}
+
+  return insert.rows[0];
+};
+
+CampaniasModel.estaInscripto = async function (campaniaId, usuarioId) {
+  const { rows } = await pool.query(
+    'SELECT 1 FROM campanias_donantes WHERE campania_id=$1 AND usuario_id=$2 LIMIT 1',
+    [campaniaId, usuarioId]
+  );
+  return !!rows[0];
+};
+
+CampaniasModel.listarInscripcionesPorUsuario = async function (usuarioId) {
+  const { rows } = await pool.query(
+    `SELECT c.*
+     FROM campanias_donantes cd
+     JOIN campanias c ON c.id = cd.campania_id
+     WHERE cd.usuario_id = $1
+     ORDER BY c.fecha_inicio NULLS LAST, c.id DESC`,
+    [usuarioId]
+  );
+  return rows;
+};
+
+CampaniasModel.cancelarInscripcion = async function (campaniaId, usuarioId) {
+  const { rows } = await pool.query(
+    'DELETE FROM campanias_donantes WHERE campania_id=$1 AND usuario_id=$2 RETURNING *',
+    [campaniaId, usuarioId]
+  );
+  return rows[0] || null;
+};
+
+CampaniasModel.listarInscriptosDeCampania = async function (campaniaId) {
+  const { rows } = await pool.query(
+    `SELECT u.id as usuario_id, u.nombre, u.apellido, u.email, d.grupo_sanguineo
+     FROM campanias_donantes cd
+     JOIN usuarios u ON u.id = cd.usuario_id
+     LEFT JOIN donantes d ON d.usuario_id = u.id
+     WHERE cd.campania_id = $1
+     ORDER BY cd.created_at DESC`,
+    [campaniaId]
+  );
   return rows;
 };

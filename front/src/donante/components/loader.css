@@ -1,0 +1,64 @@
+/* ==========================================================
+   Loader / Pantalla de carga - Donante
+   ========================================================== */
+
+/* === Contenedor general del loader === */
+#loader {
+  position: fixed;
+  inset: 0; /* Ocupa toda la pantalla */
+  background: rgba(243, 238, 238, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  text-align: center;
+}
+
+/* Texto debajo del spinner */
+#loader span {
+  font-family: 'Poppins', Arial, sans-serif;
+  font-size: 1.1rem;
+  color: #a70c0c;
+  font-weight: 500;
+  margin-top: 1rem;
+}
+
+/* === Spinner circular === */
+.spinner {
+  border: 6px solid #f4bbbb;     /* Borde base claro */
+  border-top: 6px solid #c11515; /* Borde superior en color principal */
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  animation: spin 1s linear infinite;
+}
+
+/* Animación de rotación */
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================================
+   Variantes reutilizables para loaders más pequeños
+   ========================================================== */
+
+/* Loader pequeño para elementos internos (por ejemplo, botones o secciones) */
+.loader-mini {
+  width: 24px;
+  height: 24px;
+  border: 4px solid #f4bbbb;
+  border-top: 4px solid #c11515;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Loader alternativo para secciones oscuras */
+.loader-light {
+  border-color: rgba(255, 255, 255, 0.5);
+  border-top-color: #fff;
+}
