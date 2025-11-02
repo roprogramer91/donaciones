@@ -6,7 +6,7 @@
 
 import { API_BASE_URL } from "../../config.js";
 import { toggleSeccion } from "../dashboard-centro.js";
-
+import { appLogger } from "../../utils/logger.js";
 
 // ============================================================
 // VARIABLES Y ELEMENTOS BASE
@@ -68,8 +68,6 @@ import("./notificaciones.js").then((mod) => {
   if (mod?.inicializarNotificaciones) mod.inicializarNotificaciones();
 });
 
-
-
 // ============================================================
 // CARGA DE DONANTES CON FILTROS
 // ============================================================
@@ -95,12 +93,11 @@ async function cargarDonantes() {
     actualizarConteoYExport();
     renderDonantes(data);
   } catch (err) {
-    console.error("❌ Error al cargar donantes:", err);
+    appLogger.error("❌ Error al cargar donantes:", err);
     tablaBody.innerHTML = `<tr><td colspan="8">Error al cargar donantes</td></tr>`;
     mostrarMensaje("Error al cargar donantes", "error");
   }
 }
-
 
 /**
  * Construye los parámetros de búsqueda desde los filtros activos.
@@ -140,7 +137,8 @@ async function inicializarFiltrosDonantes() {
     if (filtroProvincia && filtroProvincia.options.length <= 1) {
       const resP = await fetch(`${API_BASE_URL}/api/provincias`);
       const provincias = await resP.json();
-      filtroProvincia.innerHTML = '<option value="">Todas las provincias</option>';
+      filtroProvincia.innerHTML =
+        '<option value="">Todas las provincias</option>';
       provincias.forEach((p) => {
         const opt = document.createElement("option");
         opt.value = p.id;
@@ -186,7 +184,7 @@ async function inicializarFiltrosDonantes() {
       filtroLocalidad.disabled = false;
     });
   } catch (e) {
-    console.error("Error inicializando filtros de donantes:", e);
+    appLogger.error("Error inicializando filtros de donantes:", e);
   }
 }
 
@@ -198,7 +196,8 @@ async function limpiarFiltros() {
   if (filtroGrupo) filtroGrupo.value = "";
   if (filtroProvincia) filtroProvincia.value = "";
   if (filtroLocalidad) {
-    filtroLocalidad.innerHTML = '<option value="">Todas las localidades</option>';
+    filtroLocalidad.innerHTML =
+      '<option value="">Todas las localidades</option>';
     filtroLocalidad.disabled = true;
   }
   if (filtroBarrio) filtroBarrio.value = "";
@@ -246,7 +245,12 @@ function renderDonantes(donantes) {
       <td>${d.telefono || ""}</td>
       <td>${
         insc
-          ? `<a href="#" class="link-inscripciones" data-uid="${d.usuario_id}" data-nombre="${nombreCompleto.replace(/"/g, "&quot;")}">Inscripto</a>`
+          ? `<a href="#" class="link-inscripciones" data-uid="${
+              d.usuario_id
+            }" data-nombre="${nombreCompleto.replace(
+              /"/g,
+              "&quot;"
+            )}">Inscripto</a>`
           : "Ninguna"
       }</td>
       <td>${d.apto_para_donar ? "Sí" : "No"}</td>
@@ -299,8 +303,7 @@ function exportarCSVDonantes() {
     d.email || "",
   ]);
 
-  const escape = (v) =>
-    /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+  const escape = (v) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
 
   const csv = [headers, ...rows].map((r) => r.map(escape).join(",")).join("\n");
   const blob = new Blob(["\uFEFF" + csv], {
@@ -329,9 +332,12 @@ function renderDonantesPaginados() {
 
   renderDonantes(pagina);
 
-  const totalPaginas = Math.ceil(ultimoResultadoDonantes.length / donantesPorPagina);
-  document.getElementById("paginacion-info").textContent =
-    `Página ${paginaActual} de ${totalPaginas || 1}`;
+  const totalPaginas = Math.ceil(
+    ultimoResultadoDonantes.length / donantesPorPagina
+  );
+  document.getElementById(
+    "paginacion-info"
+  ).textContent = `Página ${paginaActual} de ${totalPaginas || 1}`;
 
   document.getElementById("btn-prev").disabled = paginaActual === 1;
   document.getElementById("btn-next").disabled = paginaActual >= totalPaginas;
@@ -345,7 +351,9 @@ document.getElementById("btn-prev")?.addEventListener("click", () => {
 });
 
 document.getElementById("btn-next")?.addEventListener("click", () => {
-  const totalPaginas = Math.ceil(ultimoResultadoDonantes.length / donantesPorPagina);
+  const totalPaginas = Math.ceil(
+    ultimoResultadoDonantes.length / donantesPorPagina
+  );
   if (paginaActual < totalPaginas) {
     paginaActual++;
     renderDonantesPaginados();

@@ -56,7 +56,7 @@ async function cargarPanel() {
     if (!res.ok) throw new Error("Error al obtener perfil");
 
     const donante = await res.json();
-    console.log(donante); // SOLO PARA DEBUGGING
+    appLogger.log(donante); // SOLO PARA DEBUGGING
 
     // Estado de aptitud del donante (basado en días restantes)
     let dias = donante.dias_restantes;
@@ -93,7 +93,7 @@ async function cargarPanel() {
     loader.style.display = "none";
     contenidoPrivado.style.display = "block";
   } catch (e) {
-    console.error("⚠️ Error detallado en cargarPanel():", e);
+    appLogger.error("⚠️ Error detallado en cargarPanel():", e);
 
     loader.innerHTML = `
     <p style="color:red;">
@@ -143,7 +143,6 @@ const confirmMsg = document.getElementById("confirmCancelMsg");
 const confirmYes = document.getElementById("btnCancelYes");
 const confirmNo = document.getElementById("btnCancelNo");
 
-
 // FIX: Cerrar los modales al iniciar
 if (modal && modal.open) modal.close();
 if (confirmDlg && confirmDlg.open) confirmDlg.close();
@@ -167,7 +166,7 @@ async function cargarCampanias(tok) {
     const lista = data.campanias || [];
     renderCampanias(lista);
   } catch (err) {
-    console.error("Error al cargar campañas:", err);
+    appLogger.error("Error al cargar campañas:", err);
     if (campaniasList)
       campaniasList.innerHTML = "<em>No se pudieron cargar las campañas</em>";
   }
@@ -319,7 +318,7 @@ function abrirModalCampania(c) {
             await cargarNotificaciones();
             await cargarProximaInscripcion(token);
           } catch (er) {
-            console.error("Error al cancelar inscripción:", er);
+            appLogger.error("Error al cancelar inscripción:", er);
             showToast("No se pudo cancelar la inscripción", "error");
           }
         };
@@ -364,7 +363,7 @@ btnAsistir?.addEventListener("click", async () => {
     await cargarNotificaciones();
     await cargarProximaInscripcion(token);
   } catch (err) {
-    console.error("Error al inscribirse:", err);
+    appLogger.error("Error al inscribirse:", err);
     showToast("No se pudo registrar tu asistencia", "error");
   }
 });
@@ -410,7 +409,7 @@ async function cargarMisCampanias(tok) {
     const data = await res.json();
     renderMisCampanias(data || [], listEl);
   } catch (e) {
-    console.error("Error al cargar mis campañas:", e);
+    appLogger.error("Error al cargar mis campañas:", e);
   }
 }
 
@@ -421,8 +420,7 @@ function renderMisCampanias(campanias, container) {
   if (!container) return;
 
   if (!campanias || campanias.length === 0) {
-    container.innerHTML =
-      "<em>Todavía no te inscribiste a campañas.</em>";
+    container.innerHTML = "<em>Todavía no te inscribiste a campañas.</em>";
     return;
   }
 
@@ -528,14 +526,13 @@ async function cargarProximaInscripcion(tok) {
       btnProxima.onclick = () =>
         abrirModalCampania({ ...prox, ya_inscripto: true });
     } else if (span && btnProxima) {
-      span.textContent =
-        "Aún no te inscribiste a campañas próximas.";
+      span.textContent = "Aún no te inscribiste a campañas próximas.";
       btnProxima.disabled = true;
       btnProxima.textContent = "Muy pronto!";
       btnProxima.onclick = null;
     }
   } catch (e) {
-    console.error("Error al calcular próxima campaña inscripta:", e);
+    appLogger.error("Error al calcular próxima campaña inscripta:", e);
   }
 }
 
@@ -578,7 +575,7 @@ async function cargarNotificaciones() {
     renderNotificaciones(lista);
     actualizarBadgeNotificaciones(lista);
   } catch (err) {
-    console.error("Error al cargar notificaciones:", err);
+    appLogger.error("Error al cargar notificaciones:", err);
   }
 }
 
@@ -723,3 +720,4 @@ function timeAgo(dateInput) {
     return "";
   }
 }
+import { appLogger } from "../utils/logger.js";

@@ -1,8 +1,12 @@
+import { appLogger } from "../../../utils/logger.js";
+
 /* ==========================================================
    MODAL BASE REUTILIZABLE
    Controla la apertura y cierre del <dialog id="modal-base">.
    Cualquier componente puede importar estas funciones.
 =========================================================== */
+
+
 
 /* === REFERENCIAS A ELEMENTOS DEL MODAL BASE === */
 const modalBase = document.getElementById("modal-base");
@@ -14,7 +18,7 @@ const modalContent = document.getElementById("modal-content");
 =========================================================== */
 export function abrirModal(htmlContenido) {
   if (!modalBase || !modalContent) {
-    console.error("⚠️ No se encontró el modal base en el DOM.");
+    appLogger.error("⚠️ No se encontró el modal base en el DOM.");
     return;
   }
 
@@ -29,7 +33,7 @@ export function abrirModal(htmlContenido) {
     modalBase.showModal();
   } catch (error) {
     // Fallback por si showModal falla
-    console.warn("⚠️ No se pudo usar showModal(), usando fallback:", error);
+    appLogger.warn("⚠️ No se pudo usar showModal(), usando fallback:", error);
     modalBase.style.display = "block";
   }
 
@@ -73,7 +77,6 @@ if (modalBase) {
   });
 }
 
-
 /* ==========================================================
    MODAL DE MENSAJE REUTILIZABLE (éxito / error / advertencia)
 =========================================================== */
@@ -97,8 +100,5 @@ export function mostrarModalMensaje(mensaje, tipo = "info", duracion = 2000) {
   setTimeout(() => cerrarModal(), duracion);
 }
 
-
-
-
 /* === LOG DE INICIALIZACIÓN === */
-console.log("✅ modalBase.js inicializado correctamente.");
+appLogger.log("✅ modalBase.js inicializado correctamente.");

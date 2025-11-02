@@ -1,7 +1,6 @@
 // src/instituciones/login-centro.js
 import { AUTH_URL } from "../config.js";
 
-
 const form = document.getElementById("loginCentroForm");
 const errorDiv = document.getElementById("login-error");
 const btnAtras = document.getElementById("btn-atras");
@@ -38,9 +37,8 @@ form.addEventListener("submit", async (e) => {
 
     // Redirigir al dashboard del centro
     window.location.href = "./dashboard-centro.html";
-
   } catch (error) {
-    console.error("Error en login-centro:", error);
+    appLogger.error("Error en login-centro:", error);
     errorDiv.textContent = "Error de conexión con el servidor.";
   }
 });
@@ -49,3 +47,4 @@ form.addEventListener("submit", async (e) => {
 btnAtras.addEventListener("click", () => {
   window.location.href = "../../index.html";
 });
+import { appLogger } from "../utils/logger.js";

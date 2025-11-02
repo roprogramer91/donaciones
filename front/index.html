@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inicio - Donación de Sangre</title>
+    <!-- Logger global disponible en toda la app -->
+    <script src="./src/utils/logger.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="src/styles.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
@@ -75,9 +78,8 @@
       </section>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script type="module" src="./src/estadisticas.js"></script>
-    <script type="module" src="./src/auth.js"></script>
+    <script type="module" src="./src/utils/initLogger.js"></script>
+
     <script type="module">
       import { AUTH_URL } from './src/config.js';
       const link = document.getElementById('googleLoginLink');
@@ -92,7 +94,9 @@
         });
       }
     </script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="./src/estadisticas.js"></script>
+    <script type="module" src="./src/auth.js"></script>
 
   </body>
 </html>

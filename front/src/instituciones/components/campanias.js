@@ -5,13 +5,14 @@
 
 import { API_BASE_URL } from "../../config.js";
 import { abrirModal, cerrarModal } from "./modales/modalBase.js";
+import { appLogger } from "../../utils/logger.js";
 import { mostrarPopup } from "./popup.js";
 
 /* === FUNCIÓN PRINCIPAL === */
 export async function cargarCampanias() {
   const contenedor = document.getElementById("seccion-campanias");
   if (!contenedor) {
-    console.error("⚠️ No se encontró #seccion-campanias en el DOM.");
+    appLogger.error("⚠️ No se encontró #seccion-campanias en el DOM.");
     return;
   }
 
@@ -64,8 +65,12 @@ export async function cargarCampanias() {
                 <td>${formatearFecha(c.fecha_fin)}</td>
                 <td>${c.estado || "-"}</td>
                 <td>
-                  <button class="btn-secundario btn-editar" data-id="${c.id}">Editar</button>
-                  <button class="btn-peligro btn-eliminar" data-id="${c.id}" data-nombre="${c.nombre}">Eliminar</button>
+                  <button class="btn-secundario btn-editar" data-id="${
+                    c.id
+                  }">Editar</button>
+                  <button class="btn-peligro btn-eliminar" data-id="${
+                    c.id
+                  }" data-nombre="${c.nombre}">Eliminar</button>
                 </td>
               </tr>
             `
@@ -79,7 +84,9 @@ export async function cargarCampanias() {
     contenedor.innerHTML = html;
 
     // === Asignar eventos ===
-    document.getElementById("btnNuevaCampania")?.addEventListener("click", () => abrirModalCampania());
+    document
+      .getElementById("btnNuevaCampania")
+      ?.addEventListener("click", () => abrirModalCampania());
 
     document.querySelectorAll(".btn-editar").forEach((btn) => {
       btn.addEventListener("click", async () => {
@@ -96,7 +103,7 @@ export async function cargarCampanias() {
       });
     });
   } catch (error) {
-    console.error("❌ Error al cargar campañas:", error);
+    appLogger.error("❌ Error al cargar campañas:", error);
     contenedor.innerHTML = `<p>Error al cargar campañas. Intente más tarde.</p>`;
   }
 }
@@ -157,7 +164,9 @@ async function abrirModalCampania(id = null) {
       <input type="date" id="fecha_fin" name="fecha_fin" required />
 
       <div class="modal-buttons">
-        <button type="submit" class="btn-accion-centro">${esEdicion ? "Actualizar" : "Guardar"}</button>
+        <button type="submit" class="btn-accion-centro">${
+          esEdicion ? "Actualizar" : "Guardar"
+        }</button>
         <button type="button" id="btnCancelarModal" class="btn-secundario">Cancelar</button>
       </div>
     </form>
@@ -256,7 +265,9 @@ async function cargarProvincias() {
 }
 
 async function cargarLocalidades(provinciaId) {
-  const res = await fetch(`${API_BASE_URL}/api/localidades/provincia/${provinciaId}`);
+  const res = await fetch(
+    `${API_BASE_URL}/api/localidades/provincia/${provinciaId}`
+  );
   const localidades = await res.json();
   const select = document.getElementById("localidad_id");
   limpiarSelect(select);
@@ -270,7 +281,9 @@ async function cargarLocalidades(provinciaId) {
 }
 
 async function cargarBarrios(localidadId) {
-  const res = await fetch(`${API_BASE_URL}/api/barrios/localidad/${localidadId}`);
+  const res = await fetch(
+    `${API_BASE_URL}/api/barrios/localidad/${localidadId}`
+  );
   const barrios = await res.json();
   const select = document.getElementById("barrio_id");
   limpiarSelect(select);
@@ -318,11 +331,19 @@ async function guardarOCrearCampania(metodo, id = null) {
   if (!datos.nombre || !datos.descripcion || !datos.imagen_url)
     return mostrarPopup("Todos los campos son obligatorios.", "advertencia");
   if (datos.fecha_inicio < hoy)
-    return mostrarPopup("La fecha de inicio no puede ser anterior a hoy.", "advertencia");
+    return mostrarPopup(
+      "La fecha de inicio no puede ser anterior a hoy.",
+      "advertencia"
+    );
   if (datos.fecha_fin < datos.fecha_inicio)
-    return mostrarPopup("La fecha de fin no puede ser anterior a la de inicio.", "advertencia");
+    return mostrarPopup(
+      "La fecha de fin no puede ser anterior a la de inicio.",
+      "advertencia"
+    );
 
-  const url = `${API_BASE_URL}/api/campanias${metodo === "PUT" ? `/${id}` : ""}`;
+  const url = `${API_BASE_URL}/api/campanias${
+    metodo === "PUT" ? `/${id}` : ""
+  }`;
 
   try {
     const res = await fetch(url, {
@@ -337,7 +358,9 @@ async function guardarOCrearCampania(metodo, id = null) {
     if (!res.ok) throw new Error("Error al guardar campaña");
 
     mostrarPopup(
-      metodo === "PUT" ? "Campaña actualizada correctamente." : "Campaña creada correctamente.",
+      metodo === "PUT"
+        ? "Campaña actualizada correctamente."
+        : "Campaña creada correctamente.",
       "exito"
     );
     cerrarModal();
@@ -345,7 +368,7 @@ async function guardarOCrearCampania(metodo, id = null) {
     modalContent.classList.remove("large"); // 🔧 reset del tamaño
     cargarCampanias();
   } catch (err) {
-    console.error("Error al guardar:", err);
+    appLogger.error("Error al guardar:", err);
     mostrarPopup("No se pudo guardar la campaña.", "error");
   }
 }
@@ -366,11 +389,15 @@ function mostrarModalConfirmacionEliminar(id, nombre) {
     </div>
   `);
 
-  document.getElementById("btnCancelarEliminar").addEventListener("click", cerrarModal);
-  document.getElementById("btnConfirmEliminar").addEventListener("click", async () => {
-    await eliminarCampania(id);
-    cerrarModal();
-  });
+  document
+    .getElementById("btnCancelarEliminar")
+    .addEventListener("click", cerrarModal);
+  document
+    .getElementById("btnConfirmEliminar")
+    .addEventListener("click", async () => {
+      await eliminarCampania(id);
+      cerrarModal();
+    });
 }
 
 /* === ELIMINAR CAMPAÑA === */
@@ -387,7 +414,10 @@ async function eliminarCampania(id) {
     mostrarPopup("Campaña eliminada correctamente.", "exito");
     cargarCampanias();
   } catch (err) {
-    console.error("❌ Error al eliminar campaña:", err);
-    mostrarPopup("No se pudo eliminar la campaña. Intente nuevamente.", "error");
+    appLogger.error("❌ Error al eliminar campaña:", err);
+    mostrarPopup(
+      "No se pudo eliminar la campaña. Intente nuevamente.",
+      "error"
+    );
   }
 }

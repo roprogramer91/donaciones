@@ -59,7 +59,7 @@ export async function abrirModalInscripciones(campaniaId, campaniaNombre = "") {
     const inscripciones = await res.json();
     renderInscripciones(inscripciones);
   } catch (error) {
-    console.error("Error al cargar inscripciones:", error);
+    appLogger.error("Error al cargar inscripciones:", error);
     mostrarMensaje("Error al cargar inscripciones", "error");
   }
 }
@@ -113,3 +113,4 @@ function formatearEstado(estado) {
       return { texto: "Desconocido", clase: "estado-desconocido" };
   }
 }
+import { appLogger } from "../../../utils/logger.js";

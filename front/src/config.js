@@ -1,7 +1,12 @@
 // front/src/config.js
 
+
+
+
 // cambiar variable segun el entorno
-const ENV = window.location.hostname.includes("localhost") ? "development" : "production";
+const ENV = window.location.hostname.includes("localhost")
+  ? "development"
+  : "production";
 
 // URLs por entorno
 const CONFIG = {
@@ -18,5 +23,3 @@ const CONFIG = {
 // Exportar las URLs dependiendo del entorno detectado
 export const API_BASE_URL = CONFIG[ENV].API_BASE_URL;
 export const AUTH_URL = CONFIG[ENV].AUTH_URL;
-
-console.log(`Modo: ${ENV.toUpperCase()} — API: ${API_BASE_URL}`);

@@ -5,7 +5,11 @@
 // ============================================================
 
 import { API_BASE_URL } from "../../config.js";
-import { authHeaders, getCentroId, mostrarMensaje } from "../dashboard-centro.js";
+import {
+  authHeaders,
+  getCentroId,
+  mostrarMensaje,
+} from "../dashboard-centro.js";
 
 // ============================================================
 // ELEMENTOS BASE
@@ -57,7 +61,7 @@ async function cargarPerfilCentro() {
     document.getElementById("perfil_telefono").value = data.telefono || "";
     document.getElementById("perfil_email").value = data.email || "";
   } catch (e) {
-    console.error("Error al cargar perfil:", e);
+    appLogger.error("Error al cargar perfil:", e);
     mostrarMensaje("Error al cargar el perfil del centro", "error");
   }
 }
@@ -106,7 +110,7 @@ async function guardarPerfilCentro(e) {
     mostrarMensaje("Perfil actualizado correctamente", "success");
     modalPerfil.style.display = "none";
   } catch (e) {
-    console.error(e);
+    appLogger.error(e);
     mostrarMensaje("Error al guardar el perfil", "error");
   }
 }
@@ -119,3 +123,4 @@ function validarEmail(email) {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
 }
+import { appLogger } from "../../utils/logger.js";

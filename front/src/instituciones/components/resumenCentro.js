@@ -24,8 +24,8 @@ export async function cargarResumen() {
     const res = await fetch(`${API_BASE_URL}/api/centro/summary`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, 
-        "X-Centro-Id": centroId, 
+        Authorization: `Bearer ${token}`,
+        "X-Centro-Id": centroId,
       },
     });
 
@@ -34,12 +34,10 @@ export async function cargarResumen() {
 
     actualizarResumenUI(resumen);
   } catch (error) {
-    console.error("Error al cargar resumen del centro:", error);
+    appLogger.error("Error al cargar resumen del centro:", error);
     mostrarErrorResumen();
   }
 }
-
-
 
 // ============================================================
 // FUNCIONES AUXILIARES
@@ -85,8 +83,12 @@ function actualizarResumenUI(s) {
   const elSig = document.getElementById("campania-siguiente");
   if (elSig) {
     if (s.siguiente_campania) {
-      const fecha = new Date(s.siguiente_campania.fecha_inicio).toLocaleDateString("es-AR");
-      elSig.textContent = `${s.siguiente_campania.nombre || "Campaña"} — ${fecha}`;
+      const fecha = new Date(
+        s.siguiente_campania.fecha_inicio
+      ).toLocaleDateString("es-AR");
+      elSig.textContent = `${
+        s.siguiente_campania.nombre || "Campaña"
+      } — ${fecha}`;
     } else {
       elSig.textContent = "--";
     }
@@ -104,3 +106,4 @@ function mostrarErrorResumen() {
       ⚠️ Error al cargar los datos del resumen.
     </div>`;
 }
+import { appLogger } from "../../utils/logger.js";

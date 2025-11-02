@@ -1,5 +1,6 @@
 import { API_BASE_URL } from "../../config.js";
 import { obtenerUltimoResultadoDonantes } from "./donantes.js";
+import { appLogger } from "../../utils/logger.js";
 
 export function inicializarNotificaciones() {
   const tipo = document.getElementById("tipo-notif");
@@ -42,8 +43,7 @@ export function inicializarNotificaciones() {
       const data = await res.json();
       tablaLog.innerHTML = "";
       if (!data.length) {
-        tablaLog.innerHTML =
-          `<tr><td colspan="4" style="text-align:center;color:#888;">Sin registros</td></tr>`;
+        tablaLog.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#888;">Sin registros</td></tr>`;
         return;
       }
       data.forEach((n) => {
@@ -52,14 +52,18 @@ export function inicializarNotificaciones() {
           <td>${new Date(n.created_at).toLocaleString()}</td>
           <td>${n.tipo || "-"}</td>
           <td>${n.enviados || 0}</td>
-          <td>${n.mensaje ? n.mensaje.substring(0, 50) + (n.mensaje.length > 50 ? "..." : "") : ""}</td>
+          <td>${
+            n.mensaje
+              ? n.mensaje.substring(0, 50) +
+                (n.mensaje.length > 50 ? "..." : "")
+              : ""
+          }</td>
         `;
         tablaLog.appendChild(tr);
       });
     } catch (err) {
-      console.error("Error al cargar historial:", err);
-      tablaLog.innerHTML =
-        `<tr><td colspan="4" style="text-align:center;color:#999;">Error al cargar historial</td></tr>`;
+      appLogger.error("Error al cargar historial:", err);
+      tablaLog.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#999;">Error al cargar historial</td></tr>`;
     }
   }
 
@@ -69,20 +73,25 @@ export function inicializarNotificaciones() {
   btnPreview?.addEventListener("click", async () => {
     try {
       const filtros = construirFiltros();
-      const res = await fetch(`${API_BASE_URL}/api/centros/notificaciones/preview`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          "X-Centro-Id": centroId,
-        },
-        body: JSON.stringify({ filtros }),
-      });
+      const res = await fetch(
+        `${API_BASE_URL}/api/centros/notificaciones/preview`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            "X-Centro-Id": centroId,
+          },
+          body: JSON.stringify({ filtros }),
+        }
+      );
       const data = await res.json();
-      previewContenido.textContent = `📬 Destinatarios estimados: ${data.destinatarios || 0}`;
+      previewContenido.textContent = `📬 Destinatarios estimados: ${
+        data.destinatarios || 0
+      }`;
       previewContenedor.classList.remove("preview-oculto");
     } catch (e) {
-      console.error("Error en preview:", e);
+      appLogger.error("Error en preview:", e);
       previewContenido.textContent = "Error al generar vista previa.";
       previewContenedor.classList.remove("preview-oculto");
     }
@@ -128,7 +137,7 @@ export function inicializarNotificaciones() {
       previewContenedor.classList.add("preview-oculto");
       cargarHistorial();
     } catch (err) {
-      console.error("Error al enviar notificación:", err);
+      appLogger.error("Error al enviar notificación:", err);
       alert("❌ Error al enviar notificación.");
     }
   });
@@ -139,7 +148,9 @@ export function inicializarNotificaciones() {
   function construirFiltros() {
     const lista = obtenerUltimoResultadoDonantes();
     if (destinatario.value === "filtrados" && lista?.length) {
-      const grupos = [...new Set(lista.map((d) => d.grupo_sanguineo))].filter(Boolean);
+      const grupos = [...new Set(lista.map((d) => d.grupo_sanguineo))].filter(
+        Boolean
+      );
       return { grupo: grupos.length === 1 ? grupos[0] : undefined };
     }
     if (destinatario.value === "aptos") return { estado: "apto" };
@@ -148,5 +159,5 @@ export function inicializarNotificaciones() {
 
   // === Inicialización ===
   cargarHistorial();
-  console.log("✅ notificaciones.js inicializado correctamente.");
+  appLogger.log("✅ notificaciones.js inicializado correctamente.");
 }

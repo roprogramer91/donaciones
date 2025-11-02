@@ -93,7 +93,7 @@ async function cargarPerfilCentro() {
     document.getElementById('perfil_telefono').value = data.telefono || '';
     document.getElementById('perfil_email').value = data.email || '';
   } catch (e) {
-    console.error(e);
+    appLogger.error(e);
     alert('Error al cargar el perfil');
   }
 }
@@ -121,7 +121,7 @@ formPerfil?.addEventListener('submit', async (e) => {
     bienvenida.textContent = `Bienvenido, ${actualizado.nombre || 'Centro de Hemoterapia'}!`;
     modalPerfil.style.display = 'none';
   } catch (e) {
-    console.error(e);
+    appLogger.error(e);
     alert('Error al guardar el perfil');
   }
 });
@@ -198,7 +198,7 @@ async function cargarDonantes() {
     await ensureLocalidadesFor(provIds);
     renderDonantes(data);
   } catch (err) {
-    console.error("Error al cargar donantes:", err);
+    appLogger.error("Error al cargar donantes:", err);
     tablaBody.innerHTML = `<tr><td colspan="7">Error al cargar donantes</td></tr>`;
   }
 }
@@ -245,7 +245,7 @@ async function inicializarFiltrosDonantes() {
       filtroLocalidad.disabled = false;
     });
   } catch (e) {
-    console.error('Error inicializando filtros de donantes:', e);
+    appLogger.error('Error inicializando filtros de donantes:', e);
   }
 }
 
@@ -319,7 +319,7 @@ async function cargarCampanias() {
     );
 
   } catch (err) {
-    console.error('Error al cargar campañas:', err);
+    appLogger.error('Error al cargar campañas:', err);
   }
 }
 
@@ -339,7 +339,7 @@ async function eliminarCampania(id) {
     alert("Campaña eliminada correctamente.");
     await cargarCampanias();
   } catch (err) {
-    console.error(err);
+    appLogger.error(err);
     alert("No se pudo eliminar la campaña.");
   }
 }
@@ -367,7 +367,7 @@ async function editarCampania(id) {
     formCampania.dataset.editId = id;
 
   } catch (err) {
-    console.error('Error al cargar campaña para editar:', err);
+    appLogger.error('Error al cargar campaña para editar:', err);
     alert('No se pudo cargar la campaña para editar.');
   }
 }
@@ -452,11 +452,11 @@ async function cargarUbicaciones() {
         });
         selectLocalidad.disabled = false;
       } catch (error) {
-        console.error('Error cargando localidades:', error);
+        appLogger.error('Error cargando localidades:', error);
       }
     });
   } catch (error) {
-    console.error('Error cargando ubicaciones:', error);
+    appLogger.error('Error cargando ubicaciones:', error);
   }
 }
 
@@ -522,7 +522,7 @@ formCampania.addEventListener('submit', async (e) => {
     await cargarCampanias();
 
   } catch (error) {
-    console.error(error);
+    appLogger.error(error);
     alert('Error al guardar la campaña: ' + error.message);
   }
 });

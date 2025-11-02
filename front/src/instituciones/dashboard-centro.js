@@ -9,13 +9,13 @@
 =========================================================== */
 
 /* === IMPORTACIONES DE MÓDULOS === */
+import { appLogger } from "../utils/logger.js";
 import { abrirModal, cerrarModal } from "./components/modales/modalBase.js";
 import { cargarCampanias } from "./components/campanias.js";
 import { cargarResumen } from "./components/resumenCentro.js";
 import { mostrarPopup } from "./components/popup.js";
 import { inicializarDonantes } from "./components/donantes.js";
 import { inicializarNotificaciones } from "./components/notificaciones.js";
-
 
 /* ==========================================================
    🔁 FUNCIÓN GLOBAL: TOGGLE DE SECCIONES
@@ -32,7 +32,8 @@ export function toggleSeccion(nombre) {
     const id = sec.id || sec.classList[0];
     const esActiva =
       id.includes(nombre) ||
-      (nombre === "resumen" && sec.classList.contains("dashboard-centro-resumen"));
+      (nombre === "resumen" &&
+        sec.classList.contains("dashboard-centro-resumen"));
 
     if (esActiva) {
       sec.classList.remove("oculto");
@@ -79,7 +80,12 @@ document.addEventListener("DOMContentLoaded", () => {
      Muestra la sección seleccionada y oculta las demás
   =========================================================== */
   const mostrarSeccion = (seccionActiva) => {
-    const secciones = [seccionResumen, seccionDonantes, seccionCampanias, seccionNotifs];
+    const secciones = [
+      seccionResumen,
+      seccionDonantes,
+      seccionCampanias,
+      seccionNotifs,
+    ];
     secciones.forEach((sec) => {
       if (sec) sec.classList.toggle("oculto", sec !== seccionActiva);
     });
@@ -104,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnVerCampanias)
     btnVerCampanias.addEventListener("click", () => {
       mostrarSeccion(seccionCampanias);
-      cargarCampanias(); 
+      cargarCampanias();
     });
 
   if (btnVerNotifs)
@@ -133,11 +139,10 @@ document.addEventListener("DOMContentLoaded", () => {
      Borra token y recarga página
   =========================================================== */
   if (btnLogout)
-    btnLogout.addEventListener('click', () => {
+    btnLogout.addEventListener("click", () => {
       localStorage.clear();
-      window.location.href = '../../index.html'; // vuelve al login principal
-});
-
+      window.location.href = "../../index.html"; // vuelve al login principal
+    });
 
   /* ==========================================================
      7️⃣ INICIALIZAR MÓDULOS SECUNDARIOS
@@ -146,14 +151,9 @@ document.addEventListener("DOMContentLoaded", () => {
   inicializarDonantes();
   inicializarNotificaciones();
 
-
-
-
   /* ==========================================================
      8️⃣ DEBUG Y CONFIRMACIÓN DE CARGA
   =========================================================== */
-  console.log("✅ dashboard-centro.js cargado y funcionando correctamente.");
-  console.log("ModalBase encontrado:", document.getElementById("modal-base"));
+  appLogger.log("✅ dashboard-centro.js cargado y funcionando correctamente.");
+  appLogger.log("ModalBase encontrado:", document.getElementById("modal-base"));
 });
-
-
