@@ -153,7 +153,32 @@ const Notificaciones = {
       await pool.query(sql, values);
       return dons.length;
     }
-    return 0;
+  return 0;
+},
+
+async getHistorial() {
+    const s = await loadSchema();
+
+    const colFecha = s.hasCreatedAt
+      ? 'created_at'
+      : s.hasFechaEnvio
+      ? 'fecha_envio'
+      : 'NOW() as fecha_envio';
+    const colTipo = s.hasTipo ? 'tipo' : (s.hasEstado ? 'estado' : "'info' as tipo");
+
+    const { rows } = await pool.query(
+      `SELECT 
+         id,
+         ${s.hasUsuario ? 'usuario_id' : (s.hasDonante ? 'donante_id' : 'NULL::int as usuario_id')},
+         ${s.hasCampania ? 'campania_id' : (s.hasCampaña ? '"campaña_id" as campania_id' : 'NULL::int as campania_id')},
+         ${colTipo},
+         mensaje,
+         ${colFecha}
+       FROM notificaciones
+       ORDER BY ${s.hasCreatedAt ? 'created_at' : (s.hasFechaEnvio ? 'fecha_envio' : 'id')} DESC
+       LIMIT 50`
+    );
+    return rows;
   }
 };
 

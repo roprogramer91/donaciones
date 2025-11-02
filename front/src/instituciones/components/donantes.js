@@ -50,6 +50,25 @@ export function inicializarDonantes() {
   btnLimpiarFiltro?.addEventListener("click", limpiarFiltros);
 }
 
+// ============================================================
+// PLEGABLE DE NOTIFICACIONES
+// ============================================================
+const toggleNotif = document.getElementById("toggle-notif");
+const notifPanel = document.getElementById("notif-panel");
+
+if (toggleNotif && notifPanel) {
+  toggleNotif.addEventListener("click", () => {
+    notifPanel.classList.toggle("oculto");
+    toggleNotif.classList.toggle("activo");
+  });
+}
+
+// Inicializamos módulo de notificaciones solo cuando se abra
+import("./notificaciones.js").then((mod) => {
+  if (mod?.inicializarNotificaciones) mod.inicializarNotificaciones();
+});
+
+
 
 // ============================================================
 // CARGA DE DONANTES CON FILTROS
@@ -295,4 +314,68 @@ function exportarCSVDonantes() {
   a.download = `donantes_${now.toISOString().split("T")[0]}.csv`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+/* ==========================================================
+   PAGINACIÓN Y BÚSQUEDA LOCAL
+========================================================== */
+let paginaActual = 1;
+const donantesPorPagina = 6;
+
+function renderDonantesPaginados() {
+  const inicio = (paginaActual - 1) * donantesPorPagina;
+  const fin = inicio + donantesPorPagina;
+  const pagina = ultimoResultadoDonantes.slice(inicio, fin);
+
+  renderDonantes(pagina);
+
+  const totalPaginas = Math.ceil(ultimoResultadoDonantes.length / donantesPorPagina);
+  document.getElementById("paginacion-info").textContent =
+    `Página ${paginaActual} de ${totalPaginas || 1}`;
+
+  document.getElementById("btn-prev").disabled = paginaActual === 1;
+  document.getElementById("btn-next").disabled = paginaActual >= totalPaginas;
+}
+
+document.getElementById("btn-prev")?.addEventListener("click", () => {
+  if (paginaActual > 1) {
+    paginaActual--;
+    renderDonantesPaginados();
+  }
+});
+
+document.getElementById("btn-next")?.addEventListener("click", () => {
+  const totalPaginas = Math.ceil(ultimoResultadoDonantes.length / donantesPorPagina);
+  if (paginaActual < totalPaginas) {
+    paginaActual++;
+    renderDonantesPaginados();
+  }
+});
+
+/* ==========================================================
+   BÚSQUEDA LOCAL POR NOMBRE O EMAIL
+========================================================== */
+document.getElementById("filtro-busqueda")?.addEventListener("input", (e) => {
+  const texto = e.target.value.toLowerCase().trim();
+  if (!texto) {
+    renderDonantesPaginados();
+    return;
+  }
+
+  const filtrados = ultimoResultadoDonantes.filter(
+    (d) =>
+      (d.nombre && d.nombre.toLowerCase().includes(texto)) ||
+      (d.apellido && d.apellido.toLowerCase().includes(texto)) ||
+      (d.email && d.email.toLowerCase().includes(texto))
+  );
+
+  renderDonantes(filtrados);
+  document.getElementById("paginacion-info").textContent = "Filtrado local";
+});
+
+// ============================================================
+// Función pública para obtener los donantes filtrados actuales
+// ============================================================
+export function obtenerUltimoResultadoDonantes() {
+  return ultimoResultadoDonantes || [];
 }

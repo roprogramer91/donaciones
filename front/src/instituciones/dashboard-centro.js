@@ -14,6 +14,8 @@ import { cargarCampanias } from "./components/campanias.js";
 import { cargarResumen } from "./components/resumenCentro.js";
 import { mostrarPopup } from "./components/popup.js";
 import { inicializarDonantes } from "./components/donantes.js";
+import { inicializarNotificaciones } from "./components/notificaciones.js";
+
 
 /* ==========================================================
    🔁 FUNCIÓN GLOBAL: TOGGLE DE SECCIONES
@@ -97,13 +99,12 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnVerDonantes)
     btnVerDonantes.addEventListener("click", () => {
       mostrarSeccion(seccionDonantes);
-      console.log("🩸 Botón 'Ver Donantes' clickeado");
     });
 
   if (btnVerCampanias)
     btnVerCampanias.addEventListener("click", () => {
       mostrarSeccion(seccionCampanias);
-      cargarCampanias(); // carga dinámica desde backend
+      cargarCampanias(); 
     });
 
   if (btnVerNotifs)
@@ -132,18 +133,21 @@ document.addEventListener("DOMContentLoaded", () => {
      Borra token y recarga página
   =========================================================== */
   if (btnLogout)
-    btnLogout.addEventListener("click", () => {
-      if (confirm("¿Deseas cerrar sesión?")) {
-        localStorage.removeItem("token");
-        window.location.href = "/front/src/login.html";
-      }
-    });
+    btnLogout.addEventListener('click', () => {
+      localStorage.clear();
+      window.location.href = '../../index.html'; // vuelve al login principal
+});
+
 
   /* ==========================================================
      7️⃣ INICIALIZAR MÓDULOS SECUNDARIOS
      (Debe ir al final para asegurar que el DOM esté listo)
   =========================================================== */
   inicializarDonantes();
+  inicializarNotificaciones();
+
+
+
 
   /* ==========================================================
      8️⃣ DEBUG Y CONFIRMACIÓN DE CARGA
@@ -151,3 +155,5 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("✅ dashboard-centro.js cargado y funcionando correctamente.");
   console.log("ModalBase encontrado:", document.getElementById("modal-base"));
 });
+
+

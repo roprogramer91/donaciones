@@ -5,6 +5,7 @@ const Notificaciones = require('../models/notificaciones.model');
 const db = require('../data/config');
 const { calcularAptoYRestante } = require('../utils/donanteUtils');
 
+
 function obtenerCentroIdDeRequest(req) {
   const header = req.headers['x-centro-id'] || req.headers['X-Centro-Id'];
   if (header && !isNaN(parseInt(header))) return parseInt(header);
@@ -72,11 +73,6 @@ async obtenerResumen(req, res) {
         }
       }
     });
-
-    // Resto de tu lógica…
-
-
-    
 
 
       // Campañas del centro
@@ -369,5 +365,18 @@ module.exports.getInscripcionesUsuario = async function(req, res){
   }catch(e){
     console.error('Error al obtener inscripciones por usuario:', e);
     res.status(500).json({ error: 'Error al obtener inscripciones' });
+  }
+};
+
+
+
+
+module.exports.getHistorialNotificaciones = async function(req, res) {
+  try {
+    const historial = await Notificaciones.getHistorial();
+    res.json(historial);
+  } catch (error) {
+    console.error("Error al obtener historial de notificaciones:", error);
+    res.status(500).json({ error: "Error al obtener historial de notificaciones" });
   }
 };
