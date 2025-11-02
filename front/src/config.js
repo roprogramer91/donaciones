@@ -10,7 +10,7 @@ const CONFIG = {
     AUTH_URL: "http://localhost:5000",
   },
   production: {
-    API_BASE_URL: "https://donaciones-back-prod.up.railway.app",
+    API_BASE_URL: "https://donaciones-production.up.railway.app",
     AUTH_URL: "https://donaciones-auth-service-production.up.railway.app",
   },
 };
@@ -19,4 +19,4 @@ const CONFIG = {
 export const API_BASE_URL = CONFIG[ENV].API_BASE_URL;
 export const AUTH_URL = CONFIG[ENV].AUTH_URL;
 
-console.log(`🧩 Modo: ${ENV.toUpperCase()} — API: ${API_BASE_URL}`);
+console.log(`Modo: ${ENV.toUpperCase()} — API: ${API_BASE_URL}`);
