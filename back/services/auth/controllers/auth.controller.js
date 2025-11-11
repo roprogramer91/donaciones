@@ -8,47 +8,56 @@
   } = require('../models/verificaciones2FA.model');
   const { generate2FACode } = require('../utils/generate2FACode');
   const { generarToken } = require('../utils/jwt'); 
+  const { enviarCodigo2FA } = require('../utils/mailer');
+
 
   // --- LOGIN ---
-  async function login(req, res) {
-    try {
-      const { dni, password } = req.body;
+async function login(req, res) {
+  try {
+    const { dni, password } = req.body;
 
-      if (!dni || !password)
-        return res.status(400).json({ message: 'DNI y contraseña son requeridos.' });
+    if (!dni || !password)
+      return res.status(400).json({ message: 'DNI y contraseña son requeridos.' });
 
-      const user = await findUserByDni(dni);
-      if (!user || !user.activo)
-        return res.status(401).json({ message: 'Usuario no encontrado o inactivo.' });
+    const user = await findUserByDni(dni);
+    if (!user || !user.activo)
+      return res.status(401).json({ message: 'Usuario no encontrado o inactivo.' });
 
-      const valid = await bcrypt.compare(password, user.password_hash || '');
-      if (!valid)
-        return res.status(401).json({ message: 'Contraseña incorrecta.' });
+    const valid = await bcrypt.compare(password, user.password_hash || '');
+    if (!valid)
+      return res.status(401).json({ message: 'Contraseña incorrecta.' });
 
-      // --- Generar código 2FA ---
-      const code = generate2FACode();
-      const verification = await createVerification(user.id, code, 'email');
+    // --- Generar código 2FA ---
+    const codigo = generate2FACode();
+    await createVerification(user.id, codigo, 'email');
 
-      console.log(`📧 Código 2FA enviado a ${user.email}: ${code}`);
+    // --- Enviar correo 2FA ---
+    const enviado = await enviarCodigo2FA(user.email, codigo);
 
-      // --- NUEVO: generar token preliminar (antes del 2FA final) ---
-      const tempToken = generarToken({
-        id: user.id,
-        dni: user.dni,
-        tipo_usuario: user.tipo_usuario,
-      });
-
-      res.status(200).json({
-        message: 'Código 2FA generado. Revise su correo.',
-        usuario_id: user.id,
-        verification_id: verification.id,
-        temp_token: tempToken, // <-- el frontend lo usa temporalmente hasta verificar el 2FA
-      });
-    } catch (error) {
-      console.error('Error en login:', error);
-      res.status(500).json({ message: 'Error interno del servidor.' });
+    if (!enviado) {
+      console.warn(`⚠️ No se pudo enviar el correo a ${user.email}`);
+      return res.status(500).json({ message: 'No se pudo enviar el código 2FA.' });
     }
+
+    // --- Crear token temporal (para el paso de verificación) ---
+    const tempToken = generarToken({
+      id: user.id,
+      dni: user.dni,
+      email: user.email,
+      tipo_usuario: user.tipo_usuario,
+    });
+
+    res.status(200).json({
+      message: 'Código 2FA generado y enviado por correo.',
+      usuario_id: user.id,
+      temp_token: tempToken,
+    });
+
+  } catch (error) {
+    console.error('Error en login:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
   }
+}
 
   // --- VERIFY 2FA ---
   async function verify2FA(req, res) {

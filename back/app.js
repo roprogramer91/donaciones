@@ -16,8 +16,6 @@ const authRoutes = require('./services/auth/routes/auth.routes');
 const usuariosRoutes = require('./services/auth/routes/usuarios.routes');
 const adminRoutes = require('./services/auth/routes/admin.routes');
 
-// Rutas de testing
-const testEmailRoutes = require('./services/auth/routes/testEmail.routes');
 
 
 // Middlewares
@@ -56,9 +54,6 @@ app.listen(PORT, () => {
 app.get('/back', (req, res) => {
   res.send('Servidor funcionando OK');
 });
-
-// Test de envío de email
-app.use('/api/test', testEmailRoutes);
 
 
 // TEST DE CONEXIÓN A LA BASE DE DATOS
