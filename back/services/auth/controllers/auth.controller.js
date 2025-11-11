@@ -1,10 +1,11 @@
   // controllers/auth.controller.js
   const bcrypt = require('bcrypt');
-  const { findUserByid, findUserByDni,findUserByEmail } = require('../models/usuarios.model');
+  const { findUserByid, findUserByDni,findUserByEmail, updatePassword } = require('../models/usuarios.model');
   const { createVerification, verifyCode, markCodeAsUsed} = require('../models/verificaciones2FA.model');
   const { generate2FACode } = require('../utils/generate2FACode');
   const { generarToken } = require('../utils/jwt'); 
   const { enviarCodigo2FA, sendMail } = require('../utils/mailer');
+
 
 
 
@@ -147,4 +148,36 @@ async function recoverPassword(req, res) {
   }
 }
 
-  module.exports = { login, verify2FA, recoverPassword };
+
+async function resetPassword(req, res) {
+  try {
+    const { dni, codigo, nuevaPassword } = req.body;
+
+    if (!dni || !codigo || !nuevaPassword) {
+      return res.status(400).json({ message: 'DNI, código y nueva contraseña son requeridos.' });
+    }
+
+    const user = await findUserByDni(dni);
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado.' });
+
+    // Verificar código de recuperación
+    const verificacion = await verifyCode(user.id, codigo, 'recuperacion');
+    if (!verificacion) {
+      return res.status(400).json({ message: 'Código inválido o expirado.' });
+    }
+
+    // Hashear nueva contraseña
+    const hashed = await bcrypt.hash(nuevaPassword, 10);
+    await updatePassword(user.id, hashed);
+
+    // Marcar código como usado
+    await markCodeAsUsed(verificacion.id);
+
+    return res.status(200).json({ message: 'Contraseña actualizada correctamente.' });
+  } catch (error) {
+    console.error('Error en resetPassword:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+}
+
+  module.exports = { login, verify2FA, recoverPassword, resetPassword };

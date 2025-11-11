@@ -22,5 +22,10 @@ async function findUserByEmail(email) {
   return rows[0];
 }
 
+async function updatePassword(id, hashedPassword) {
+  const query = 'UPDATE usuarios SET password_hash = $1 WHERE id = $2';
+  await pool.query(query, [hashedPassword, id]);
+}
 
-module.exports = { findUserByDni, findUserByid, findUserByEmail };
+
+module.exports = { findUserByDni, findUserByid, findUserByEmail, updatePassword };
