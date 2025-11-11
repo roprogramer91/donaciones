@@ -1,38 +1,29 @@
-// middleware/authMiddleware.js
-const { verificarToken } = require('../utils/jwt');
+// services/auth/middleware/authMiddleware.js
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
-// Verifica si el usuario tiene un token valido
-function verificarAutenticacion(req, res, next) {
-  const authHeader = req.headers.authorization;
+function authMiddleware(req, res, next) {
+  try {
+    const authHeader = req.headers['authorization'];
 
-  if (!authHeader) {
-    return res.status(401).json({ mensaje: 'Token no proporcionado' });
-  }
+    if (!authHeader)
+      return res.status(401).json({ message: 'Token no proporcionado.' });
 
-  const token = authHeader.split(' ')[1]; // "Bearer <token>"
-  const decoded = verificarToken(token);
+    const token = authHeader.split(' ')[1];
+    if (!token)
+      return res.status(401).json({ message: 'Formato de token inválido.' });
 
-  if (!decoded) {
-    return res.status(401).json({ mensaje: 'Token inválido o expirado' });
-  }
+    // Verificar el token con la clave secreta
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  req.user = decoded; // Guarda los datos del usuario
-  next();
-}
-
-// Verifica si el usuario tiene uno de los roles permitidos
-function verificarRol(...rolesPermitidos) {
-  return (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({ mensaje: 'No autenticado' });
-    }
-
-    if (!rolesPermitidos.includes(req.user.tipo_usuario)) {
-      return res.status(403).json({ mensaje: 'No autorizado para esta acción' });
-    }
+    // Adjuntamos los datos del usuario al request
+    req.user = decoded;
 
     next();
-  };
+  } catch (error) {
+    console.error('Error en authMiddleware:', error);
+    return res.status(401).json({ message: 'Token inválido o expirado.' });
+  }
 }
 
-module.exports = { verificarAutenticacion, verificarRol };
+module.exports = authMiddleware;

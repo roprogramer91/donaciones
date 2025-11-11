@@ -12,6 +12,10 @@ const localidadesRoutes = require('./routes/localidadesRoutes');
 const barriosRoutes = require('./routes/barriosRoutes');
 const campaniasRoutes = require('./routes/campanias.routes');
 const centroRoutes = require('./routes/centro.routes');
+const authRoutes = require('./services/auth/routes/auth.routes');
+const usuariosRoutes = require('./services/auth/routes/usuarios.routes');
+const adminRoutes = require('./services/auth/routes/admin.routes');
+
 
 // Middlewares
 app.use(morgan('dev'));
@@ -26,6 +30,14 @@ app.use('/api/localidades', localidadesRoutes);
 app.use('/api/barrios', barriosRoutes);
 app.use('/api/campanias', campaniasRoutes);
 app.use('/api/centro', centroRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/admin', adminRoutes);
+
+
+
+
+
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;

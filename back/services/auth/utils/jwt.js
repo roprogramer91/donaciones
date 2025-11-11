@@ -12,6 +12,7 @@ function generarToken(usuario) {
   const payload = {
     id: usuario.id,
     dni: usuario.dni,
+    email: usuario.email,
     tipo_usuario: usuario.tipo_usuario,
   };
 
