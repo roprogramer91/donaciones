@@ -16,6 +16,9 @@ const authRoutes = require('./services/auth/routes/auth.routes');
 const usuariosRoutes = require('./services/auth/routes/usuarios.routes');
 const adminRoutes = require('./services/auth/routes/admin.routes');
 
+// Rutas de testing
+const testEmailRoutes = require('./services/auth/routes/testEmail.routes');
+
 
 // Middlewares
 app.use(morgan('dev'));
@@ -45,10 +48,18 @@ app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
 });
 
+
+
+//// RUTAS DE TESTING ////
+
 // Test endpoint para verificar que el servidor está funcionando
 app.get('/back', (req, res) => {
   res.send('Servidor funcionando OK');
 });
+
+// Test de envío de email
+app.use('/api/test', testEmailRoutes);
+
 
 // TEST DE CONEXIÓN A LA BASE DE DATOS
 // Este endpoint es solo para verificar la conexión a la base de datos
