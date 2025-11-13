@@ -78,4 +78,4 @@ async function verificarRolYRedirigir(token) {
     appLogger.error("Error en la verificación:", error);
   }
 }
-import { appLogger } from "./utils/logger.js";
+import { appLogger } from "./logger.js";
