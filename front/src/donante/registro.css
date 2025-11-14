@@ -1,0 +1,76 @@
+body {
+  font-family: 'Poppins', Arial, sans-serif;
+  background: #faf5f5;
+  margin: 0;
+  padding: 0;
+}
+
+.registro-container {
+  max-width: 420px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 28px 0 #edc8c821;
+  padding: 32px 26px 22px 26px;
+}
+
+h1 {
+  text-align: center;
+  font-weight: 700;
+  color: #a62424;
+  margin-bottom: 18px;
+  font-size: 1.8rem;
+}
+
+form label {
+  display: block;
+  font-weight: 600;
+  margin-top: 16px;
+  margin-bottom: 5px;
+  color: #581010;
+  font-size: 1rem;
+}
+
+form input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 4px;
+  border: 1px solid #e5bdbd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #fcf7f7;
+  outline: none;
+  transition: border 0.2s;
+}
+
+form input:focus {
+  border: 1.5px solid #a62424;
+  background: #fff0f0;
+}
+
+button[type="submit"] {
+  width: 100%;
+  background: #a62424;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 9px;
+  padding: 13px;
+  font-size: 1.14rem;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 10px #edc8c821;
+}
+
+button[type="submit"]:hover {
+  background: #c83e3e;
+}
+
+#mensaje {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 600;
+}

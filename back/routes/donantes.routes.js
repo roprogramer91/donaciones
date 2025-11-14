@@ -55,7 +55,7 @@ router.get('/notificaciones', authMiddleware, getMisNotificaciones);
 router.post('/notificaciones/:id/leida', authMiddleware, marcarNotificacionLeida);
 
 //POST
-router.post('/', authMiddleware, crearDonante);
+router.post('/', crearDonante);
 
 //PUT
 router.put('/perfil', authMiddleware, editarPerfilDonante); 

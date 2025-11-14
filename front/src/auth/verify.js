@@ -1,44 +1,67 @@
-import { apiFetch } from "../utils/api.js";
+import { API_BASE_URL } from "../utils/config.js";
 
 const form = document.getElementById("verifyForm");
-const message = document.getElementById("message");
+const codigoInput = document.getElementById("codigo");
+const mensaje = document.getElementById("mensaje");
+
+// Tomar usuario_id y token temporal
+const usuario_id = localStorage.getItem("usuario_id");
+const temp_token = localStorage.getItem("temp_token");
+
+if (!usuario_id || !temp_token) {
+  mensaje.textContent = "Error: sesión no iniciada.";
+  mensaje.style.color = "red";
+}
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
+  mensaje.textContent = "";
 
-  const codigo = document.getElementById("codigo").value.trim();
-  const usuario_id = sessionStorage.getItem("usuario_id"); 
+  const codigo = codigoInput.value.trim();
 
-  // Validar campos
-  if (!usuario_id || !codigo) {
-    message.style.color = "red";
-    message.textContent = "Datos incompletos.";
+  if (!codigo) {
+    mensaje.textContent = "Ingresá el código.";
+    mensaje.style.color = "red";
     return;
   }
 
   try {
-    const res = await apiFetch("/auth/verify", "POST", { usuario_id, codigo });
+    const res = await fetch(`${API_BASE_URL}/api/auth/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${temp_token}`,
+      },
+      body: JSON.stringify({
+        usuario_id,
+        codigo
+      }),
+    });
 
-    if (res.token) {
-      localStorage.setItem("token", res.token);
-      localStorage.setItem("role", res.role);
-      localStorage.setItem("dni", sessionStorage.getItem("dni"));
+    const data = await res.json();
 
-      message.style.color = "green";
-      message.textContent = "Verificación exitosa. Redirigiendo...";
-
-      setTimeout(() => {
-        if (res.role === "admin") window.location.href = "../admin/dashboard-admin.html";
-        else if (res.role === "centro") window.location.href = "../instituciones/dashboard-centro.html";
-        else window.location.href = "../donante/dashboard-donante.html";
-      }, 1500);
-    } else {
-      message.style.color = "red";
-      message.textContent = res.message || "Código incorrecto o expirado.";
+    if (!res.ok) {
+      mensaje.textContent = data.message || "Código incorrecto.";
+      mensaje.style.color = "red";
+      return;
     }
-  } catch (error) {
-    console.error("❌ Error:", error);
-    message.style.color = "red";
-    message.textContent = "Error al conectar con el servidor.";
+
+    // Guardar token final
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("role", data.tipo_usuario);
+
+    // Limpiar temporales
+    localStorage.removeItem("temp_token");
+
+    mensaje.style.color = "green";
+    mensaje.textContent = "Verificado. Redirigiendo...";
+
+    setTimeout(() => {
+      window.location.href = "../donante/dashboard-donante.html";
+    }, 800);
+
+  } catch (err) {
+    mensaje.textContent = "Error al conectar.";
+    mensaje.style.color = "red";
   }
 });

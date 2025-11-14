@@ -9,7 +9,12 @@ const { calcularAptoYRestante } = require('../utils/donanteUtils');
 
 // Crear donante
 const crearDonante = async (req, res) => {
-  const usuarioId = req.user.id;
+  const usuarioId = Number(req.body.usuario_id); // <<< USAR BODY, NO TOKEN
+
+  if (!usuarioId) {
+    return res.status(400).json({ error: "usuario_id faltante o inválido" });
+  }
+
   const nuevoDonante = req.body;
 
   if (!validarDNI(nuevoDonante.dni)) {
@@ -32,13 +37,17 @@ const crearDonante = async (req, res) => {
     if (!nuevoDonante.estado) nuevoDonante.estado = 'activo';
 
     const donanteCreado = await Donante.guardar(nuevoDonante);
-    res.status(201).json({ mensaje: 'Donante agregado exitosamente', donante: donanteCreado });
+    res.status(201).json({
+      mensaje: 'Donante agregado exitosamente',
+      donante: donanteCreado
+    });
 
   } catch (error) {
     console.error('Error al guardar donante:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
+
 
 // Obtener todos los donantes (con cálculo de aptitud)
 const obtenerDonantes = async (req, res) => {

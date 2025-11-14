@@ -1,6 +1,29 @@
 // services/auth/models/usuarios.model.js
 const pool = require('../../../data/config');
 
+
+
+async function createUser({ nombre, email, dni, password_hash, tipo_usuario, activo }) {
+  const query = `
+    INSERT INTO usuarios 
+    (nombre, email, dni, password_hash, tipo_usuario, activo, created_at)
+    VALUES ($1, $2, $3, $4, $5, $6, NOW())
+    RETURNING id;
+  `;
+
+  const values = [
+    nombre,
+    email,
+    dni,
+    password_hash,
+    tipo_usuario,
+    activo
+  ];
+
+  const { rows } = await pool.query(query, values);
+  return rows[0];
+}
+
 async function findUserByid(id) {
   const query = 'SELECT * FROM usuarios WHERE id = $1 AND activo = TRUE';
   const { rows } = await pool.query(query, [id]);
@@ -28,4 +51,4 @@ async function updatePassword(id, hashedPassword) {
 }
 
 
-module.exports = { findUserByDni, findUserByid, findUserByEmail, updatePassword };
+module.exports = { createUser, findUserByDni, findUserByid, findUserByEmail, updatePassword };

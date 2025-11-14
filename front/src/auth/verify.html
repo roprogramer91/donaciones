@@ -1,23 +1,34 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Verificación 2FA</title>
-  <link rel="stylesheet" href="../auth/auth.css">
+  <link rel="stylesheet" href="./verify.css">
 </head>
 <body>
-  <div class="auth-container">
-    <h1>Verificación de Seguridad</h1>
-        <form id="verifyForm">
-            <input type="text" id="codigo" placeholder="Código recibido por correo" required>
-            <button type="submit">Verificar</button>
-            <p id="message"></p>
-        </form>
 
+  <main>
+    <div class="verify-card">
+      <h2>Verificación de Seguridad</h2>
 
-    <p class="msg" id="message"></p>
-  </div>
+      <form id="verifyForm">
+
+        <input 
+          id="codigo"
+          type="text"
+          maxlength="6"
+          placeholder="Código recibido"
+          required
+        />
+
+        <!-- 🔥 MENSAJE DE ERROR / OK -->
+        <p id="mensaje"></p>
+
+        <button type="submit">Verificar</button>
+      </form>
+    </div>
+  </main>
 
   <script type="module" src="./verify.js"></script>
 </body>

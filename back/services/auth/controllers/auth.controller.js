@@ -1,6 +1,9 @@
   // controllers/auth.controller.js
+
+
+  // --- IMPORTS ---
   const bcrypt = require('bcrypt');
-  const { findUserByid, findUserByDni,findUserByEmail, updatePassword } = require('../models/usuarios.model');
+  const { createUser, findUserByid, findUserByDni,findUserByEmail, updatePassword } = require('../models/usuarios.model');
   const { createVerification, verifyCode, markCodeAsUsed} = require('../models/verificaciones2FA.model');
   const { generate2FACode } = require('../utils/generate2FACode');
   const { generarToken } = require('../utils/jwt'); 
@@ -8,46 +11,90 @@
 
 
 
-
-
-  // --- LOGIN ---
-async function login(req, res) {
+  // --- REGISTER ---
+  async function register(req, res) {
   try {
-    const { dni, password } = req.body;
+    const { nombre, apellido, email, dni, password } = req.body;
 
-    if (!dni || !password)
-      return res.status(400).json({ message: 'DNI y contraseña son requeridos.' });
-
-    const user = await findUserByDni(dni);
-    if (!user || !user.activo)
-      return res.status(401).json({ message: 'Usuario no encontrado o inactivo.' });
-
-    const valid = await bcrypt.compare(password, user.password_hash || '');
-    if (!valid)
-      return res.status(401).json({ message: 'Contraseña incorrecta.' });
-
-    // --- Generar código 2FA ---
-    const codigo = generate2FACode();
-    await createVerification(user.id, codigo, 'email');
-
-    // --- Enviar correo 2FA ---
-    const enviado = await enviarCodigo2FA(user.email, codigo);
-
-    if (!enviado) {
-      console.warn(`⚠️ No se pudo enviar el correo a ${user.email}`);
-      return res.status(500).json({ message: 'No se pudo enviar el código 2FA.' });
+    if (!nombre || !apellido || !email || !dni || !password) {
+      return res.status(400).json({ message: "Todos los campos son obligatorios." });
     }
 
-    // --- Crear token temporal (para el paso de verificación) ---
+    const existente = await findUserByEmail(email);
+    if (existente) {
+      return res.status(409).json({ message: "El email ya está registrado." });
+    }
+
+    const password_hash = await bcrypt.hash(password, 10);
+    const nombre_completo = `${nombre.trim()} ${apellido.trim()}`;
+
+    const nuevoUsuario = await createUser({
+      nombre: nombre_completo,
+      email,
+      dni,
+      password_hash,
+      tipo_usuario: 'donante',
+      activo: true
+    });
+
+    return res.json({
+      message: "Usuario registrado",
+      usuario_id: nuevoUsuario.id
+    });
+
+  } catch (error) {
+    console.error("Error en register:", error);
+    return res.status(500).json({ message: "Error interno del servidor." });
+  }
+}
+
+
+
+
+
+  async function login(req, res) {
+  try {
+    const { dni, email, password } = req.body;
+
+    if (!password)
+      return res.status(400).json({ message: 'Contraseña requerida.' });
+
+    // Buscar por DNI o email
+    let user = null;
+
+    if (email) {
+      user = await findUserByEmail(email);
+    }
+
+    if (!user && dni) {
+      user = await findUserByDni(dni);
+    }
+
+    if (!user || !user.activo) {
+      return res.status(401).json({ message: 'Usuario no encontrado o inactivo.' });
+    }
+
+    // Validar contraseña
+    const valid = await bcrypt.compare(password, user.password_hash || '');
+    if (!valid) {
+      return res.status(401).json({ message: 'Contraseña incorrecta.' });
+    }
+
+    // Generar código de 2FA
+    const codigo = generate2FACode();
+    await createVerification(user.id, codigo, 'email');
+    await enviarCodigo2FA(user.email, codigo);
+
+    // Crear token temporal
     const tempToken = generarToken({
       id: user.id,
       dni: user.dni,
       email: user.email,
-      tipo_usuario: user.tipo_usuario,
+      tipo_usuario: user.tipo_usuario
     });
 
     res.status(200).json({
-      message: 'Código 2FA generado y enviado por correo.',
+      message: 'Código 2FA enviado.',
       usuario_id: user.id,
       temp_token: tempToken,
     });
@@ -57,6 +104,7 @@ async function login(req, res) {
     res.status(500).json({ message: 'Error interno del servidor.' });
   }
 }
+
 
   // --- VERIFY 2FA ---
   async function verify2FA(req, res) {
@@ -181,4 +229,4 @@ async function resetPassword(req, res) {
   }
 }
 
-  module.exports = { login, verify2FA, recoverPassword, resetPassword };
+  module.exports = { register, login, verify2FA, recoverPassword, resetPassword };
