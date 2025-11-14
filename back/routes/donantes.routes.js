@@ -4,7 +4,7 @@
 // Importar dependencias
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/authMiddleware');
+const authMiddleware = require('../services/auth/middleware/authMiddleware');
 //fin importaciones-----
 
 

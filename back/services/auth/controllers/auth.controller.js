@@ -60,7 +60,8 @@ async function login(req, res) {
 
   // --- VERIFY 2FA ---
   async function verify2FA(req, res) {
-  
+  console.log("🧠 Body recibido en verify:", req.body);
+
     try {
       const { usuario_id, codigo } = req.body;
       

@@ -2,7 +2,8 @@
 const express = require("express");
 const router = express.Router();
 const CentrosController = require("../controllers/centros.controller");
-const authMiddleware = require("../middleware/authMiddleware");
+const authMiddleware = require('../services/auth/middleware/authMiddleware');
+
 
 // Perfil del centro autenticado
 router.get("/me", CentrosController.obtenerMiPerfil);

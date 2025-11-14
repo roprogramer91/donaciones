@@ -4,17 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Verificación 2FA</title>
-  <link rel="stylesheet" href="../styles/auth.css">
+  <link rel="stylesheet" href="../auth/auth.css">
 </head>
 <body>
   <div class="auth-container">
     <h1>Verificación de Seguridad</h1>
-    <form id="verifyForm" class="auth-form">
-      <label for="code">Código recibido por correo</label>
-      <input type="text" id="code" name="code" placeholder="Ej: 123456" required>
+        <form id="verifyForm">
+            <input type="text" id="codigo" placeholder="Código recibido por correo" required>
+            <button type="submit">Verificar</button>
+            <p id="message"></p>
+        </form>
 
-      <button type="submit" class="btn-primary">Verificar</button>
-    </form>
 
     <p class="msg" id="message"></p>
   </div>

@@ -4,7 +4,7 @@
 const express = require('express');
 const router = express.Router();
 const CampaniasController = require('../controllers/campanias.controller');
-const authMiddleware = require('../middleware/authMiddleware');
+const authMiddleware = require('../services/auth/middleware/authMiddleware');
 
 // RUTAS CRUD DE CAMPAÑAS
 router.get('/', CampaniasController.obtenerCampanias);         // Obtener todas

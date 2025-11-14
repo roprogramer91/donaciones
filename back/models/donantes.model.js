@@ -79,17 +79,18 @@ const findByEmail = async (email) => {
 
 // Perfil completo del donante
 const getPerfilCompletoByUsuarioId = async (usuarioId) => {
-  const sql = `
-    SELECT d.*, u.nombre, u.apellido, u.email,
-      p.nombre AS provincia_nombre,
-      l.nombre AS localidad_nombre
-    FROM donantes d
-    JOIN usuarios u ON d.usuario_id = u.id
-    LEFT JOIN provincias p ON d.provincia_id = p.id
-    LEFT JOIN localidades l ON d.localidad_id = l.id
-    WHERE d.usuario_id = $1
-    LIMIT 1
-  `;
+const sql = `
+  SELECT 
+    d.*,
+    u.nombre,
+    u.email,
+    u.tipo_usuario,
+    u.activo
+  FROM donantes d
+  JOIN usuarios u ON d.usuario_id = u.id
+  WHERE d.usuario_id = $1
+`;
+
   const { rows } = await db.query(sql, [usuarioId]);
   return rows[0] || null;
 };

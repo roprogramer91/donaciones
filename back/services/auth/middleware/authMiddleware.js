@@ -5,7 +5,6 @@ require('dotenv').config();
 function authMiddleware(req, res, next) {
   try {
     const authHeader = req.headers['authorization'];
-
     if (!authHeader)
       return res.status(401).json({ message: 'Token no proporcionado.' });
 
@@ -13,10 +12,7 @@ function authMiddleware(req, res, next) {
     if (!token)
       return res.status(401).json({ message: 'Formato de token inválido.' });
 
-    // Verificar el token con la clave secreta
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Adjuntamos los datos del usuario al request
     req.user = decoded;
 
     next();

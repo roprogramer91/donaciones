@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../config.js";
+import { API_BASE_URL } from "../utils/config.js";
 
 const estadoApto = document.getElementById("estado-apto");
 

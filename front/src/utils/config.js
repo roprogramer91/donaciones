@@ -10,7 +10,7 @@ const ENV = (hostname.includes("localhost") || hostname.includes("127.0.0.1"))
 
 const CONFIG = {
   development: {
-    API_BASE_URL: "https://donaciones-back-dev-entorno.up.railway.app/api",
+    API_BASE_URL: "http://localhost:3000",
     AUTH_URL: "http://localhost:3000/api", // 
   },
   production: {
