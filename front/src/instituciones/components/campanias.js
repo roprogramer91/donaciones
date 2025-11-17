@@ -3,7 +3,7 @@
    Controla la carga, render y gestión de campañas del centro
 =========================================================== */
 
-import { API_BASE_URL } from "../../config.js";
+import { API_BASE_URL } from "../../utils/config.js";
 import { abrirModal, cerrarModal } from "./modales/modalBase.js";
 import { appLogger } from "../../utils/logger.js";
 import { mostrarPopup } from "./popup.js";

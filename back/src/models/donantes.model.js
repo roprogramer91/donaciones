@@ -1,208 +1,262 @@
 // En este archivo manejo todas las consultas de donantes
 const db = require('../config/database');
 
-// Aqui obtengo todos los donantes
+// ----------------------------------------------------------
+// Traigo todos los donantes
+// ----------------------------------------------------------
 const obtenerTodos = async () => {
-  const result = await db.query(`
-    SELECT d.*, u.nombre, u.apellido, u.email
-    FROM donantes d
-    JOIN usuarios u ON d.usuario_id = u.id
-    ORDER BY d.id DESC
-  `);
-  return result.rows;
-};
-
-// Aqui guardo un donante nuevo
-const guardar = async (nuevo) => {
-  const result = await db.query(
-    `INSERT INTO donantes (
-      usuario_id,
-      grupo_sanguineo,
-      fecha_nacimiento,
-      telefono,
-      preferencias_notif,
-      fecha_ultima_donacion,
-      estado,
-      provincia_id,
-      localidad_id,
-      barrio_id,
-      dni,
-      sexo
-    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-    RETURNING *`,
-    [
-      nuevo.usuario_id,
-      nuevo.grupo_sanguineo,
-      nuevo.fecha_nacimiento || null,
-      nuevo.telefono || null,
-      nuevo.preferencias_notif || null,
-      nuevo.fecha_ultima_donacion || null,
-      nuevo.estado || 'activo',
-      nuevo.provincia_id || null,
-      nuevo.localidad_id || null,
-      nuevo.barrio_id || null,
-      nuevo.dni,
-      nuevo.sexo
-    ]
-  );
-  return result.rows[0];
-};
-
-// Aqui busco un donante por dni
-const findByDni = async (dni) => {
-  const sql = 'SELECT * FROM donantes WHERE dni = $1 LIMIT 1';
-  const { rows } = await db.query(sql, [dni]);
-  return rows[0] || null;
-};
-
-// Aqui busco un donante por su usuario
-const findByUsuarioId = async (usuarioId) => {
-  const sql = 'SELECT * FROM donantes WHERE usuario_id = $1 LIMIT 1';
-  const { rows } = await db.query(sql, [usuarioId]);
-  return rows[0] || null;
-};
-
-// Aqui busco un donante por email
-const findByEmail = async (email) => {
-  const sql = `
-    SELECT d.*, u.nombre, u.apellido, u.email
-    FROM donantes d
-    JOIN usuarios u ON d.usuario_id = u.id
-    WHERE u.email = $1
-    LIMIT 1
+  const q = `
+    select d.*, u.nombre, u.apellido, u.email
+    from donantes d
+    join usuarios u on d.usuario_id = u.id
+    order by d.id desc
   `;
-  const { rows } = await db.query(sql, [email]);
+  const { rows } = await db.query(q);
+  return rows;
+};
+
+// ----------------------------------------------------------
+// Guardo un donante nuevo
+// ----------------------------------------------------------
+const guardar = async (nuevo) => {
+  const q = `
+    insert into donantes (
+      usuario_id, grupo_sanguineo, fecha_nacimiento, telefono,
+      preferencias_notif, fecha_ultima_donacion, estado,
+      provincia_id, localidad_id, barrio_id,
+      dni, sexo
+    )
+    values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+    returning *
+  `;
+  const params = [
+    nuevo.usuario_id,
+    nuevo.grupo_sanguineo,
+    nuevo.fecha_nacimiento || null,
+    nuevo.telefono || null,
+    nuevo.preferencias_notif || null,
+    nuevo.fecha_ultima_donacion || null,
+    nuevo.estado || 'activo',
+    nuevo.provincia_id || null,
+    nuevo.localidad_id || null,
+    nuevo.barrio_id || null,
+    nuevo.dni,
+    nuevo.sexo
+  ];
+
+  const { rows } = await db.query(q, params);
+  return rows[0];
+};
+
+// ----------------------------------------------------------
+// Buscar donante por dni
+// ----------------------------------------------------------
+const findByDni = async (dni) => {
+  const q = `select * from donantes where dni = $1 limit 1`;
+  const { rows } = await db.query(q, [dni]);
   return rows[0] || null;
 };
 
-// Aqui recupero el perfil completo del donante
+// ----------------------------------------------------------
+// Buscar donante por usuario_id
+// ----------------------------------------------------------
+const findByUsuarioId = async (usuarioId) => {
+  const q = `select * from donantes where usuario_id = $1 limit 1`;
+  const { rows } = await db.query(q, [usuarioId]);
+  return rows[0] || null;
+};
+
+// ----------------------------------------------------------
+// Buscar donante por email
+// ----------------------------------------------------------
+const findByEmail = async (email) => {
+  const q = `
+    select d.*, u.nombre, u.apellido, u.email
+    from donantes d
+    join usuarios u on d.usuario_id = u.id
+    where u.email = $1
+    limit 1
+  `;
+  const { rows } = await db.query(q, [email]);
+  return rows[0] || null;
+};
+
+// ----------------------------------------------------------
+// Traigo el perfil completo del donante
+// ----------------------------------------------------------
 const getPerfilCompletoByUsuarioId = async (usuarioId) => {
-const sql = `
-  SELECT 
-    d.*,
-    u.nombre,
-    u.email,
-    u.tipo_usuario,
-    u.activo
-  FROM donantes d
-  JOIN usuarios u ON d.usuario_id = u.id
-  WHERE d.usuario_id = $1
-`;
-
-  const { rows } = await db.query(sql, [usuarioId]);
+  const q = `
+    select 
+      d.*,
+      u.nombre,
+      u.email,
+      u.tipo_usuario,
+      u.activo
+    from donantes d
+    join usuarios u on d.usuario_id = u.id
+    where d.usuario_id = $1
+  `;
+  const { rows } = await db.query(q, [usuarioId]);
   return rows[0] || null;
 };
 
-// Aqui aplico los filtros avanzados para centros
+// ----------------------------------------------------------
+// Aplico filtros para el centro
+// ----------------------------------------------------------
 const filtrar = async (filtros) => {
   const condiciones = [];
   const valores = [];
 
-  if (filtros.provincia) {
+  if (filtros?.provincia) {
     condiciones.push(`d.provincia_id = $${condiciones.length + 1}`);
     valores.push(filtros.provincia);
   }
-  if (filtros.localidad) {
+  if (filtros?.localidad) {
     condiciones.push(`d.localidad_id = $${condiciones.length + 1}`);
     valores.push(filtros.localidad);
   }
-  if (filtros.barrio) {
+  if (filtros?.barrio) {
     condiciones.push(`d.barrio_id = $${condiciones.length + 1}`);
     valores.push(filtros.barrio);
   }
-  if (filtros.grupo) {
+  if (filtros?.grupo) {
     condiciones.push(`d.grupo_sanguineo = $${condiciones.length + 1}`);
     valores.push(filtros.grupo);
   }
-  if (filtros.estado) {
+  if (filtros?.estado) {
     condiciones.push(`d.estado = $${condiciones.length + 1}`);
     valores.push(filtros.estado);
   }
 
-  let sql = `
-    SELECT d.*, u.nombre, u.apellido, u.email,
-           p.nombre AS provincia_nombre,
-           l.nombre AS localidad_nombre,
-           EXISTS (
-             SELECT 1 FROM campanias_donantes cd WHERE cd.usuario_id = d.usuario_id
-           ) AS inscripto_en_campania,
-           (
-             SELECT c.nombre
-             FROM campanias_donantes cd
-             JOIN campanias c ON c.id = cd.campania_id
-             WHERE cd.usuario_id = d.usuario_id
-             ORDER BY cd.created_at DESC NULLS LAST, c.fecha_inicio DESC NULLS LAST, c.id DESC
-             LIMIT 1
-           ) AS campania_inscripta
-    FROM donantes d
-    JOIN usuarios u ON d.usuario_id = u.id
-    LEFT JOIN provincias p ON d.provincia_id = p.id
-    LEFT JOIN localidades l ON d.localidad_id = l.id
+  let q = `
+    select 
+      d.*, 
+      u.nombre, u.apellido, u.email,
+      p.nombre as provincia_nombre,
+      l.nombre as localidad_nombre,
+      exists (
+        select 1 from campanias_donantes cd where cd.usuario_id = d.usuario_id
+      ) as inscripto_en_campania,
+      (
+        select c.nombre
+        from campanias_donantes cd
+        join campanias c on c.id = cd.campania_id
+        where cd.usuario_id = d.usuario_id
+        order by cd.created_at desc nulls last, c.fecha_inicio desc nulls last, c.id desc
+        limit 1
+      ) as campania_inscripta
+    from donantes d
+    join usuarios u on d.usuario_id = u.id
+    left join provincias p on d.provincia_id = p.id
+    left join localidades l on d.localidad_id = l.id
   `;
 
   if (condiciones.length > 0) {
-    sql += ' WHERE ' + condiciones.join(' AND ');
+    q += ' where ' + condiciones.join(' and ');
   }
 
-  sql += ' ORDER BY d.id DESC';
+  q += ' order by d.id desc';
 
-  const { rows } = await db.query(sql, valores);
+  const { rows } = await db.query(q, valores);
   return rows;
 };
 
-
-// Aqui actualizo el perfil del donante segun su usuario
+// ----------------------------------------------------------
+// Actualizo el perfil del donante
+// ----------------------------------------------------------
 const updatePerfilByUsuarioId = async (usuarioId, data) => {
   const payload = { ...data };
 
-  // Aqui convierto strings vacios a null para evitar problemas
-  ['fecha_nacimiento', 'telefono'].forEach(k => {
-    if (payload[k] === '') payload[k] = null;
-  });
+  if (payload.fecha_nacimiento === '') payload.fecha_nacimiento = null;
+  if (payload.telefono === '') payload.telefono = null;
 
-  // Solo permito editar este conjunto de campos
   const allowed = [
     'grupo_sanguineo',
     'fecha_nacimiento',
     'telefono',
     'provincia_id',
     'localidad_id',
-    'barrio_id',
+    'barrio_id'
   ];
 
   const sets = [];
   const values = [];
   let i = 1;
 
-  // Solo recorro los campos permitidos
   for (const k of allowed) {
     if (Object.prototype.hasOwnProperty.call(payload, k) && payload[k] !== undefined) {
       let val = payload[k];
-      if (['provincia_id', 'localidad_id', 'barrio_id'].includes(k) && val !== null && val !== '') {
-        const n = parseInt(val, 10);
-        if (!Number.isNaN(n)) val = n; else continue;
+
+      if (['provincia_id', 'localidad_id', 'barrio_id'].includes(k)) {
+        if (val !== null && val !== '') {
+          const n = parseInt(val, 10);
+          if (!isNaN(n)) val = n;
+          else continue;
+        }
       }
+
       sets.push(`${k} = $${i++}`);
       values.push(val);
     }
   }
 
-  // Si no llega nada valido devuelvo el perfil actual
   if (sets.length === 0) {
     return await getPerfilCompletoByUsuarioId(usuarioId);
   }
 
-  const sql = `UPDATE donantes SET ${sets.join(', ')} WHERE usuario_id = $${i} RETURNING *`;
+  const q = `
+    update donantes
+    set ${sets.join(', ')}
+    where usuario_id = $${i}
+    returning *
+  `;
   values.push(usuarioId);
 
-  const { rows } = await db.query(sql, values);
+  const { rows } = await db.query(q, values);
   if (!rows[0]) return null;
 
-  // Devuelvo el perfil completo ya combinado
   return await getPerfilCompletoByUsuarioId(usuarioId);
 };
 
+// ----------------------------------------------------------
+// Baja total del donante
+// ----------------------------------------------------------
+module.exports.bajaTotalByUsuarioId = async function (usuarioId) {
+  await db.query('begin');
+  try {
+    await db.query('delete from campanias_donantes where usuario_id = $1', [usuarioId]);
+    await db.query('delete from donantes where usuario_id = $1', [usuarioId]);
+    await db.query('delete from usuarios where id = $1', [usuarioId]);
 
+    await db.query('commit');
+    return true;
+  } catch (e) {
+    await db.query('rollback');
+    throw e;
+  }
+};
+
+// ----------------------------------------------------------
+// Traer donantes segun lista de usuarios_ids
+// ----------------------------------------------------------
+module.exports.obtenerPorUsuariosIds = async function (usuariosIds = []) {
+  if (!Array.isArray(usuariosIds) || usuariosIds.length === 0) return [];
+
+  const placeholders = usuariosIds.map((_, i) => `$${i + 1}`).join(',');
+
+  const q = `
+    select *
+    from donantes
+    where usuario_id in (${placeholders})
+  `;
+
+  const { rows } = await db.query(q, usuariosIds);
+  return rows;
+};
+
+// ----------------------------------------------------------
+// exporto todas las funciones
+// ----------------------------------------------------------
 module.exports = {
   obtenerTodos,
   guardar,
@@ -211,20 +265,7 @@ module.exports = {
   findByEmail,
   getPerfilCompletoByUsuarioId,
   updatePerfilByUsuarioId,
-  filtrar
-};
-
-// Aqui ejecuto la baja total del donante y su usuario
-module.exports.bajaTotalByUsuarioId = async function(usuarioId) {
-  await db.query('BEGIN');
-  try {
-    await db.query('DELETE FROM campanias_donantes WHERE usuario_id = $1', [usuarioId]);
-    await db.query('DELETE FROM donantes WHERE usuario_id = $1', [usuarioId]);
-    await db.query('DELETE FROM usuarios WHERE id = $1', [usuarioId]);
-    await db.query('COMMIT');
-    return true;
-  } catch (e) {
-    await db.query('ROLLBACK');
-    throw e;
-  }
+  filtrar,
+  obtenerPorUsuariosIds: module.exports.obtenerPorUsuariosIds,
+  bajaTotalByUsuarioId: module.exports.bajaTotalByUsuarioId
 };

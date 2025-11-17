@@ -1,385 +1,250 @@
-// En este archivo coordino las acciones del centro
+// back/src/controllers/centros.controller.js
+// Controlador del panel del centro
+// Aca manejo el perfil, resumen y todo lo relacionado a notificaciones
+
 const CentrosModel = require('../models/centros.model');
-const Donante = require('../models/donantes.model');
-const CampaniasModel = require('../models/campanias.model');
+const DonantesModel = require('../models/donantes.model');
 const Notificaciones = require('../models/notificaciones.model');
-const db = require('../config/database');
-const { calcularAptoYRestante } = require('../utils/donanteUtils');
 
+// ==============================================================
+// PERFIL DEL CENTRO
+// ==============================================================
 
-function obtenerCentroIdDeRequest(req) {
-  const header = req.headers['x-centro-id'] || req.headers['X-Centro-Id'];
-  if (header && !isNaN(parseInt(header))) return parseInt(header);
-  if (req.user && req.user.centro_id) return req.user.centro_id;
-  return null;
-}
-
-const CentrosController = {
-  async obtenerMiPerfil(req, res) {
-    try {
-      const centroId = obtenerCentroIdDeRequest(req);
-      if (!centroId) return res.status(400).json({ error: 'centro_id no especificado' });
-      const centro = await CentrosModel.obtenerPorId(centroId);
-      if (!centro) return res.status(404).json({ error: 'Centro no encontrado' });
-      res.json(centro);
-    } catch (error) {
-      console.error('Error al obtener perfil del centro:', error);
-      res.status(500).json({ error: 'Error al obtener perfil' });
-    }
-  },
-
-  async actualizarMiPerfil(req, res) {
-    try {
-      const centroId = obtenerCentroIdDeRequest(req);
-      if (!centroId) return res.status(400).json({ error: 'centro_id no especificado' });
-
-      const { nombre, direccion, telefono, email } = req.body || {};
-      const actualizado = await CentrosModel.actualizarParcial(centroId, {
-        nombre,
-        direccion,
-        telefono,
-        email,
-      });
-      if (!actualizado) return res.status(404).json({ error: 'Centro no encontrado' });
-      res.json(actualizado);
-    } catch (error) {
-      console.error('Error al actualizar perfil del centro:', error);
-      res.status(500).json({ error: 'Error al actualizar perfil' });
-    }
-  }
-  ,
-
-async obtenerResumen(req, res) {
+module.exports.obtenerMiPerfil = async function (req, res) {
   try {
-    // Aqui leo el id desde los headers o el cuerpo
-    const centroId = req.headers["x-centro-id"] || req.body?.centro_id;
-    if (!centroId) {
-      return res.status(400).json({ error: "centro_id no especificado" });
-    }
+    const centroId = req.user?.id;
+    if (!centroId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
 
-    // Aqui calculo la cantidad total y la cantidad apta por grupo
-    const donantes = await Donante.obtenerTodos();
-    const hoy = new Date();
-    let donantesAptos = 0;
-    const grupos = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-    const aptosPorGrupo = Object.fromEntries(grupos.map((g) => [g, 0]));
+    const perfil = await CentrosModel.obtenerPorUsuarioId(centroId);
+    res.json(perfil);
+  } catch (e) {
+    console.error("Error en obtenerMiPerfil:", e);
+    res.status(500).json({ error: 'Error al obtener perfil del centro' });
+  }
+};
 
-    donantes.forEach((d) => {
-      const sexo = d.sexo || "M";
-      const { apto } = calcularAptoYRestante(d.fecha_ultima_donacion, sexo, hoy);
-      if (apto) {
-        donantesAptos++;
-        if (d.grupo_sanguineo && aptosPorGrupo.hasOwnProperty(d.grupo_sanguineo)) {
-          aptosPorGrupo[d.grupo_sanguineo] += 1;
-        }
+module.exports.actualizarMiPerfil = async function (req, res) {
+  try {
+    const centroId = req.user?.id;
+    if (!centroId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
+
+    const actualizado = await CentrosModel.actualizarPorUsuarioId(centroId, req.body);
+    res.json({ mensaje: 'Perfil actualizado', perfil: actualizado });
+  } catch (e) {
+    console.error("Error en actualizarMiPerfil:", e);
+    res.status(500).json({ error: 'Error al actualizar perfil' });
+  }
+};
+
+// ==============================================================
+// RESUMEN DEL DASHBOARD
+// ==============================================================
+
+module.exports.obtenerResumen = async function (req, res) {
+  try {
+    const centroId = req.user?.id;
+    if (!centroId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
+
+    const resumen = await CentrosModel.obtenerResumen(centroId);
+    res.json(resumen);
+  } catch (e) {
+    console.error("Error en obtenerResumen:", e);
+    res.status(500).json({ error: 'Error al obtener el resumen del centro' });
+  }
+};
+
+// ==============================================================
+// NOTIFICACIONES MANUALES
+// ==============================================================
+//
+// Aca envio notificaciones manuales segun:
+// 1) IDs de usuarios (envio directo)
+// 2) Filtros enviados desde el panel
+//
+
+module.exports.enviarNotificaciones = async function (req, res) {
+  try {
+    const centroId = req.user?.id;
+    if (!centroId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
+
+    const { mensaje, usuarios, filtros } = req.body;
+
+    console.log("📥 Body recibido:", req.body);
+
+    // ----------------------------------------------------------
+    // 1) Envio directo por usuario_id[]
+    // ----------------------------------------------------------
+    if (Array.isArray(usuarios) && usuarios.length > 0) {
+      console.log("➡ Envio directo a usuarios:", usuarios);
+
+      const donantes = await DonantesModel.obtenerPorUsuariosIds(usuarios);
+      const ids = donantes.map(d => d.id);
+
+      if (ids.length === 0) {
+        return res.status(400).json({ error: "No se encontraron donantes con esos usuarios_id" });
       }
-    });
 
+      const creadas = await Notificaciones.crearBatch(ids, null, mensaje);
 
-      // Aqui reviso las campanias del centro
-      const campanias = await CampaniasModel.obtenerPorCentro(centroId);
-
-      const isActiva = (c) => {
-        const fi = c.fecha_inicio ? new Date(c.fecha_inicio) : null;
-        const ff = c.fecha_fin ? new Date(c.fecha_fin) : null;
-        if (fi || ff) {
-          if (fi && ff) return fi <= hoy && hoy <= ff;
-          if (fi && !ff) return fi <= hoy;
-          if (!fi && ff) return hoy <= ff;
-        }
-        const est = (c.estado || '').toLowerCase();
-        if (est.includes('cancel')) return false;
-        if (est.includes('final')) return false;
-        return est.includes('act');
-      };
-
-      const activas = campanias.filter(isActiva).length;
-
-      const en14 = new Date(hoy); en14.setDate(hoy.getDate() + 14);
-      const proximas14 = campanias.filter(c => {
-        if (!c.fecha_inicio) return false;
-        const fi = new Date(c.fecha_inicio);
-        const est = (c.estado || '').toLowerCase();
-        if (est.includes('cancel')) return false;
-        return fi > hoy && fi <= en14;
-      }).length;
-
-      const finalizadas = campanias.filter(c => c.fecha_fin && new Date(c.fecha_fin) < hoy);
-      const finalizadasCount = finalizadas.length;
-
-      const futuras = campanias.filter(c => c.fecha_inicio && new Date(c.fecha_inicio) > hoy);
-      futuras.sort((a,b) => new Date(a.fecha_inicio) - new Date(b.fecha_inicio));
-      const siguiente = futuras[0] ? {
-        id: futuras[0].id,
-        nombre: futuras[0].nombre,
-        fecha_inicio: futuras[0].fecha_inicio
-      } : null;
-
-      return res.json({
-        centro_id: centroId,
-        donantes_aptos_hoy: donantesAptos,
-        donantes_totales: donantes.length,
-        campanias_activas: activas,
-        campanias_finalizadas: finalizadasCount,
-        proximas_14_dias: proximas14,
-        aptos_por_grupo: aptosPorGrupo,
-        siguiente_campania: siguiente
-      });
-    } catch (error) {
-      console.error('Error al obtener resumen del centro:', error);
-      res.status(500).json({ error: 'Error al obtener resumen' });
-    }
-  }
-};
-
-module.exports = CentrosController;
-
-// Aqui manejo las notificaciones del centro
-module.exports.enviarNotificaciones = async function(req, res) {
-  try {
-    const { mensaje, tipo = 'aviso', campania_id = null, filtros = {} } = req.body || {};
-    if (!mensaje || String(mensaje).trim() === '') return res.status(400).json({ error: 'Mensaje requerido' });
-    const lista = await Donante.filtrar({
-      provincia: filtros.provincia || undefined,
-      localidad: filtros.localidad || undefined,
-      barrio: filtros.barrio || undefined,
-      grupo: filtros.grupo || undefined,
-      estado: filtros.estado || undefined,
-    });
-    if (!Array.isArray(lista) || lista.length === 0) return res.json({ enviados: 0 });
-    let enviados = 0;
-    for (const d of lista) {
-      const uid = d.usuario_id || d.usuario || d.user_id;
-      if (!uid) continue;
-      try {
-        await Notificaciones.createForUsuario(uid, { tipo, mensaje, campania_id });
-        enviados++;
-      } catch {}
-    }
-    // Aqui dejo trazas para debug
-    try {
-      const centroId = obtenerCentroIdDeRequest(req);
-      await db.query(`CREATE TABLE IF NOT EXISTS notificaciones_log (
-        id SERIAL PRIMARY KEY,
-        centro_id INTEGER,
-        tipo TEXT,
-        mensaje TEXT NOT NULL,
-        enviados INTEGER NOT NULL DEFAULT 0,
-        filtros JSONB,
-        created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
-      );`);
-      await db.query(
-        `INSERT INTO notificaciones_log(centro_id, tipo, mensaje, enviados, filtros) VALUES($1,$2,$3,$4,$5)`,
-        [centroId, tipo, mensaje, enviados, JSON.stringify(filtros || {})]
+      await Notificaciones.registrarLog(
+        centroId,
+        "manual_directo",
+        mensaje,
+        creadas.length,
+        { usuarios }
       );
-    } catch (e) { console.error('No se pudo registrar notificaciones_log:', e.message); }
 
-    res.json({ enviados });
-  } catch (e) {
-    console.error('Error al enviar notificaciones:', e);
-    res.status(500).json({ error: 'Error al enviar notificaciones' });
-  }
-};
-
-module.exports.enviarFelicitacionesCumple = async function(req, res) {
-  try {
-    const dias = parseInt((req.body && req.body.dias) || '0', 10) || 0;
-    // Aqui busco donantes cuyo cumpleanos cae dentro de la ventana
-    const sql = `
-      SELECT d.usuario_id, d.fecha_nacimiento, u.nombre
-      FROM donantes d JOIN usuarios u ON d.usuario_id = u.id
-      WHERE d.fecha_nacimiento IS NOT NULL
-    `;
-    const { rows } = await db.query(sql);
-    const hoy = new Date();
-    const objetivo = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
-    const candidatos = rows.filter(r => {
-      const fn = new Date(r.fecha_nacimiento);
-      const esteAnio = new Date(objetivo.getFullYear(), fn.getMonth(), fn.getDate());
-      const diff = Math.floor((esteAnio - objetivo) / (1000*60*60*24));
-      return diff >= 0 && diff <= dias;
-    });
-    let enviados = 0;
-    for (const c of candidatos) {
-      const nombre = c.nombre || 'donante';
-      const msg = dias > 0 && new Date(c.fecha_nacimiento).getDate() !== objetivo.getDate()
-        ? `Se acerca tu cumpleaños, ${nombre}! Gracias por ser parte.`
-        : `¡Feliz cumpleaños, ${nombre}! Gracias por ser parte.`;
-      try { await Notificaciones.createForUsuario(c.usuario_id, { tipo: 'cumple', mensaje: msg }); enviados++; } catch {}
+      return res.json({ ok: true, enviados: creadas.length });
     }
-    // Aqui dejo trazas para debug
-    try {
-      const centroId = obtenerCentroIdDeRequest(req);
-      await db.query(`CREATE TABLE IF NOT EXISTS notificaciones_log (
-        id SERIAL PRIMARY KEY,
-        centro_id INTEGER,
-        tipo TEXT,
-        mensaje TEXT NOT NULL,
-        enviados INTEGER NOT NULL DEFAULT 0,
-        filtros JSONB,
-        created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
-      );`);
-      await db.query(
-        `INSERT INTO notificaciones_log(centro_id, tipo, mensaje, enviados, filtros) VALUES($1,$2,$3,$4,$5)`,
-        [centroId, 'cumple', 'Felicitaciones de cumpleaños', enviados, JSON.stringify({ dias })]
-      );
-    } catch (e) { console.error('No se pudo registrar notificaciones_log:', e.message); }
 
-    res.json({ candidatos: candidatos.length, enviados });
-  } catch (e) {
-    console.error('Error en felicitaciones:', e);
-    res.status(500).json({ error: 'Error al generar felicitaciones' });
-  }
-};
+    // ----------------------------------------------------------
+    // 2) Envio por filtros
+    // ----------------------------------------------------------
+    console.log("➡ Envio por filtros:", filtros);
 
-// Aqui anticipo la cantidad de destinatarios segun los filtros
-module.exports.previewNotificaciones = async function(req, res) {
-  try {
-    const filtros = req.body && req.body.filtros ? req.body.filtros : {};
-    const lista = await Donante.filtrar({
-      provincia: filtros.provincia || undefined,
-      localidad: filtros.localidad || undefined,
-      barrio: filtros.barrio || undefined,
-      grupo: filtros.grupo || undefined,
-      estado: filtros.estado || undefined,
-    });
-    res.json({ destinatarios: Array.isArray(lista) ? lista.length : 0 });
-  } catch (e) {
-    console.error('Error en preview notificaciones:', e);
-    res.status(500).json({ error: 'Error al previsualizar' });
-  }
-};
+    const donantes = await DonantesModel.filtrar(filtros);
+    const ids = donantes.map(d => d.id);
 
-// Aqui cuento los candidatos de felicitaciones
-module.exports.previewFelicitaciones = async function(req, res) {
-  try {
-    const dias = parseInt((req.body && req.body.dias) || '0', 10) || 0;
-    const sql = `
-      SELECT d.usuario_id, d.fecha_nacimiento
-      FROM donantes d
-      WHERE d.fecha_nacimiento IS NOT NULL
-    `;
-    const { rows } = await db.query(sql);
-    const hoy = new Date();
-    const objetivo = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
-    const candidatos = rows.filter(r => {
-      const fn = new Date(r.fecha_nacimiento);
-      const esteAnio = new Date(objetivo.getFullYear(), fn.getMonth(), fn.getDate());
-      const diff = Math.floor((esteAnio - objetivo) / (1000*60*60*24));
-      return diff >= 0 && diff <= dias;
-    });
-    res.json({ candidatos: candidatos.length });
-  } catch (e) {
-    console.error('Error en preview felicitaciones:', e);
-    res.status(500).json({ error: 'Error al previsualizar felicitaciones' });
-  }
-};
-
-// Aqui armo un historial simple
-module.exports.getNotificacionesLog = async function(req, res) {
-  try {
-    const centroId = obtenerCentroIdDeRequest(req);
-    await db.query(`CREATE TABLE IF NOT EXISTS notificaciones_log (
-      id SERIAL PRIMARY KEY,
-      centro_id INTEGER,
-      tipo TEXT,
-      mensaje TEXT NOT NULL,
-      enviados INTEGER NOT NULL DEFAULT 0,
-      filtros JSONB,
-      created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
-    );`);
-    const { rows } = await db.query(
-      `SELECT id, tipo, mensaje, enviados, filtros, created_at
-       FROM notificaciones_log
-       WHERE ($1::int IS NULL AND centro_id IS NULL) OR centro_id = $1
-       ORDER BY id DESC
-       LIMIT 30`,
-      [centroId || null]
-    );
-    res.json(rows);
-  } catch (e) {
-    console.error('Error al obtener notificaciones_log:', e);
-    res.status(500).json({ error: 'Error al obtener historial' });
-  }
-};
-
-// Aqui armo el feed para la campana del centro
-module.exports.getNotificacionesCentro = async function(req, res){
-  try{
-    const centroId = obtenerCentroIdDeRequest(req);
-    if(!centroId) return res.status(400).json({ error: 'centro_id no especificado' });
-
-    // Aqui detecto el esquema flexible de la tabla de notificaciones
-    const { rows: colsRows } = await db.query(
-      "SELECT column_name FROM information_schema.columns WHERE table_name='notificaciones'"
-    );
-    const cols = new Set(colsRows.map(r => r.column_name));
-    if(!cols.has('centro_id')){
-      // Si no encuentro centro_id corto porque no hay datos
-      return res.json([]);
+    if (ids.length === 0) {
+      return res.status(400).json({ error: "No se encontraron donantes para enviar notificacion" });
     }
-    const selTipo = cols.has('tipo') ? 'tipo' : (cols.has('estado') ? "estado as tipo" : "'aviso'::text as tipo");
-    const selLeida = cols.has('leida') ? 'leida' : (cols.has('estado') ? "CASE WHEN estado='leida' THEN TRUE ELSE FALSE END AS leida" : 'FALSE as leida');
-    const selCreated = cols.has('created_at') ? 'created_at' : (cols.has('fecha_envio') ? 'fecha_envio as created_at' : 'NOW() as created_at');
-    const orderBy = cols.has('created_at') ? 'created_at' : (cols.has('fecha_envio') ? 'fecha_envio' : 'id');
 
-    const sql = `SELECT id, ${selTipo}, mensaje, ${selLeida}, ${selCreated}
-                 FROM notificaciones
-                 WHERE centro_id = $1
-                 ORDER BY ${orderBy} DESC
-                 LIMIT 30`;
-    const { rows } = await db.query(sql, [centroId]);
-    res.json(rows);
-  }catch(e){
-    console.error('Error al obtener notificaciones del centro:', e);
-    res.status(500).json({ error: 'Error al obtener notificaciones' });
-  }
-};
+    const creadas = await Notificaciones.crearBatch(ids, null, mensaje);
 
-module.exports.marcarNotificacionCentroLeida = async function(req, res){
-  try{
-    const centroId = obtenerCentroIdDeRequest(req);
-    if(!centroId) return res.status(400).json({ error: 'centro_id no especificado' });
-    const id = parseInt(req.params.id, 10);
-    if(!id) return res.status(400).json({ error: 'id inválido' });
-    const { rows } = await db.query(
-      `UPDATE notificaciones SET leida = TRUE
-       WHERE id = $1 AND centro_id = $2
-       RETURNING id, tipo, mensaje, leida, created_at`,
-      [id, centroId]
+    await Notificaciones.registrarLog(
+      centroId,
+      "manual_filtros",
+      mensaje,
+      creadas.length,
+      filtros
     );
-    if(!rows[0]) return res.status(404).json({ error: 'No encontrada' });
-    res.json(rows[0]);
-  }catch(e){
-    console.error('Error al marcar notificación leída (centro):', e);
-    res.status(500).json({ error: 'Error al actualizar notificación' });
+
+    res.json({ ok: true, enviados: creadas.length });
+
+  } catch (e) {
+    console.error("❌ Error en enviarNotificaciones:", e);
+    res.status(500).json({ error: "Error al enviar notificaciones" });
   }
 };
 
-// Aqui traigo las inscripciones activas para el modal de donantes
-module.exports.getInscripcionesUsuario = async function(req, res){
-  try{
-    const usuarioId = parseInt(req.params.usuarioId, 10);
-    if(!usuarioId) return res.status(400).json({ error: 'usuarioId inválido' });
-    const lista = await CampaniasModel.listarInscripcionesPorUsuario(usuarioId);
-    res.json(Array.isArray(lista) ? lista : []);
-  }catch(e){
-    console.error('Error al obtener inscripciones por usuario:', e);
-    res.status(500).json({ error: 'Error al obtener inscripciones' });
-  }
-};
+// ==============================================================
+// PREVIEW DE NOTIFICACIONES
+// ==============================================================
 
-
-
-
-module.exports.getHistorialNotificaciones = async function(req, res) {
+module.exports.previewNotificaciones = async function (req, res) {
   try {
-    const historial = await Notificaciones.getHistorial();
-    res.json(historial);
-  } catch (error) {
-    console.error("Error al obtener historial de notificaciones:", error);
-    res.status(500).json({ error: "Error al obtener historial de notificaciones" });
+    const { filtros } = req.body;
+    const donantes = await DonantesModel.filtrar(filtros);
+
+    res.json({
+      cantidad: donantes.length,
+      filtros
+    });
+  } catch (e) {
+    console.error("Error en previewNotificaciones:", e);
+    res.status(500).json({ error: "Error en el preview" });
   }
 };
 
+// ==============================================================
+// FELICITACIONES DE CUMPLEAÑOS
+// ==============================================================
 
+module.exports.enviarFelicitacionesCumple = async function (req, res) {
+  try {
+    const centroId = req.user?.id;
+    if (!centroId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
+
+    const hoy = new Date();
+    const mes = hoy.getMonth() + 1;
+    const dia = hoy.getDate();
+
+    const cumpleanieros = await DonantesModel.buscarCumpleanios(mes, dia);
+    const ids = cumpleanieros.map(d => d.id);
+
+    if (ids.length === 0) {
+      return res.json({ mensaje: "No hay donantes que cumplan hoy" });
+    }
+
+    const mensaje = "Feliz cumple! Gracias por seguir formando parte de nuestra red de donacion.";
+
+    const creadas = await Notificaciones.crearBatch(ids, null, mensaje);
+
+    await Notificaciones.registrarLog(
+      centroId,
+      "cumpleanios",
+      mensaje,
+      creadas.length,
+      { dia, mes }
+    );
+
+    res.json({ ok: true, enviados: creadas.length });
+
+  } catch (e) {
+    console.error("Error en enviarFelicitacionesCumple:", e);
+    res.status(500).json({ error: "Error al enviar felicitaciones" });
+  }
+};
+
+module.exports.previewFelicitaciones = async function (req, res) {
+  try {
+    const hoy = new Date();
+    const mes = hoy.getMonth() + 1;
+    const dia = hoy.getDate();
+
+    const cumpleanieros = await DonantesModel.buscarCumpleanios(mes, dia);
+
+    res.json({
+      cantidad: cumpleanieros.length,
+      mes,
+      dia
+    });
+
+  } catch (e) {
+    console.error("Error en previewFelicitaciones:", e);
+    res.status(500).json({ error: "Error en el preview de felicitaciones" });
+  }
+};
+
+// ==============================================================
+// LOGS DE NOTIFICACIONES
+// ==============================================================
+
+module.exports.getNotificacionesCentro = async function (req, res) {
+  try {
+    const centroId = req.user?.id;
+    if (!centroId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
+
+    const log = await Notificaciones.getLogCentro(centroId);
+    res.json(log);
+  } catch (e) {
+    console.error("Error en getNotificacionesCentro:", e);
+    res.status(500).json({ error: "Error al obtener notificaciones" });
+  }
+};
+
+module.exports.getNotificacionesLog = async function (req, res) {
+  try {
+    const centroId = req.user?.id;
+    if (!centroId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
+
+    const log = await Notificaciones.getLogCentro(centroId);
+    res.json(log);
+  } catch (e) {
+    console.error("Error en getNotificacionesLog:", e);
+    res.status(500).json({ error: "Error al obtener historial" });
+  }
+};
+
+// ==============================================================
+// MARCAR COMO LEIDA (placeholder)
+// ==============================================================
+
+module.exports.marcarNotificacionCentroLeida = async function (req, res) {
+  try {
+    return res.json({ mensaje: 'OK (pendiente de implementar logica de leido para centro)' });
+  } catch (e) {
+    console.error("Error en marcarNotificacionCentroLeida:", e);
+    res.status(500).json({ error: "Error al marcar notificacion" });
+  }
+};

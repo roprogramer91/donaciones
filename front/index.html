@@ -3,100 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inicio - Donación de Sangre</title>
-    <!-- Logger global disponible en toda la app -->
-    <script src="./src/utils/logger.js"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+    <title>Donación de Sangre</title>
     <link rel="stylesheet" href="src/styles.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   </head>
 
   <body>
     <main class="main">
-      <h1>Banco de Sangre Comunitario</h1>
 
-      <div class="bienvenida">
-        <h2>Unite, Ayudá, Salvá vidas</h2>
-        <p>
-          Este sistema conecta donantes, pacientes y hospitales de manera segura y transparente.<br />
-          <strong>Registrate con Google</strong> o ingresá con tu DNI.
-        </p>
+      <!-- SECCIÓN HERO -->
+      <section class="hero">
+        <h1>Banco de Sangre Comunitario</h1>
+        <p>Unite. Ayudá. Salvá vidas.</p>
+      </section>
+
+      <!-- BOTONES PRINCIPALES -->
+      <section class="acciones-principales">
+        <button id="btnIngresar" class="btn">Ingresar</button>
+        <button id="btnRegistrarme" class="btn">Registrarme</button>
+      </section>
+
+      <!-- SUBMENÚ DESPLEGABLE AL HACER CLICK EN "INGRESAR" -->
+      <div id="submenuIngresar" class="submenu oculto">
+        <button class="btn-sub" id="ingresarDonante">Soy Donante</button>
+        <button class="btn-sub" id="ingresarCentro">Soy Centro</button>
+        <button class="btn-sub" id="ingresarAdmin">Soy Admin Técnico</button>
       </div>
 
-      <!-- BOTÓN DE LOGIN CON GOOGLE -->
-      <a id="googleLoginLink" href="#" class="login-btn-google">
-        <img
-          src="https://www.svgrepo.com/show/475656/google-color.svg"
-          alt="Google"
-        />
-        Iniciar sesión con Google
-      </a>
-
-      <!-- LOGIN CON DNI -->
-      <div class="login-dni-box">
-        <input
-          type="text"
-          id="dniInput"
-          placeholder="Ingresá tu DNI"
-          class="dni-input"
-        />
-        <button id="dniLoginBtn" class="login-btn-dni">
-          <i class="fa-solid fa-id-card"></i> Ingresar con DNI
-        </button>
-      </div>
-
-      <div class="info-opciones">
-        <span
-          >¿Sos una institución?
-          <a
-            href="./src/instituciones/login.html"
-            style="color: #5a0000; text-decoration: underline"
-            >Ingresar aquí</a
-          ></span
-        >
-      </div>
-
-      <hr class="separador" />
-
+      <!-- SECCIÓN EDUCATIVA -->
       <section class="educativa">
-        <a href="./src/educacion.html" class="boton educativo">Sección educativa</a>
-        <p>Todo lo que necesitás saber sobre la donación de sangre</p>
+        <a href="educacion.html" class="link-educacion">Sección educativa</a>
       </section>
 
-      <section class="estadisticas">
-        <h2>Estadísticas Generales</h2>
-        <div class="grid-estadisticas">
-          <div class="columna-izquierda">
-            <div class="grafico-box"><canvas id="graficoTotales"></canvas></div>
-            <div class="grafico-box"><canvas id="graficoEdades"></canvas></div>
-          </div>
-          <div class="columna-derecha">
-            <div class="grafico-box"><canvas id="graficoTipoSangre"></canvas></div>
-          </div>
-        </div>
-      </section>
     </main>
 
-    <script type="module" src="./src/utils/initLogger.js"></script>
-
-    <script type="module">
-      import { AUTH_URL } from './src/config.js';
-      const link = document.getElementById('googleLoginLink');
-      if (link) {
-        const returnTo = `${location.origin}/front/index.html`;
-        const url = `${AUTH_URL}/auth/google?redirect_to=${encodeURIComponent(returnTo)}`;
-        link.setAttribute('href', url);
-        link.addEventListener('click', (e) => {
-          // Fuerza navegación de nivel superior (evita previews embebidos)
-          e.preventDefault();
-          window.location.href = url;
-        });
-      }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script type="module" src="./src/estadisticas.js"></script>
-    <script type="module" src="./src/auth.js"></script>
-
+    <script type="module" src="src/index.js"></script>
   </body>
 </html>

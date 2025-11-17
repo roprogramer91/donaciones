@@ -34,7 +34,7 @@ form.addEventListener("submit", async (e) => {
       },
       body: JSON.stringify({
         usuario_id,
-        codigo
+        codigo,
       }),
     });
 
@@ -46,18 +46,37 @@ form.addEventListener("submit", async (e) => {
       return;
     }
 
-    // Guardar token final
+    // Guardar token final y rol REAL
     localStorage.setItem("token", data.token);
-    localStorage.setItem("role", data.tipo_usuario);
+    localStorage.setItem("tipo_usuario", data.tipo_usuario);
 
     // Limpiar temporales
     localStorage.removeItem("temp_token");
+    localStorage.removeItem("usuario_id");
+    localStorage.removeItem("login_context");
 
     mensaje.style.color = "green";
     mensaje.textContent = "Verificado. Redirigiendo...";
 
+    // Redirección según rol real
     setTimeout(() => {
-      window.location.href = "../donante/dashboard-donante.html";
+      switch (data.tipo_usuario) {
+        case "donante":
+          window.location.href = "../donante/dashboard-donante.html";
+          break;
+
+        case "centro":
+          window.location.href = "../instituciones/dashboard-centro.html";
+          break;
+
+        case "admin":
+          window.location.href = "../admin/admin-panel.html";
+          break;
+
+        default:
+          mensaje.textContent = "Error: rol desconocido.";
+          mensaje.style.color = "red";
+      }
     }, 800);
 
   } catch (err) {

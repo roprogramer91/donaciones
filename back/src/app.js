@@ -4,7 +4,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const app = express();
 
-// Aqui importo las rutas principales
+// aca importo las rutas principales
 const donantesRoutes = require('./routes/donantes.routes');
 const userRoutes = require('./routes/user.routes');
 const provinciasRoutes = require('./routes/provinciasRoutes');
@@ -14,15 +14,16 @@ const campaniasRoutes = require('./routes/campanias.routes');
 const centroRoutes = require('./routes/centro.routes');
 const authRoutes = require('./services/auth/routes/auth.routes');
 const usuariosRoutes = require('./services/auth/routes/usuarios.routes');
-const adminRoutes = require('./services/auth/routes/admin.routes');
+const adminRoutes = require('./routes/admin.routes');
 const testDbRoutes = require('./routes/testdb.routes');
 
-// Aqui configuro los middlewares base
+
+// aca configuro los middlewares base
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(cors());
 
-// Aqui engancho cada grupo de rutas
+// aca engancho cada grupo de rutas
 app.use('/api/donantes', donantesRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/provincias', provinciasRoutes);
@@ -35,7 +36,7 @@ app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/test-db', testDbRoutes);
 
-// Aqui levanto el servidor
+// aca levanto el servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);

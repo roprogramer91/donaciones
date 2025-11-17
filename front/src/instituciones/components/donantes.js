@@ -4,7 +4,7 @@
 // para el panel del Centro de Hemoterapia.
 // ============================================================
 
-import { API_BASE_URL } from "../../config.js";
+import { API_BASE_URL } from "../../utils/config.js";
 import { toggleSeccion } from "../dashboard-centro.js";
 import { appLogger } from "../../utils/logger.js";
 
