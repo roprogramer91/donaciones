@@ -1,5 +1,5 @@
 // En este archivo manejo todas las consultas de donantes
-const db = require('../config/database');
+const db = require("../config/database");
 
 // ----------------------------------------------------------
 // Traigo todos los donantes
@@ -21,27 +21,24 @@ const obtenerTodos = async () => {
 const guardar = async (nuevo) => {
   const q = `
     insert into donantes (
-      usuario_id, grupo_sanguineo, fecha_nacimiento, telefono,
+      usuario_id, grupo_sanguineo, fecha_nacimiento,
       preferencias_notif, fecha_ultima_donacion, estado,
-      provincia_id, localidad_id, barrio_id,
-      dni, sexo
+      provincia_id, localidad_id, barrio_id, sexo
     )
-    values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+    values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
     returning *
   `;
   const params = [
     nuevo.usuario_id,
     nuevo.grupo_sanguineo,
     nuevo.fecha_nacimiento || null,
-    nuevo.telefono || null,
     nuevo.preferencias_notif || null,
     nuevo.fecha_ultima_donacion || null,
-    nuevo.estado || 'activo',
+    nuevo.estado || "activo",
     nuevo.provincia_id || null,
     nuevo.localidad_id || null,
     nuevo.barrio_id || null,
-    nuevo.dni,
-    nuevo.sexo
+    nuevo.sexo,
   ];
 
   const { rows } = await db.query(q, params);
@@ -152,10 +149,10 @@ const filtrar = async (filtros) => {
   `;
 
   if (condiciones.length > 0) {
-    q += ' where ' + condiciones.join(' and ');
+    q += " where " + condiciones.join(" and ");
   }
 
-  q += ' order by d.id desc';
+  q += " order by d.id desc";
 
   const { rows } = await db.query(q, valores);
   return rows;
@@ -167,16 +164,16 @@ const filtrar = async (filtros) => {
 const updatePerfilByUsuarioId = async (usuarioId, data) => {
   const payload = { ...data };
 
-  if (payload.fecha_nacimiento === '') payload.fecha_nacimiento = null;
-  if (payload.telefono === '') payload.telefono = null;
+  if (payload.fecha_nacimiento === "") payload.fecha_nacimiento = null;
+  if (payload.telefono === "") payload.telefono = null;
 
   const allowed = [
-    'grupo_sanguineo',
-    'fecha_nacimiento',
-    'telefono',
-    'provincia_id',
-    'localidad_id',
-    'barrio_id'
+    "grupo_sanguineo",
+    "fecha_nacimiento",
+    "telefono",
+    "provincia_id",
+    "localidad_id",
+    "barrio_id",
   ];
 
   const sets = [];
@@ -184,11 +181,14 @@ const updatePerfilByUsuarioId = async (usuarioId, data) => {
   let i = 1;
 
   for (const k of allowed) {
-    if (Object.prototype.hasOwnProperty.call(payload, k) && payload[k] !== undefined) {
+    if (
+      Object.prototype.hasOwnProperty.call(payload, k) &&
+      payload[k] !== undefined
+    ) {
       let val = payload[k];
 
-      if (['provincia_id', 'localidad_id', 'barrio_id'].includes(k)) {
-        if (val !== null && val !== '') {
+      if (["provincia_id", "localidad_id", "barrio_id"].includes(k)) {
+        if (val !== null && val !== "") {
           const n = parseInt(val, 10);
           if (!isNaN(n)) val = n;
           else continue;
@@ -206,7 +206,7 @@ const updatePerfilByUsuarioId = async (usuarioId, data) => {
 
   const q = `
     update donantes
-    set ${sets.join(', ')}
+    set ${sets.join(", ")}
     where usuario_id = $${i}
     returning *
   `;
@@ -222,16 +222,18 @@ const updatePerfilByUsuarioId = async (usuarioId, data) => {
 // Baja total del donante
 // ----------------------------------------------------------
 module.exports.bajaTotalByUsuarioId = async function (usuarioId) {
-  await db.query('begin');
+  await db.query("begin");
   try {
-    await db.query('delete from campanias_donantes where usuario_id = $1', [usuarioId]);
-    await db.query('delete from donantes where usuario_id = $1', [usuarioId]);
-    await db.query('delete from usuarios where id = $1', [usuarioId]);
+    await db.query("delete from campanias_donantes where usuario_id = $1", [
+      usuarioId,
+    ]);
+    await db.query("delete from donantes where usuario_id = $1", [usuarioId]);
+    await db.query("delete from usuarios where id = $1", [usuarioId]);
 
-    await db.query('commit');
+    await db.query("commit");
     return true;
   } catch (e) {
-    await db.query('rollback');
+    await db.query("rollback");
     throw e;
   }
 };
@@ -242,7 +244,7 @@ module.exports.bajaTotalByUsuarioId = async function (usuarioId) {
 module.exports.obtenerPorUsuariosIds = async function (usuariosIds = []) {
   if (!Array.isArray(usuariosIds) || usuariosIds.length === 0) return [];
 
-  const placeholders = usuariosIds.map((_, i) => `$${i + 1}`).join(',');
+  const placeholders = usuariosIds.map((_, i) => `$${i + 1}`).join(",");
 
   const q = `
     select *
@@ -254,6 +256,24 @@ module.exports.obtenerPorUsuariosIds = async function (usuariosIds = []) {
   return rows;
 };
 
+// ----------------------------------------------------------
+// Traer donantes que cumplen años hoy
+// ----------------------------------------------------------
+const obtenerCumpleanerosDelDia = async () => {
+  const q = `
+    SELECT 
+      d.usuario_id,
+      u.nombre,
+      u.email
+    FROM donantes d
+    JOIN usuarios u ON d.usuario_id = u.id
+    WHERE 
+      EXTRACT(MONTH FROM d.fecha_nacimiento) = EXTRACT(MONTH FROM CURRENT_DATE)
+      AND EXTRACT(DAY FROM d.fecha_nacimiento) = EXTRACT(DAY FROM CURRENT_DATE);
+  `;
+  const { rows } = await db.query(q);
+  return rows;
+};
 // ----------------------------------------------------------
 // exporto todas las funciones
 // ----------------------------------------------------------
@@ -267,5 +287,6 @@ module.exports = {
   updatePerfilByUsuarioId,
   filtrar,
   obtenerPorUsuariosIds: module.exports.obtenerPorUsuariosIds,
-  bajaTotalByUsuarioId: module.exports.bajaTotalByUsuarioId
+  bajaTotalByUsuarioId: module.exports.bajaTotalByUsuarioId,
+  obtenerCumpleanerosDelDia,
 };

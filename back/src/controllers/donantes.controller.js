@@ -2,7 +2,7 @@
 
 const Donante = require('../models/donantes.model');
 const CampaniasModel = require('../models/campanias.model');
-const Notificaciones = require('../models/notificaciones.model');
+const Notificaciones = require('../models/notificaciones.model'); // Ahora importa el modelo correcto
 
 const { validarDNI, validarFechaNacimiento, validarGrupo } = require('../validations/donanteValidations');
 const { calcularAptoYRestante } = require('../utils/donanteUtils');
@@ -21,9 +21,6 @@ const crearDonante = async (req, res) => {
 
   const nuevoDonante = req.body;
 
-  if (!validarDNI(nuevoDonante.dni)) {
-    return res.status(400).json({ error: 'DNI invalido.' });
-  }
   if (!validarGrupo(nuevoDonante.grupo_sanguineo)) {
     return res.status(400).json({ error: 'Grupo sanguineo invalido.' });
   }
@@ -32,11 +29,6 @@ const crearDonante = async (req, res) => {
   }
 
   try {
-    const existente = await Donante.findByDni(nuevoDonante.dni);
-    if (existente) {
-      return res.status(400).json({ error: 'Ya existe un donante con ese DNI.' });
-    }
-
     nuevoDonante.usuario_id = usuarioId;
     if (!nuevoDonante.estado) nuevoDonante.estado = 'activo';
 
@@ -92,8 +84,50 @@ const getPerfilDonanteCompleto = async (req, res) => {
     const { apto, dias_restantes } = calcularAptoYRestante(perfil.fecha_ultima_donacion, perfil.sexo);
     perfil.apto_para_donar = apto;
     perfil.dias_restantes = dias_restantes;
+    
+    // --- INICIO DE MEJORA: Unifico las llamadas a la API ---
+    // Ahora, además del perfil, devuelvo las campañas y notificaciones en una sola respuesta.
 
-    res.json(perfil);
+    // 2. Obtener campañas
+    let campanias = [];
+    if (perfil.localidad_id) {
+      const hoy = new Date();
+      const campaniasCrudas = await CampaniasModel.obtenerPorLocalidad(perfil.localidad_id);
+      const inscripciones = await CampaniasModel.listarInscripcionesPorUsuario(usuarioId);
+      const inscSet = new Set(inscripciones.map(c => c.id));
+
+      campanias = campaniasCrudas
+        .map(c => {
+          const fi = c.fecha_inicio ? new Date(c.fecha_inicio) : null;
+          const ff = c.fecha_fin ? new Date(c.fecha_fin) : null;
+          let estado_calculado = 'desconocido';
+          if (fi && ff) {
+            if (fi <= hoy && hoy <= ff) estado_calculado = 'activa';
+            else if (ff < hoy) estado_calculado = 'finalizada';
+            else if (fi > hoy) estado_calculado = 'futura';
+          } else if (fi) {
+            estado_calculado = fi <= hoy ? 'activa' : 'futura';
+          }
+
+          const dias_para_inicio = fi ? Math.ceil((fi - hoy) / (1000 * 60 * 60 * 24)) : null;
+          const ya_inscripto = inscSet.has(c.id);
+          const inscribible = !ya_inscripto && ['activa', 'futura'].includes(estado_calculado);
+
+          return { ...c, estado_calculado, dias_para_inicio, inscribible, ya_inscripto };
+        })
+        .filter(c => ['activa', 'futura'].includes(c.estado_calculado));
+    }
+
+    // 3. Obtener notificaciones
+    const notificaciones = await Notificaciones.getForUsuario(usuarioId, 30);
+
+    // 4. Enviar todo junto
+    res.json({
+      perfil,
+      campanias,
+      notificaciones
+    });
+    // --- FIN DE MEJORA ---
 
   } catch (err) {
     console.error('Error al traer perfil completo:', err);
@@ -214,7 +248,6 @@ async function editarPerfilDonante(req, res) {
   const ALLOWED = [
     'grupo_sanguineo',
     'fecha_nacimiento',
-    'telefono',
     'provincia_id',
     'localidad_id',
     'barrio_id'
@@ -432,7 +465,7 @@ const getMisNotificaciones = async (req, res) => {
     const usuarioId = req.user && req.user.id;
     if (!usuarioId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
 
-    const lista = await Notificaciones.getForUsuario(usuarioId, 30);
+    const lista = await Notificaciones.getForUsuario(usuarioId, 30); // Esto ahora funcionará
     res.json(lista);
 
   } catch (e) {
@@ -475,12 +508,13 @@ const darBajaDonante = async (req, res) => {
     const { dni } = req.body || {};
     if (!dni) return res.status(400).json({ error: 'Debe ingresar DNI para confirmar' });
 
-    const perfil = await Donante.findByUsuarioId(usuarioId);
-    if (!perfil) return res.status(404).json({ error: 'No sos donante registrado' });
+    // Busco el usuario para obtener el DNI, que ahora está en la tabla 'usuarios'
+    const usuario = await require('../services/auth/models/usuarios.model').findUserByid(usuarioId);
+    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
 
     const normalizar = (s) => String(s || '').replace(/\D/g, '');
 
-    if (normalizar(perfil.dni) !== normalizar(dni)) {
+    if (normalizar(usuario.dni) !== normalizar(dni)) {
       return res.status(400).json({ error: 'DNI no coincide' });
     }
 
@@ -525,4 +559,3 @@ module.exports = {
   // Baja definitiva
   darBajaDonante
 };
-
