@@ -22,7 +22,11 @@ const testDbRoutes = require("./routes/testdb.routes");
 // aca configuro los middlewares base
 app.use(morgan("dev"));
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'http://127.0.0.1:5500 ',
+  credentials: true,
+}));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser()); // Lo uso como middleware para que el servidor entienda las cookies
 
 // aca engancho cada grupo de rutas

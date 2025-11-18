@@ -67,8 +67,9 @@ async function login(req, res) {
   try {
     const { dni, email, password, skip2FA } = req.body; // skip2FA es para el post-registro
     const trustedDeviceToken = req.cookies.trusted_device_token;
+console.log("Este es el trustedDeviceToken que envia el navegador: ", trustedDeviceToken);
 
-    // --- INICIO DE MEJORA: "Confiar en este dispositivo" ---
+    // --- "Confiar en este dispositivo" ---
     if (trustedDeviceToken) {
       const trustedDevice = await DispositivosConfianza.findValidToken(
         trustedDeviceToken
@@ -104,7 +105,7 @@ async function login(req, res) {
         .json({ message: "Usuario no encontrado o inactivo." });
     }
 
-    // Aqui valido la contrasena
+    // aca valido la contrasena
     const valid = await bcrypt.compare(password, user.password_hash || "");
     if (!valid) {
       return res.status(401).json({ message: "Contraseña incorrecta." });
@@ -174,24 +175,8 @@ async function verify2FA(req, res) {
         .json({ message: "Error interno: verification sin ID." });
     }
     await markCodeAsUsed(verification.id);
-
-    // --- INICIO DE MEJORA: "Confiar en este dispositivo" ---
-    if (trust_device === true) {
-      const userAgent = req.headers["user-agent"];
-      const ip = req.ip;
-      const dispositivo = await DispositivosConfianza.crear(
-        usuario_id,
-        userAgent,
-        ip
-      );
-
-      res.cookie("trusted_device_token", dispositivo.token_dispositivo, {
-        httpOnly: true, // El cookie no es accesible por JS en el navegador
-        secure: process.env.NODE_ENV === "production", // Solo por HTTPS en producción
-        sameSite: "strict",
-        expires: new Date(dispositivo.expires_at),
-      });
-    }
+    console.log("Este es trust_device recibido:", trust_device);
+    
 
     // Aqui genero el token definitivo
     const user = await findUserByid(req.body.usuario_id);
