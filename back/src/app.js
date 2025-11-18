@@ -2,6 +2,7 @@
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
+const cookieParser = require("cookie-parser"); // Importo cookie-parser
 const app = express();
 require("./workers/cumpleanios.worker"); // Activo el worker de cumpleaños
 
@@ -22,6 +23,7 @@ const testDbRoutes = require("./routes/testdb.routes");
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cors());
+app.use(cookieParser()); // Lo uso como middleware para que el servidor entienda las cookies
 
 // aca engancho cada grupo de rutas
 app.use("/api/donantes", donantesRoutes);

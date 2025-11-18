@@ -54,13 +54,18 @@ async function cargarPanel() {
       return;
     }
     if (!res.ok) throw new Error("Error al obtener perfil");
-
-    const donante = await res.json();
-    appLogger.log(donante); // SOLO PARA DEBUGGING
+    
+    // --- INICIO DE MEJORA: Recibo todos los datos en una sola respuesta ---
+    const { perfil: donante, campanias, notificaciones } = await res.json();
+    appLogger.log({ donante, campanias, notificaciones }); // SOLO PARA DEBUGGING
 
     // Estado de aptitud del donante (basado en días restantes)
     let dias = donante.dias_restantes;
-    if (dias !== undefined && dias !== null) {
+    if (
+      dias !== undefined &&
+      dias !== null &&
+      donante.apto_para_donar !== undefined
+    ) {
       if (dias === 0) {
         estadoApto.textContent = "APTO";
         estadoApto.className = "estado-apto apto";
@@ -85,9 +90,9 @@ async function cargarPanel() {
         : "-- días";
 
     // Carga inicial de datos del panel
-    await cargarCampanias(token);
-    await cargarNotificaciones();
-    await cargarProximaInscripcion(token);
+    renderCampanias(campanias);
+    renderNotificaciones(notificaciones);
+    cargarProximaInscripcion(campanias);
 
     // Mostrar contenido del dashboard cuando todo está listo
     loader.style.display = "none";
@@ -156,22 +161,6 @@ btnCerrarModal?.addEventListener("click", () => {
   campaniaSeleccionada = null;
 });
 
-async function cargarCampanias(tok) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/donantes/campanias`, {
-      headers: { Authorization: "Bearer " + tok },
-    });
-    if (!res.ok) throw new Error("Error al obtener campañas");
-    const data = await res.json();
-    const lista = data.campanias || [];
-    renderCampanias(lista);
-  } catch (err) {
-    appLogger.error("Error al cargar campañas:", err);
-    if (campaniasList)
-      campaniasList.innerHTML = "<em>No se pudieron cargar las campañas</em>";
-  }
-}
-
 /**
  * Renderiza la lista de campañas disponibles ordenadas por prioridad:
  * 1) Inscripto primero.
@@ -209,67 +198,43 @@ function renderCampanias(campanias) {
 
   campaniasList.innerHTML = "";
   items.forEach((c) => {
-    const card = document.createElement("div");
-    card.className = "campania-card";
-
-    const img = document.createElement("img");
-    img.src = c.imagen_url || "https://placehold.co/64x64/EEE/AAA?text=Img";
-    img.alt = c.nombre || "Campaña";
-
-    const info = document.createElement("div");
-    info.className = "campania-info";
-
-    const strong = document.createElement("strong");
-    strong.textContent = c.nombre || "Campaña";
-
-    const p = document.createElement("p");
-    p.textContent = c.descripcion || "";
-
-    const tag = document.createElement("span");
-    tag.style.cssText =
-      "display:inline-block;margin-top:4px;margin-right:6px;padding:2px 8px;border-radius:10px;font-size:0.78rem;background:#eee;color:#555;";
-
+    // --- INICIO DE MEJORA: Uso de template literals para un código más limpio ---
+    let estadoTag = '';
     if (c.estado_calculado === "activa") {
-      tag.textContent = "Activa";
-      tag.style.background = "#d4f5d7";
-      tag.style.color = "#1b7e20";
+      estadoTag = `<span class="tag tag-activa">Activa</span>`;
     } else if (c.estado_calculado === "futura") {
       const dias =
         typeof c.dias_para_inicio === "number" && c.dias_para_inicio > 0
           ? ` (en ${c.dias_para_inicio} días)`
           : "";
-      tag.textContent = "Próxima" + dias;
-      tag.style.background = "#e7f0ff";
-      tag.style.color = "#0a58ca";
+      estadoTag = `<span class="tag tag-futura">Próxima${dias}</span>`;
     }
 
-    const tagIns = document.createElement("span");
-    tagIns.style.cssText =
-      "display:inline-block;margin-top:4px;padding:2px 8px;border-radius:10px;font-size:0.78rem;";
+    let inscripcionTag = '';
     if (c.ya_inscripto) {
-      tagIns.textContent = "Inscripto";
-      tagIns.style.background = "#d4f5d7";
-      tagIns.style.color = "#1b7e20";
+      inscripcionTag = `<span class="tag tag-inscripto">Inscripto</span>`;
     } else {
-      tagIns.textContent = "No inscripto";
-      tagIns.style.background = "#fff3cd";
-      tagIns.style.color = "#946200";
+      inscripcionTag = `<span class="tag tag-no-inscripto">No inscripto</span>`;
     }
 
-    const btn = document.createElement("button");
-    btn.textContent = "Ver";
-    btn.className = "btn-secundario";
-    btn.addEventListener("click", () => abrirModalCampania(c));
+    const card = document.createElement("article");
+    card.className = "campania-card";
+    card.innerHTML = `
+      <img src="${c.imagen_url || "https://placehold.co/64x64/EEE/AAA?text=Img"}" alt="${c.nombre || "Campaña"}">
+      <div class="campania-info">
+        <strong>${c.nombre || "Campaña"}</strong>
+        <p>${c.descripcion || ""}</p>
+        <div class="tags-container">
+          ${estadoTag}
+          ${inscripcionTag}
+        </div>
+      </div>
+      <button class="btn-secundario btn-ver-campania">Ver</button>
+    `;
 
-    info.appendChild(strong);
-    info.appendChild(p);
-    info.appendChild(tag);
-    info.appendChild(tagIns);
-    info.appendChild(btn);
-
-    card.appendChild(img);
-    card.appendChild(info);
+    card.querySelector('.btn-ver-campania').addEventListener('click', () => abrirModalCampania(c));
     campaniasList.appendChild(card);
+    // --- FIN DE MEJORA ---
   });
 }
 
@@ -314,9 +279,8 @@ function abrirModalCampania(c) {
             showToast("Inscripción cancelada", "success");
             confirmDlg.style.display = "none";
             modal.style.display = "none";
-            await cargarCampanias(token);
-            await cargarNotificaciones();
-            await cargarProximaInscripcion(token);
+            // Vuelvo a cargar todo el panel para refrescar los datos
+            await cargarPanel();
           } catch (er) {
             appLogger.error("Error al cancelar inscripción:", er);
             showToast("No se pudo cancelar la inscripción", "error");
@@ -358,10 +322,8 @@ btnAsistir?.addEventListener("click", async () => {
     alert("Inscripción registrada. ¡Gracias por participar!");
     modal.style.display = "none";
 
-    // Refrescar listados y próxima campaña inscripta
-    await cargarCampanias(token);
-    await cargarNotificaciones();
-    await cargarProximaInscripcion(token);
+    // Vuelvo a cargar todo el panel para refrescar los datos
+    await cargarPanel();
   } catch (err) {
     appLogger.error("Error al inscribirse:", err);
     showToast("No se pudo registrar tu asistencia", "error");
@@ -472,21 +434,16 @@ function renderMisCampanias(campanias, container) {
  * cercana o la próxima futura, y actualiza el panel lateral con acceso directo.
  */
 
-async function cargarProximaInscripcion(tok) {
+async function cargarProximaInscripcion(campanias) {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/donantes/inscripciones`, {
-      headers: { Authorization: "Bearer " + tok },
-    });
-    if (!res.ok) throw new Error("Error al obtener mis inscripciones");
-    const data = await res.json();
-    const lista = Array.isArray(data) ? data : [];
-
     const today = new Date();
     const hoy = new Date(
       today.getFullYear(),
       today.getMonth(),
       today.getDate()
     );
+
+    const lista = (campanias || []).filter(c => c.ya_inscripto);
 
     const esActiva = (c) => {
       const fi = c.fecha_inicio ? new Date(c.fecha_inicio) : null;
@@ -564,21 +521,6 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// Carga de notificaciones desde la API
-async function cargarNotificaciones() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/donantes/notificaciones`, {
-      headers: { Authorization: "Bearer " + token },
-    });
-    if (!res.ok) throw new Error("No se pudieron cargar notificaciones");
-    const lista = await res.json();
-    renderNotificaciones(lista);
-    actualizarBadgeNotificaciones(lista);
-  } catch (err) {
-    appLogger.error("Error al cargar notificaciones:", err);
-  }
-}
-
 /**
  * Renderiza cada notificación:
  * - Muestra mensaje y fecha relativa (time-ago).
@@ -586,6 +528,8 @@ async function cargarNotificaciones() {
  */
 function renderNotificaciones(lista) {
   notifList.innerHTML = "";
+  actualizarBadgeNotificaciones(lista);
+
   if (!lista || lista.length === 0) {
     notifEmpty.style.display = "block";
     return;

@@ -5,28 +5,20 @@ const localidadSelect = document.getElementById("localidad_id");
 const form = document.getElementById("altaDonanteForm");
 const mensajeExito = document.getElementById("mensajeExito");
 const fechaNacimientoInput = document.getElementById("fecha_nacimiento");
-const fechaUltimaDonacionInput = document.getElementById("fecha_ultima_donacion");
+const fechaUltimaDonacionInput = document.getElementById(
+  "fecha_ultima_donacion"
+);
 const nuncaDoneCheck = document.getElementById("nunca_done");
-const dniInput = document.getElementById("dni");
 
 // ----------------------------
 // 1) Cargar usuario_id guardado
 // ----------------------------
 const usuario_id = localStorage.getItem("usuario_id");
-if (!usuario_id) {
-  alert("No tenés una cuenta creada. Volvé al registro.");
-  window.location.href = "./registro.html";
-}
-
+console.log("Usuario ID para donante:", usuario_id);
 // Setear fecha máxima hoy
 const today = new Date().toISOString().split("T")[0];
 fechaNacimientoInput.setAttribute("max", today);
 fechaUltimaDonacionInput.setAttribute("max", today);
-
-// Solo números para DNI
-dniInput.addEventListener("input", function () {
-  this.value = this.value.replace(/\D/g, '').slice(0, 9);
-});
 
 // ----------------------------
 // 2) Cargar provincias
@@ -55,7 +47,9 @@ provinciaSelect.addEventListener("change", async function () {
   if (!provinciaId) return;
 
   try {
-    const res = await fetch(`${API_BASE_URL}/api/localidades?provincia_id=${provinciaId}`);
+    const res = await fetch(
+      `${API_BASE_URL}/api/localidades?provincia_id=${provinciaId}`
+    );
     const localidades = await res.json();
     localidades.forEach((l) => {
       localidadSelect.innerHTML += `<option value="${l.id}">${l.nombre}</option>`;
@@ -63,13 +57,6 @@ provinciaSelect.addEventListener("change", async function () {
   } catch {
     localidadSelect.innerHTML = `<option value="">Error al cargar</option>`;
   }
-});
-
-// ----------------------------
-// 4) Validación de teléfono
-// ----------------------------
-form.telefono.addEventListener("input", function () {
-  this.value = this.value.replace(/\D/g, "");
 });
 
 // ----------------------------
@@ -90,12 +77,6 @@ nuncaDoneCheck.addEventListener("change", function () {
 form.addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  const dni = dniInput.value;
-  if (!dni.match(/^\d{7,9}$/)) {
-    alert("El DNI debe tener entre 7 y 9 dígitos.");
-    return;
-  }
-
   const fechaNacimiento = fechaNacimientoInput.value;
   const hoy = new Date();
   const fechaNac = new Date(fechaNacimiento);
@@ -115,8 +96,10 @@ form.addEventListener("submit", async function (e) {
   const fechaUltimaDonacion = fechaUltimaDonacionInput.value;
   if (!nuncaDoneCheck.checked && fechaUltimaDonacion) {
     const fechaUlt = new Date(fechaUltimaDonacion);
-    if (fechaUlt > hoy) return alert("La fecha de última donación no puede ser futura.");
-    if (fechaUlt < fechaNac) return alert("La fecha de donación no puede ser antes de nacer.");
+    if (fechaUlt > hoy)
+      return alert("La fecha de última donación no puede ser futura.");
+    if (fechaUlt < fechaNac)
+      return alert("La fecha de donación no puede ser antes de nacer.");
   }
 
   if (
@@ -124,8 +107,7 @@ form.addEventListener("submit", async function (e) {
     !fechaNacimiento ||
     !form.sexo.value ||
     !form.provincia_id.value ||
-    !form.localidad_id.value ||
-    !form.telefono.value.match(/^\d{7,15}$/)
+    !form.localidad_id.value
   ) {
     return alert("Completá todos los campos correctamente.");
   }
@@ -136,6 +118,10 @@ form.addEventListener("submit", async function (e) {
   const datos = Object.fromEntries(new FormData(form).entries());
   datos.usuario_id = usuario_id;
 
+  // Ya no enviamos dni ni telefono desde acá, porque están en la tabla de usuarios.
+  delete datos.dni;
+  delete datos.telefono;
+
   if (nuncaDoneCheck.checked) datos.fecha_ultima_donacion = "";
 
   // ----------------------------
@@ -145,9 +131,9 @@ form.addEventListener("submit", async function (e) {
     const res = await fetch(`${API_BASE_URL}/api/donantes`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(datos)
+      body: JSON.stringify(datos),
     });
 
     if (!res.ok) {
@@ -155,34 +141,34 @@ form.addEventListener("submit", async function (e) {
       return alert("Error: " + (error || "No se pudo registrar el donante."));
     }
 
-// ----------------------------
-// 9) LOGIN AUTOMÁTICO
-// ----------------------------
-const email = localStorage.getItem("email_temp");
-const password = localStorage.getItem("password_temp");
+    // ----------------------------
+    // 9) LOGIN AUTOMÁTICO
+    // ----------------------------
+    const email = localStorage.getItem("email_temp");
+    const password = localStorage.getItem("password_temp");
 
-if (!email || !password) {
-  alert("Cuenta creada, pero no se pudo iniciar sesión automáticamente.");
-  return (window.location.href = "./login.html");
-}
+    if (!email || !password) {
+      alert("Cuenta creada, pero no se pudo iniciar sesión automáticamente.");
+      return (window.location.href = "./login.html");
+    }
 
-const loginRes = await fetch(`${API_BASE_URL}/api/auth/login`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ email, password }) // LOGIN POR EMAIL + CONTRASEÑA
-});
+    const loginRes = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, skip2FA: true }), // LOGIN POR EMAIL + CONTRASEÑA, salteando 2FA
+    });
 
-const loginData = await loginRes.json();
+    const loginData = await loginRes.json();
 
-if (!loginRes.ok) {
-  alert("Registrado, pero error al iniciar sesión.");
-  return window.location.href = "./login.html";
-}
+    if (!loginRes.ok) {
+      alert("Registrado, pero error al iniciar sesión.");
+      return (window.location.href = "./login.html");
+    }
 
     // Guardar token + role
     localStorage.setItem("token", loginData.token);
-    localStorage.setItem("role", loginData.role);
-    localStorage.setItem("dni", dni);
+    localStorage.setItem("tipo_usuario", loginData.tipo_usuario);
+    localStorage.setItem("dni", loginData.dni);
 
     // Limpieza
     localStorage.removeItem("email_temp");
@@ -201,8 +187,8 @@ if (!loginRes.ok) {
     setTimeout(() => {
       window.location.href = "./dashboard-donante.html";
     }, 1500);
-
   } catch (err) {
+    console.error("Error detallado al finalizar registro:", err);
     alert("Error al conectar con el servidor.");
   }
 });

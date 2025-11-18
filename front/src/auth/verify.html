@@ -1,35 +1,35 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Verificación 2FA</title>
-  <link rel="stylesheet" href="./verify.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verificación de 2 Pasos</title>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <main class="main">
+      <div class="form-container">
+        <h1>Verificación de 2 Pasos</h1>
+        <p>
+          Hemos enviado un código de 6 dígitos a tu correo electrónico.
+          Ingresalo a continuación.
+        </p>
+        <form id="verifyForm">
+          <div class="form-group">
+            <label for="codigo">Código de Verificación</label>
+            <input type="text" id="codigo" name="codigo" required maxlength="6" pattern="\\d{6}" inputmode="numeric" autocomplete="one-time-code" />
+          </div>
 
-  <main>
-    <div class="verify-card">
-      <h2>Verificación de Seguridad</h2>
+          <div class="form-group checkbox-group">
+            <input type="checkbox" id="trustDevice" name="trust_device" />
+            <label for="trustDevice">Confiar en este dispositivo por 30 días</label>
+          </div>
 
-      <form id="verifyForm">
-
-        <input 
-          id="codigo"
-          type="text"
-          maxlength="6"
-          placeholder="Código recibido"
-          required
-        />
-
-        <!-- 🔥 MENSAJE DE ERROR / OK -->
-        <p id="mensaje"></p>
-
-        <button type="submit">Verificar</button>
-      </form>
-    </div>
-  </main>
-
-  <script type="module" src="./verify.js"></script>
-</body>
+          <button type="submit" class="btn">Verificar e Ingresar</button>
+        </form>
+        <p id="message" class="message"></p>
+      </div>
+    </main>
+    <script type="module" src="verify.js"></script>
+  </body>
 </html>

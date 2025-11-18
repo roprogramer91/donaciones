@@ -10,10 +10,6 @@
   <main class="alta-donante-container">
     <h1>Completá tus datos para ser Donante</h1>
     <form id="altaDonanteForm" autocomplete="off">
-      <!-- DNI -->
-      <label for="dni">DNI:</label>
-      <input type="text" id="dni" name="dni" required pattern="^\d{7,9}$" maxlength="9" minlength="7" placeholder="Ej: 12345678">
-
       <!-- Grupo sanguíneo -->
       <label for="grupo_sanguineo">Grupo sanguíneo:</label>
       <select name="grupo_sanguineo" id="grupo_sanguineo" required>
@@ -52,10 +48,6 @@
       <select name="localidad_id" id="localidad_id" required>
         <option value="">Seleccioná...</option>
       </select>
-
-      <!-- Teléfono -->
-      <label for="telefono">Teléfono de contacto:</label>
-      <input type="tel" id="telefono" name="telefono" required pattern="^\d{7,15}$" maxlength="15" placeholder="Ej: 3881234567">
 
       <!-- ¿Cuándo fue tu última donación? -->
       <label for="fecha_ultima_donacion">¿Cuándo fue tu última donación?</label>

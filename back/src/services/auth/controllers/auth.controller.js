@@ -14,6 +14,7 @@ const {
   verifyCode,
   markCodeAsUsed,
 } = require("../models/verificaciones2FA.model");
+const DispositivosConfianza = require("../models/dispositivosConfianza.model");
 const { generate2FACode } = require("../utils/generate2FACode");
 const { generarToken } = require("../utils/jwt");
 const { enviarCodigo2FA, sendMail } = require("../utils/mailer");
@@ -64,7 +65,30 @@ async function register(req, res) {
 
 async function login(req, res) {
   try {
-    const { dni, email, password, skip2FA } = req.body;
+    const { dni, email, password, skip2FA } = req.body; // skip2FA es para el post-registro
+    const trustedDeviceToken = req.cookies.trusted_device_token;
+
+    // --- INICIO DE MEJORA: "Confiar en este dispositivo" ---
+    if (trustedDeviceToken) {
+      const trustedDevice = await DispositivosConfianza.findValidToken(
+        trustedDeviceToken
+      );
+      if (trustedDevice) {
+        const user = await findUserByid(trustedDevice.usuario_id);
+        if (user) {
+          const finalToken = generarToken({
+            id: user.id,
+            dni: user.dni,
+            email: user.email,
+            tipo_usuario: user.tipo_usuario,
+          });
+          return res.status(200).json({
+            message: "Login exitoso desde dispositivo de confianza.",
+            token: finalToken,
+          });
+        }
+      }
+    }
 
     if (!password)
       return res.status(400).json({ message: "Contraseña requerida." });
@@ -131,7 +155,7 @@ async function verify2FA(req, res) {
   console.log("🧠 Body recibido en verify:", req.body);
 
   try {
-    const { usuario_id, codigo } = req.body;
+    const { usuario_id, codigo, trust_device } = req.body;
 
     if (!usuario_id || !codigo)
       return res.status(400).json({ message: "Datos incompletos." });
@@ -151,8 +175,25 @@ async function verify2FA(req, res) {
     }
     await markCodeAsUsed(verification.id);
 
-    // Aqui genero el token definitivo
+    // --- INICIO DE MEJORA: "Confiar en este dispositivo" ---
+    if (trust_device === true) {
+      const userAgent = req.headers["user-agent"];
+      const ip = req.ip;
+      const dispositivo = await DispositivosConfianza.crear(
+        usuario_id,
+        userAgent,
+        ip
+      );
 
+      res.cookie("trusted_device_token", dispositivo.token_dispositivo, {
+        httpOnly: true, // El cookie no es accesible por JS en el navegador
+        secure: process.env.NODE_ENV === "production", // Solo por HTTPS en producción
+        sameSite: "strict",
+        expires: new Date(dispositivo.expires_at),
+      });
+    }
+
+    // Aqui genero el token definitivo
     const user = await findUserByid(req.body.usuario_id);
 
     const finalToken = generarToken({

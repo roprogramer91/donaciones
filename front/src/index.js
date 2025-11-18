@@ -71,5 +71,5 @@ document.getElementById("ingresarAdmin").addEventListener("click", () => {
 
 // ====== BOTÓN REGISTRARME ======
 document.getElementById("btnRegistrarme").addEventListener("click", () => {
-  window.location.href = "src/auth/donante/test-donante.html";
+  window.location.href = "src/donante/test-donante.html";
 });

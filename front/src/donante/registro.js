@@ -17,6 +17,7 @@ form.addEventListener("submit", async (e) => {
   const apellido = form.apellido.value.trim();
   const email = form.email.value.trim();
   const dni = form.dni.value.trim();
+  const telefono = form.telefono.value.trim(); // Capturo el teléfono
   const password = form.password.value;
   const password2 = form.password2.value;
 
@@ -31,7 +32,14 @@ form.addEventListener("submit", async (e) => {
     const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre, apellido, email, dni, password })
+      body: JSON.stringify({
+        nombre,
+        apellido,
+        email,
+        dni,
+        telefono,
+        password,
+      }), // Lo envío al backend
     });
 
     const data = await res.json();
@@ -43,8 +51,8 @@ form.addEventListener("submit", async (e) => {
     }
 
     // Guardar email y password TEMPORALMENTE para login automático
-localStorage.setItem("email_temp", email);
-localStorage.setItem("password_temp", password);
+    localStorage.setItem("email_temp", email);
+    localStorage.setItem("password_temp", password);
     // Guardar usuario_id para el siguiente paso
     localStorage.setItem("usuario_id", data.usuario_id);
 
@@ -52,9 +60,8 @@ localStorage.setItem("password_temp", password);
     mensaje.innerHTML = "Cuenta creada. Redirigiendo...";
 
     setTimeout(() => {
-      window.location.href = "./alta-donante.html"; 
+      window.location.href = "./alta-donante.html";
     }, 1200);
-
   } catch (error) {
     mensaje.style.color = "red";
     mensaje.textContent = "Error al conectar con el servidor.";
