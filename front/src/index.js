@@ -1,6 +1,6 @@
 import { API_BASE_URL } from "./utils/config.js";
 
-// ====== REDIRECCIÓN AUTOMÁTICA SI HAY TOKEN ======
+// ====== REDIRECCION AUTOMATICA SI HAY TOKEN ======
 (async function verificarSesion() {
   const token = localStorage.getItem("token");
   if (!token) return;
@@ -18,7 +18,7 @@ import { API_BASE_URL } from "./utils/config.js";
       return;
     }
 
-    // El token es válido → necesitamos conocer el rol, que está guardado en localStorage
+    // El token es válido; se usa el rol guardado en localStorage.
     const tipo = localStorage.getItem("tipo_usuario");
 
     switch (tipo) {
@@ -32,7 +32,7 @@ import { API_BASE_URL } from "./utils/config.js";
         window.location.href = "admin-panel.html";
         break;
       default:
-        // si por algún motivo no existe tipo_usuario, nos quedamos en index
+        // sin tipo guardado, nos quedamos en la portada
         break;
     }
   } catch (err) {
@@ -41,35 +41,11 @@ import { API_BASE_URL } from "./utils/config.js";
   }
 })();
 
-
-
-// ====== SUBMENÚ INGRESAR ======
-const btnIngresar = document.getElementById("btnIngresar");
-const submenu = document.getElementById("submenuIngresar");
-
-// Alterna el submenú al hacer click en "Ingresar"
-btnIngresar.addEventListener("click", () => {
-  submenu.classList.toggle("oculto");
-});
-
-// ====== CONTEXTO DEL LOGIN ======
-document.getElementById("ingresarDonante").addEventListener("click", () => {
-  localStorage.setItem("login_context", "donante");
+// ====== BOTONES PRINCIPALES ======
+document.getElementById("btnIngresar").addEventListener("click", () => {
   window.location.href = "src/auth/login.html";
 });
 
-document.getElementById("ingresarCentro").addEventListener("click", () => {
-  localStorage.setItem("login_context", "centro");
-  window.location.href = "src/auth/login.html";
-});
-
-document.getElementById("ingresarAdmin").addEventListener("click", () => {
-  localStorage.setItem("login_context", "admin");
-  window.location.href = "src/auth/login.html";
-});
-
-
-// ====== BOTÓN REGISTRARME ======
 document.getElementById("btnRegistrarme").addEventListener("click", () => {
   window.location.href = "src/donante/test-donante.html";
 });
