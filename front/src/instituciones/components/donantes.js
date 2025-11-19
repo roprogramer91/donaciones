@@ -6,6 +6,7 @@
 
 import { API_BASE_URL } from "../../utils/config.js";
 import { toggleSeccion } from "../dashboard-centro.js";
+import { abrirModalInscripciones } from "./modales/modalInscripciones.js";
 import { appLogger } from "../../utils/logger.js";
 
 // ============================================================
@@ -235,7 +236,7 @@ function renderDonantes(donantes) {
   donantes.forEach((d) => {
     const tr = document.createElement("tr");
     const nombreCompleto = `${d.nombre || ""} ${d.apellido || ""}`.trim();
-    const insc = d.inscripto_en_campania || !!d.campania_inscripta;
+    const insc = Boolean(d.campania_inscripta);
 
     tr.innerHTML = `
       <td>${nombreCompleto}</td>
@@ -245,7 +246,7 @@ function renderDonantes(donantes) {
       <td>${d.telefono || ""}</td>
       <td>${
         insc
-          ? `<a href="#" class="link-inscripciones" data-uid="${
+          ? `<a href="#" class="link-inscripciones" data-usuario="${
               d.usuario_id
             }" data-nombre="${nombreCompleto.replace(
               /"/g,
@@ -262,10 +263,13 @@ function renderDonantes(donantes) {
     if (link) {
       link.addEventListener("click", (ev) => {
         ev.preventDefault();
-        abrirModalInscripciones(
-          link.dataset.uid,
-          link.dataset.nombre || "Donante"
-        );
+        const usuario = link.dataset.usuario;
+        if (usuario) {
+          abrirModalInscripciones(
+            usuario,
+            link.dataset.nombre || "Donante"
+          );
+        }
       });
     }
 

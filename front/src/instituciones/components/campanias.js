@@ -122,7 +122,7 @@ function formatearFecha(fecha) {
 /* ==========================================================
    MODAL DE CAMPAÑA (CREAR O EDITAR)
 =========================================================== */
-async function abrirModalCampania(id = null) {
+export async function abrirModalCampania(id = null) {
   const esEdicion = !!id;
   const titulo = esEdicion ? "Editar campaña" : "Nueva campaña";
 

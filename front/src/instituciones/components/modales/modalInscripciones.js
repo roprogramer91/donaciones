@@ -1,15 +1,11 @@
 // ============================================================
-// COMPONENTE: MODAL DE INSCRIPCIONES A CAMPAÑAS
-// Permite visualizar la lista de donantes inscritos a una
-// campaña específica desde el panel del centro de hemoterapia.
+// MODAL: CAMPAÑAS EN LAS QUE PARTICIPA UN DONANTE
 // ============================================================
 
-import { API_BASE_URL } from "../../../config.js";
-import { authHeaders, mostrarMensaje } from "../../dashboard-centro.js";
-
-// ============================================================
-// ELEMENTOS BASE
-// ============================================================
+import { API_BASE_URL } from "../../../utils/config.js";
+import { mostrarPopup } from "../popup.js";
+import { appLogger } from "../../../utils/logger.js";
+import { abrirModalCampania } from "../campanias.js";
 
 const modalInscripciones = document.getElementById("modal-inscripciones");
 const cerrarModalInscripciones = document.getElementById(
@@ -20,10 +16,6 @@ const tituloModalInscripciones = document.getElementById(
 );
 const tablaInscripciones = document.querySelector("#tabla-inscripciones tbody");
 
-// ============================================================
-// INICIALIZACIÓN
-// ============================================================
-
 export function inicializarModalInscripciones() {
   if (!modalInscripciones) return;
 
@@ -32,85 +24,102 @@ export function inicializarModalInscripciones() {
   });
 
   modalInscripciones.addEventListener("click", (e) => {
-    if (e.target === modalInscripciones)
+    if (e.target === modalInscripciones) {
       modalInscripciones.style.display = "none";
+    }
   });
 }
 
-// ============================================================
-// MOSTRAR MODAL CON INSCRIPCIONES DE UNA CAMPAÑA
-// ============================================================
-
-export async function abrirModalInscripciones(campaniaId, campaniaNombre = "") {
+export async function abrirModalInscripciones(
+  usuarioId,
+  nombreDonante = ""
+) {
   try {
     modalInscripciones.style.display = "flex";
-    tituloModalInscripciones.textContent = `Inscripciones - ${campaniaNombre}`;
-    tablaInscripciones.innerHTML = `<tr><td colspan="4">Cargando inscripciones...</td></tr>`;
+    tituloModalInscripciones.textContent = `Campañas de ${nombreDonante}`;
+    tablaInscripciones.innerHTML =
+      `<tr><td colspan="5">Cargando inscripciones...</td></tr>`;
 
+    const token = localStorage.getItem("token");
     const res = await fetch(
-      `${API_BASE_URL}/api/campanias/${campaniaId}/inscripciones`,
+      `${API_BASE_URL}/api/campanias/usuario/${usuarioId}/inscripciones`,
       {
-        headers: authHeaders(),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
 
-    if (!res.ok) throw new Error("No se pudieron obtener las inscripciones");
+    if (!res.ok) {
+      throw new Error("No se pudieron obtener las inscripciones");
+    }
 
     const inscripciones = await res.json();
     renderInscripciones(inscripciones);
   } catch (error) {
     appLogger.error("Error al cargar inscripciones:", error);
-    mostrarMensaje("Error al cargar inscripciones", "error");
+    mostrarPopup("Error al cargar inscripciones", "error");
   }
 }
-
-// ============================================================
-// RENDERIZADO DE INSCRIPCIONES
-// ============================================================
 
 function renderInscripciones(lista) {
   tablaInscripciones.innerHTML = "";
 
-  if (!Array.isArray(lista) || lista.length === 0) {
-    tablaInscripciones.innerHTML = `<tr><td colspan="4">No hay inscripciones registradas</td></tr>`;
+  if (!Array.isArray(lista) || !lista.length) {
+    tablaInscripciones.innerHTML =
+      `<tr><td colspan="5">No hay inscripciones registradas</td></tr>`;
     return;
   }
 
-  lista.forEach((i) => {
+  lista.forEach((item) => {
     const tr = document.createElement("tr");
-
-    const fecha = i.fecha_inscripcion
-      ? new Date(i.fecha_inscripcion).toLocaleDateString()
+    const fechaInicio = item.fecha_inicio
+      ? new Date(item.fecha_inicio).toLocaleDateString()
       : "--";
-    const estado = formatearEstado(i.estado);
+    const fechaFin = item.fecha_fin
+      ? new Date(item.fecha_fin).toLocaleDateString()
+      : "--";
+    const estado = formatearEstado(item.estado);
 
     tr.innerHTML = `
-      <td>${i.nombre_donante || "Sin nombre"}</td>
-      <td>${i.email_donante || "—"}</td>
-      <td>${fecha}</td>
       <td>
-        <span class="estado ${estado.clase}">${estado.texto}</span>
+        <a href="#" class="link-campania" data-id="${item.id}">
+          ${item.nombre || "Campaña"}
+        </a>
       </td>
+      <td>${fechaInicio}</td>
+      <td>${fechaFin}</td>
+      <td><span class="estado ${estado.clase}">${estado.texto}</span></td>
+      <td>${item.localidad_nombre || "--"}</td>
     `;
+
+    tr.querySelector(".link-campania")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      modalInscripciones.style.display = "none";
+      const campaniaId = Number(e.currentTarget.dataset.id);
+      if (campaniaId) {
+        abrirModalCampania(campaniaId);
+      }
+    });
 
     tablaInscripciones.appendChild(tr);
   });
 }
 
-// ============================================================
-// UTILIDADES
-// ============================================================
-
 function formatearEstado(estado) {
-  switch (estado) {
-    case "confirmado":
-      return { texto: "Confirmado", clase: "estado-confirmado" };
+  switch ((estado || "").toLowerCase()) {
+    case "activa":
+      return { texto: "Activa", clase: "estado-confirmado" };
+    case "futura":
     case "pendiente":
       return { texto: "Pendiente", clase: "estado-pendiente" };
-    case "cancelado":
-      return { texto: "Cancelado", clase: "estado-cancelado" };
+    case "finalizada":
+    case "cancelada":
+      return { texto: "Finalizada", clase: "estado-cancelado" };
     default:
       return { texto: "Desconocido", clase: "estado-desconocido" };
   }
 }
-import { appLogger } from "../../../utils/logger.js";
+
+appLogger.log("✅ modalInscripciones.js listo");

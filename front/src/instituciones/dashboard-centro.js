@@ -16,6 +16,7 @@ import { cargarResumen } from "./components/resumenCentro.js";
 import { mostrarPopup } from "./components/popup.js";
 import { inicializarDonantes } from "./components/donantes.js";
 import { inicializarNotificaciones } from "./components/notificaciones.js";
+import { inicializarModalInscripciones } from "./components/modales/modalInscripciones.js";
 
 /* ==========================================================
    🔁 FUNCIÓN GLOBAL: TOGGLE DE SECCIONES
@@ -150,6 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
   =========================================================== */
   inicializarDonantes();
   inicializarNotificaciones();
+  inicializarModalInscripciones();
 
   /* ==========================================================
      8️⃣ DEBUG Y CONFIRMACIÓN DE CARGA

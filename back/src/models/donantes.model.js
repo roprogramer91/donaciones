@@ -141,7 +141,15 @@ const filtrar = async (filtros) => {
         where cd.usuario_id = d.usuario_id
         order by cd.created_at desc nulls last, c.fecha_inicio desc nulls last, c.id desc
         limit 1
-      ) as campania_inscripta
+      ) as campania_inscripta,
+      (
+        select c.id
+        from campanias_donantes cd
+        join campanias c on c.id = cd.campania_id
+        where cd.usuario_id = d.usuario_id
+        order by cd.created_at desc nulls last, c.fecha_inicio desc nulls last, c.id desc
+        limit 1
+      ) as campania_inscripta_id
     from donantes d
     join usuarios u on d.usuario_id = u.id
     left join provincias p on d.provincia_id = p.id

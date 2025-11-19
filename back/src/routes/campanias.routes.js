@@ -55,5 +55,11 @@ router.get(
   CampaniasController.obtenerInscriptos
 );
 
+router.get(
+  '/usuario/:usuarioId/inscripciones',
+  authMiddleware,
+  roleMiddleware(["centro", "admin"]),
+  CampaniasController.obtenerInscripcionesPorUsuario
+);
 
 module.exports = router;

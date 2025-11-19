@@ -179,9 +179,12 @@ CampaniasModel.estaInscripto = async function (campaniaId, usuarioId) {
 
 CampaniasModel.listarInscripcionesPorUsuario = async function (usuarioId) {
   const { rows } = await pool.query(
-    `SELECT c.*
+    `SELECT 
+        c.*,
+        l.nombre AS localidad_nombre
      FROM campanias_donantes cd
      JOIN campanias c ON c.id = cd.campania_id
+     LEFT JOIN localidades l ON c.localidad_id = l.id
      WHERE cd.usuario_id = $1
      ORDER BY c.fecha_inicio NULLS LAST, c.id DESC`,
     [usuarioId]
@@ -199,7 +202,13 @@ CampaniasModel.cancelarInscripcion = async function (campaniaId, usuarioId) {
 
 CampaniasModel.listarInscriptosDeCampania = async function (campaniaId) {
   const { rows } = await pool.query(
-    `SELECT u.id as usuario_id, u.nombre, u.apellido, u.email, d.grupo_sanguineo
+    `SELECT 
+        u.id AS usuario_id,
+        u.nombre,
+        u.apellido,
+        u.email,
+        d.grupo_sanguineo,
+        cd.created_at AS fecha_inscripcion
      FROM campanias_donantes cd
      JOIN usuarios u ON u.id = cd.usuario_id
      LEFT JOIN donantes d ON d.usuario_id = u.id

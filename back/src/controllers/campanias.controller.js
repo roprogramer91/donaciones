@@ -164,6 +164,22 @@ const CampaniasController = {
       res.status(500).json({ error: "Error al listar inscriptos" });
     }
   },
+
+  async obtenerInscripcionesPorUsuario(req, res) {
+    try {
+      const { usuarioId } = req.params;
+      const id = parseInt(usuarioId, 10);
+      if (!id) {
+        return res.status(400).json({ error: "usuario_id invalido" });
+      }
+
+      const lista = await CampaniasModel.listarInscripcionesPorUsuario(id);
+      res.json(lista);
+    } catch (error) {
+      console.error("Error al listar inscripciones por usuario:", error);
+      res.status(500).json({ error: "Error al listar inscripciones" });
+    }
+  },
 };
 
 module.exports = CampaniasController;
