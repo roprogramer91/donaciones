@@ -6,6 +6,10 @@ const CentrosModel = require('../models/centros.model');
 const DonantesModel = require('../models/donantes.model');
 const Notificaciones = require('../models/notificaciones.model');
 
+const MANUAL_DIRECTO_TYPE = "centro_manual_directo";
+const MANUAL_FILTRO_TYPE = "centro_manual_filtro";
+const MANUAL_FELICITACION_TYPE = "centro_felicitacion";
+
 // ==============================================================
 // PERFIL DEL CENTRO
 // ==============================================================
@@ -65,69 +69,55 @@ module.exports.obtenerResumen = async function (req, res) {
 module.exports.enviarNotificaciones = async function (req, res) {
   try {
     const centroId = req.user?.id;
-    if (!centroId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
+    if (!centroId) return res.status(401).json({ mensaje: "Token no proporcionado" });
 
     const { mensaje, usuarios, filtros } = req.body;
+    if (!mensaje || !mensaje.trim()) {
+      return res.status(400).json({ error: "Debe especificar un mensaje" });
+    }
 
-    console.log("üì• Body recibido:", req.body);
-
-    // ----------------------------------------------------------
-    // 1) Envio directo por usuario_id[]
-    // ----------------------------------------------------------
+    // EnvÌo directo a usuarios seleccionados
     if (Array.isArray(usuarios) && usuarios.length > 0) {
-      console.log("‚û° Envio directo a usuarios:", usuarios);
-
       const donantes = await DonantesModel.obtenerPorUsuariosIds(usuarios);
-      const ids = donantes.map(d => d.id);
-
-      if (ids.length === 0) {
+      const ids = donantes.map((d) => d.id);
+      if (!ids.length) {
         return res.status(400).json({ error: "No se encontraron donantes con esos usuarios_id" });
       }
 
-      const creadas = await Notificaciones.crearBatch(ids, null, mensaje);
+      const creadas = await Notificaciones.crearBatch(ids, MANUAL_DIRECTO_TYPE, mensaje, {
+        meta: { origen: "manual_directo", usuarios },
+      });
 
-      await Notificaciones.registrarLog(
-        centroId,
-        "manual_directo",
-        mensaje,
-        creadas.length,
-        { usuarios }
-      );
+      await Notificaciones.registrarLog(centroId, MANUAL_DIRECTO_TYPE, mensaje, creadas.length, {
+        usuarios,
+      });
 
       return res.json({ ok: true, enviados: creadas.length });
     }
 
-    // ----------------------------------------------------------
-    // 2) Envio por filtros
-    // ----------------------------------------------------------
-    console.log("‚û° Envio por filtros:", filtros);
-
+    // EnvÌo por filtros
     const donantes = await DonantesModel.filtrar(filtros);
-    const ids = donantes.map(d => d.id);
-
-    if (ids.length === 0) {
-      return res.status(400).json({ error: "No se encontraron donantes para enviar notificacion" });
+    const ids = donantes.map((d) => d.id);
+    if (!ids.length) {
+      return res.status(400).json({ error: "No se encontraron donantes para enviar notificaciÛn" });
     }
 
-    const creadas = await Notificaciones.crearBatch(ids, null, mensaje);
+    const creadas = await Notificaciones.crearBatch(ids, MANUAL_FILTRO_TYPE, mensaje, {
+      meta: { origen: "manual_filtro", filtros },
+    });
 
-    await Notificaciones.registrarLog(
-      centroId,
-      "manual_filtros",
-      mensaje,
-      creadas.length,
-      filtros
-    );
+    await Notificaciones.registrarLog(centroId, MANUAL_FILTRO_TYPE, mensaje, creadas.length, {
+      filtros,
+    });
 
     res.json({ ok: true, enviados: creadas.length });
-
-  } catch (e) {
-    console.error("‚ùå Error en enviarNotificaciones:", e);
+  } catch (error) {
+    console.error("Error en enviarNotificaciones:", error);
     res.status(500).json({ error: "Error al enviar notificaciones" });
   }
 };
 
-// ==============================================================
+// ==============// ==============================================================
 // PREVIEW DE NOTIFICACIONES
 // ==============================================================
 
@@ -168,7 +158,7 @@ module.exports.enviarFelicitacionesCumple = async function (req, res) {
 
     const mensaje = "Feliz cumple! Gracias por seguir formando parte de nuestra red de donacion.";
 
-    const creadas = await Notificaciones.crearBatch(ids, null, mensaje);
+    const creadas = await Notificaciones.crearBatch(ids, MANUAL_FELICITACION_TYPE, mensaje, { meta: { origen: 'felicitacion', fecha: { dia, mes } } });
 
     await Notificaciones.registrarLog(
       centroId,
@@ -248,3 +238,7 @@ module.exports.marcarNotificacionCentroLeida = async function (req, res) {
     res.status(500).json({ error: "Error al marcar notificacion" });
   }
 };
+
+
+
+

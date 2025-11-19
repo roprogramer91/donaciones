@@ -7,6 +7,7 @@
 import { API_BASE_URL } from "../../utils/config.js";
 import { toggleSeccion } from "../dashboard-centro.js";
 import { abrirModalInscripciones } from "./modales/modalInscripciones.js";
+import { mostrarPopup } from "./popup.js";
 import { appLogger } from "../../utils/logger.js";
 
 // ============================================================
@@ -52,24 +53,6 @@ export function inicializarDonantes() {
 }
 
 // ============================================================
-// PLEGABLE DE NOTIFICACIONES
-// ============================================================
-const toggleNotif = document.getElementById("toggle-notif");
-const notifPanel = document.getElementById("notif-panel");
-
-if (toggleNotif && notifPanel) {
-  toggleNotif.addEventListener("click", () => {
-    notifPanel.classList.toggle("oculto");
-    toggleNotif.classList.toggle("activo");
-  });
-}
-
-// Inicializamos módulo de notificaciones solo cuando se abra
-import("./notificaciones.js").then((mod) => {
-  if (mod?.inicializarNotificaciones) mod.inicializarNotificaciones();
-});
-
-// ============================================================
 // CARGA DE DONANTES CON FILTROS
 // ============================================================
 async function cargarDonantes() {
@@ -82,7 +65,7 @@ async function cargarDonantes() {
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // ✅ solo token
+          Authorization: `Bearer ${token}`, //  solo token
         },
       }
     );
@@ -96,7 +79,7 @@ async function cargarDonantes() {
   } catch (err) {
     appLogger.error("❌ Error al cargar donantes:", err);
     tablaBody.innerHTML = `<tr><td colspan="8">Error al cargar donantes</td></tr>`;
-    mostrarMensaje("Error al cargar donantes", "error");
+    mostrarPopup("Error al cargar donantes", "error");
   }
 }
 
@@ -367,18 +350,19 @@ document.getElementById("btn-next")?.addEventListener("click", () => {
 /* ==========================================================
    BÚSQUEDA LOCAL POR NOMBRE O EMAIL
 ========================================================== */
-document.getElementById("filtro-busqueda")?.addEventListener("input", (e) => {
+const filtroBusqueda = document.getElementById("filtro-busqueda");
+filtroBusqueda?.addEventListener("input", (e) => {
   const texto = e.target.value.toLowerCase().trim();
   if (!texto) {
     renderDonantesPaginados();
+    document.getElementById("paginacion-info").textContent = "Paginaci�n";
     return;
   }
 
-  const filtrados = ultimoResultadoDonantes.filter(
-    (d) =>
-      (d.nombre && d.nombre.toLowerCase().includes(texto)) ||
-      (d.apellido && d.apellido.toLowerCase().includes(texto)) ||
-      (d.email && d.email.toLowerCase().includes(texto))
+  const filtrados = ultimoResultadoDonantes.filter((d) =>
+    (d.nombre && d.nombre.toLowerCase().includes(texto)) ||
+    (d.apellido && d.apellido.toLowerCase().includes(texto)) ||
+    (d.email && d.email.toLowerCase().includes(texto))
   );
 
   renderDonantes(filtrados);

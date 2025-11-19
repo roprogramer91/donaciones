@@ -10,13 +10,13 @@
 
 /* === IMPORTACIONES DE MÓDULOS === */
 import { appLogger } from "../utils/logger.js";
-import { abrirModal, cerrarModal } from "./components/modales/modalBase.js";
 import { cargarCampanias } from "./components/campanias.js";
 import { cargarResumen } from "./components/resumenCentro.js";
-import { mostrarPopup } from "./components/popup.js";
 import { inicializarDonantes } from "./components/donantes.js";
 import { inicializarNotificaciones } from "./components/notificaciones.js";
 import { inicializarModalInscripciones } from "./components/modales/modalInscripciones.js";
+import { inicializarPerfilCentro } from "./components/perfilCentro.js";
+import { inicializarNotificacionesCentro } from "./components/notificacionesCentro.js";
 
 /* ==========================================================
    🔁 FUNCIÓN GLOBAL: TOGGLE DE SECCIONES
@@ -117,23 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnVerNotifs)
     btnVerNotifs.addEventListener("click", () => mostrarSeccion(seccionNotifs));
 
-  /* ==========================================================
-     5️⃣ PERFIL DEL CENTRO
-     Muestra un modal simple con información del centro
-  =========================================================== */
-  if (btnPerfil)
-    btnPerfil.addEventListener("click", () => {
-      abrirModal(`
-        <h3>Perfil del Centro</h3>
-        <p>Próximamente se cargará la información del centro aquí.</p>
-        <div class="modal-buttons">
-          <button class="btn-secundario" id="btnCerrarModal">Cerrar</button>
-        </div>
-      `);
-
-      const btnCerrar = document.getElementById("btnCerrarModal");
-      if (btnCerrar) btnCerrar.addEventListener("click", cerrarModal);
-    });
 
   /* ==========================================================
      6️⃣ CERRAR SESIÓN
@@ -151,7 +134,9 @@ document.addEventListener("DOMContentLoaded", () => {
   =========================================================== */
   inicializarDonantes();
   inicializarNotificaciones();
+  inicializarPerfilCentro();
   inicializarModalInscripciones();
+  inicializarNotificacionesCentro();
 
   /* ==========================================================
      8️⃣ DEBUG Y CONFIRMACIÓN DE CARGA

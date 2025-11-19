@@ -1,27 +1,31 @@
-// src/utils/api.js
-import { API_BASE_URL, AUTH_URL } from "./config.js";
+import { API_BASE_URL } from "./config.js";
 
-export async function apiFetch(endpoint, method = "GET", body = null, token = null) {
-  const headers = { "Content-Type": "application/json" };
-  if (token) headers.Authorization = `Bearer ${token}`;
+export async function apiFetch(endpoint, method = "GET", body = null) {
+  const token = localStorage.getItem("token");
 
-  // Si el endpoint incluye '/auth/', usamos AUTH_URL
-  const baseURL = endpoint.startsWith("/auth") ? AUTH_URL : API_BASE_URL;
+  const options = {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: 'include',
+  };
 
-  try {
-    const res = await fetch(`${baseURL}${endpoint}`, {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : null,
-    });
-
-    if (!res.ok) {
-      console.error("❌ Error HTTP:", res.status, res.statusText);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("❌ Error de conexión con el backend:", error);
-    throw new Error("Error de conexión con el servidor");
+  if (token) {
+    options.headers["Authorization"] = `Bearer ${token}`;
   }
+
+  if (body) {
+    options.body = JSON.stringify(body);
+  }
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Error en la petición a la API");
+  }
+
+  return data;
 }

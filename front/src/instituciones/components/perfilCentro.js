@@ -1,126 +1,108 @@
 // ============================================================
 // COMPONENTE: PERFIL DEL CENTRO DE HEMOTERAPIA
-// Permite visualizar y editar los datos del centro:
-// nombre, direcci贸n, tel茅fono y correo electr贸nico.
+// Permite visualizar y editar los datos del centro.
 // ============================================================
 
 import { API_BASE_URL } from "../../utils/config.js";
-import {
-  authHeaders,
-  getCentroId,
-  mostrarMensaje,
-} from "../dashboard-centro.js";
-
-// ============================================================
-// ELEMENTOS BASE
-// ============================================================
+import { mostrarPopup } from "./popup.js";
+import { appLogger } from "../../utils/logger.js";
 
 const btnPerfil = document.getElementById("btn-perfil");
 const modalPerfil = document.getElementById("modal-perfil");
 const cerrarModalPerfil = document.getElementById("cerrarModalPerfil");
+const cancelarModalPerfil = document.getElementById("cancelarModalPerfil");
 const formPerfil = document.getElementById("form-perfil");
 const bienvenida = document.getElementById("bienvenida-centro");
 
-// ============================================================
-// INICIALIZACI脫N DEL M脫DULO
-// ============================================================
-
 export function inicializarPerfilCentro() {
-  if (!btnPerfil) return;
+  if (!btnPerfil || !modalPerfil || !formPerfil) return;
 
-  // Abrir modal de perfil
   btnPerfil.addEventListener("click", async () => {
     modalPerfil.style.display = "flex";
     await cargarPerfilCentro();
   });
 
-  // Cerrar modal
-  cerrarModalPerfil?.addEventListener("click", () => {
+  const cerrar = () => {
     modalPerfil.style.display = "none";
+  };
+
+  cerrarModalPerfil?.addEventListener("click", cerrar);
+  cancelarModalPerfil?.addEventListener("click", cerrar);
+  modalPerfil.addEventListener("click", (e) => {
+    if (e.target === modalPerfil) cerrar();
   });
 
-  // Env铆o del formulario
-  formPerfil?.addEventListener("submit", guardarPerfilCentro);
+  formPerfil.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const ok = await guardarPerfilCentro();
+    if (ok) cerrar();
+  });
 }
-
-// ============================================================
-// CARGAR DATOS DEL PERFIL
-// ============================================================
 
 async function cargarPerfilCentro() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/centro/me`, {
-      headers: authHeaders({ "X-Centro-Id": getCentroId() }),
+      headers: buildHeaders(),
     });
-
     if (!res.ok) throw new Error("No se pudo cargar el perfil");
-
     const data = await res.json();
-    document.getElementById("perfil_nombre").value = data.nombre || "";
-    document.getElementById("perfil_direccion").value = data.direccion || "";
-    document.getElementById("perfil_telefono").value = data.telefono || "";
-    document.getElementById("perfil_email").value = data.email || "";
-  } catch (e) {
-    appLogger.error("Error al cargar perfil:", e);
-    mostrarMensaje("Error al cargar el perfil del centro", "error");
+    formPerfil.querySelector("#perfil_nombre").value = data.nombre || "";
+    formPerfil.querySelector("#perfil_direccion").value = data.direccion || "";
+    formPerfil.querySelector("#perfil_telefono").value = data.telefono || "";
+    formPerfil.querySelector("#perfil_email").value = data.email || "";
+  } catch (error) {
+    appLogger.error("Error al cargar perfil:", error);
+    mostrarPopup("Error al cargar el perfil del centro", "error");
   }
 }
 
-// ============================================================
-// GUARDAR DATOS DEL PERFIL
-// ============================================================
-
-async function guardarPerfilCentro(e) {
-  e.preventDefault();
-
+async function guardarPerfilCentro() {
   const payload = {
-    nombre: document.getElementById("perfil_nombre").value.trim(),
-    direccion: document.getElementById("perfil_direccion").value.trim(),
-    telefono: document.getElementById("perfil_telefono").value.trim(),
-    email: document.getElementById("perfil_email").value.trim(),
+    nombre: formPerfil.querySelector("#perfil_nombre").value.trim(),
+    direccion: formPerfil.querySelector("#perfil_direccion").value.trim(),
+    telefono: formPerfil.querySelector("#perfil_telefono").value.trim(),
+    email: formPerfil.querySelector("#perfil_email").value.trim(),
   };
 
-  // Validaci贸n b谩sica
   if (!payload.nombre) {
-    mostrarMensaje("El nombre es obligatorio", "error");
-    return;
+    mostrarPopup("El nombre es obligatorio", "error");
+    return false;
   }
 
   if (payload.email && !validarEmail(payload.email)) {
-    mostrarMensaje("El correo electr贸nico no es v谩lido", "error");
-    return;
+    mostrarPopup("El correo electr髇ico no es v醠ido", "error");
+    return false;
   }
 
   try {
     const res = await fetch(`${API_BASE_URL}/api/centro/me`, {
       method: "PUT",
-      headers: authHeaders({
-        "Content-Type": "application/json",
-        "X-Centro-Id": getCentroId(),
-      }),
+      headers: buildHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(payload),
     });
-
     if (!res.ok) throw new Error("Error al guardar los datos");
 
     const actualizado = await res.json();
     const nombreCentro = actualizado.nombre || "Centro de Hemoterapia";
     if (bienvenida) bienvenida.textContent = `Bienvenido, ${nombreCentro}!`;
-
-    mostrarMensaje("Perfil actualizado correctamente", "success");
-    modalPerfil.style.display = "none";
-  } catch (e) {
-    appLogger.error(e);
-    mostrarMensaje("Error al guardar el perfil", "error");
+    mostrarPopup("Perfil actualizado correctamente", "success");
+    return true;
+  } catch (error) {
+    appLogger.error("Error al guardar perfil:", error);
+    mostrarPopup("Error al guardar el perfil", "error");
+    return false;
   }
 }
-
-// ============================================================
-// UTILIDADES
-// ============================================================
 
 function validarEmail(email) {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
 }
-import { appLogger } from "../../utils/logger.js";
+
+function buildHeaders(extra = {}) {
+  const token = localStorage.getItem("token");
+  return {
+    ...extra,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}

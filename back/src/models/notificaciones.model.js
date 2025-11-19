@@ -7,10 +7,13 @@ const NotificacionesModel = {
   // CREACION DE NOTIFICACIONES
   // ----------------------------------------------------------
 
-  async crear(usuarioId, { tipo, mensaje, campania_id = null }) {
+  async crear(
+    usuarioId,
+    { tipo, mensaje, campania_id = null, meta = {}, prioridad = false }
+  ) {
     const q = `
-      INSERT INTO notificaciones (usuario_id, tipo, mensaje, campania_id)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO notificaciones (usuario_id, tipo, mensaje, campania_id, meta, prioridad)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *;
     `;
     const { rows } = await pool.query(q, [
@@ -18,33 +21,47 @@ const NotificacionesModel = {
       tipo,
       mensaje,
       campania_id,
+      JSON.stringify(meta || {}),
+      prioridad,
     ]);
     return rows[0];
   },
 
-  async crearBatch(usuariosIds, tipo, mensaje) {
+  async createForUsuario(usuarioId, payload) {
+    return this.crear(usuarioId, payload);
+  },
+
+  async crearBatch(
+    usuariosIds,
+    tipo,
+    mensaje,
+    { campania_id = null, meta = {}, prioridad = false } = {}
+  ) {
     if (!usuariosIds || usuariosIds.length === 0) return [];
 
-    const values = usuariosIds
-      .map((uid) => `(${uid}, '${tipo}', '${mensaje.replace(/'/g, "''")}')`)
-      .join(", ");
-
     const q = `
-      INSERT INTO notificaciones (usuario_id, tipo, mensaje)
-      VALUES ${values}
+      INSERT INTO notificaciones (usuario_id, tipo, mensaje, campania_id, meta, prioridad)
+      SELECT unnest($1::int[]), $2, $3, $4, $5::jsonb, $6
       RETURNING *;
     `;
-    const { rows } = await pool.query(q);
+    const { rows } = await pool.query(q, [
+      usuariosIds,
+      tipo,
+      mensaje,
+      campania_id,
+      JSON.stringify(meta || {}),
+      prioridad,
+    ]);
     return rows;
   },
 
   async createForDonantesByLocalidad(
     localidadId,
-    { tipo, mensaje, campania_id }
+    { tipo, mensaje, campania_id, meta = {}, prioridad = false }
   ) {
     const q = `
-      INSERT INTO notificaciones (usuario_id, tipo, mensaje, campania_id)
-      SELECT usuario_id, $2, $3, $4
+      INSERT INTO notificaciones (usuario_id, tipo, mensaje, campania_id, meta, prioridad)
+      SELECT usuario_id, $2, $3, $4, $5::jsonb, $6
       FROM donantes
       WHERE localidad_id = $1
       RETURNING *;
@@ -54,6 +71,8 @@ const NotificacionesModel = {
       tipo,
       mensaje,
       campania_id,
+      JSON.stringify(meta || {}),
+      prioridad,
     ]);
     return rows;
   },
@@ -65,7 +84,7 @@ const NotificacionesModel = {
     email_destinatario,
     email_asunto,
   }) {
-    await this.crear(usuario_id, { tipo, mensaje });
+    await this.crear(usuario_id, { tipo, mensaje, meta });
     if (email_destinatario && email_asunto) {
       await sendMail(email_destinatario, email_asunto, `<p>${mensaje}</p>`);
     }
@@ -107,10 +126,18 @@ const NotificacionesModel = {
 
   async registrarLog(centroId, tipo, mensaje, cantidad, meta) {
     const q = `
-      INSERT INTO notificaciones_log (centro_id, tipo, mensaje, enviados, filtro)
-      VALUES ($1, $2, $3, $4, $5);
+      INSERT INTO notificaciones_log (centro_id, tipo, mensaje, enviados, filtros, meta, campania_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7);
     `;
-    await pool.query(q, [centroId, tipo, mensaje, cantidad, meta]);
+    await pool.query(q, [
+      centroId,
+      tipo,
+      mensaje,
+      cantidad,
+      meta?.filtros || null,
+      JSON.stringify(meta || {}),
+      meta?.campania_id || null,
+    ]);
   },
 
   async getLogCentro(centroId, limit = 50) {

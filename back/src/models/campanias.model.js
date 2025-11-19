@@ -1,10 +1,14 @@
 // En este archivo manejo las consultas de campanias
 const pool = require('../config/database');
+const Notificaciones = require('./notificaciones.model');
+const NOTIFICATION_TYPES = require('../constants/notificationTypes');
+const { DONANTE, CENTRO } = NOTIFICATION_TYPES;
 const CampaniasModel = {
   async obtenerTodas() {
     const query = `
       SELECT 
         c.centro_id,
+        ch.usuario_id AS centro_usuario_id,
         c.id,
         c.nombre,
         c.descripcion,
@@ -20,6 +24,7 @@ const CampaniasModel = {
       FROM campanias c
       LEFT JOIN localidades l ON c.localidad_id = l.id
       LEFT JOIN barrios b ON c.barrio_id = b.id
+      LEFT JOIN centros_hemoterapia ch ON ch.id = c.centro_id
       ORDER BY c.id DESC;
     `;
     const { rows } = await pool.query(query);
@@ -30,6 +35,7 @@ const CampaniasModel = {
     const query = `
       SELECT 
         c.centro_id,
+        ch.usuario_id AS centro_usuario_id,
         c.id,
         c.nombre,
         c.descripcion,
@@ -45,6 +51,7 @@ const CampaniasModel = {
       FROM campanias c
       LEFT JOIN localidades l ON c.localidad_id = l.id
       LEFT JOIN barrios b ON c.barrio_id = b.id
+      LEFT JOIN centros_hemoterapia ch ON ch.id = c.centro_id
       WHERE c.id = $1
       LIMIT 1;
     `;
@@ -144,7 +151,6 @@ CampaniasModel.obtenerPorLocalidad = async function (localidadId) {
 
 // Aqui inscribo al donante y creo la tabla si falta
 CampaniasModel.inscribirDonante = async function (campaniaId, usuarioId) {
-  // Aqui inserto la relacion de forma idempotente
   const insert = await pool.query(
     `INSERT INTO campanias_donantes (campania_id, usuario_id)
      VALUES ($1, $2)
@@ -153,22 +159,42 @@ CampaniasModel.inscribirDonante = async function (campaniaId, usuarioId) {
     [campaniaId, usuarioId]
   );
 
-  // Aqui intento enviar la notificacion sin bloquear
   try {
     const camp = await CampaniasModel.obtenerPorId(campaniaId);
-    const centroId = camp ? camp.centro_id : null;
-    if (centroId) {
-      try { await pool.query(`INSERT INTO notificaciones (centro_id, tipo, mensaje) VALUES ($1,$2,$3);`, [centroId, 'inscripcion', `Usuario ${usuarioId} se inscribiÃ³ en campaÃ±a ${campaniaId}`]); } catch {}
+    const centroUsuarioId = camp?.centro_usuario_id || null;
+
+    await Notificaciones.createForUsuario(usuarioId, {
+      tipo: DONANTE.INSCRIPCION_CONFIRMADA,
+      mensaje: `Confirmamos tu inscripción a "${camp?.nombre || "una campaña"}".`,
+      campania_id: campaniaId,
+      meta: {
+        campania: {
+          id: campaniaId,
+          nombre: camp?.nombre,
+          fecha_inicio: camp?.fecha_inicio,
+          localidad: camp?.localidad_nombre,
+        },
+      },
+    });
+
+    if (centroUsuarioId) {
+      await Notificaciones.crear(centroUsuarioId, {
+        tipo: CENTRO.DONANTE_INSCRIPTO,
+        mensaje: `Un donante se inscribió a "${camp?.nombre || "una campaña"}".`,
+        campania_id: campaniaId,
+        meta: {
+          donante_id: usuarioId,
+          campania: { id: campaniaId, nombre: camp?.nombre },
+        },
+        prioridad: true,
+      });
     }
-    try {
-      const Notificaciones = require('./notificaciones.model');
-      await Notificaciones.createForUsuario(usuarioId, { tipo: 'inscripcion', mensaje: `Te inscribiste a "${camp?.nombre || 'una campaÃ±a'}"`, campania_id: campaniaId });
-    } catch {}
-  } catch (_) {}
+  } catch (error) {
+    console.error("Error generando notificaciones de inscripción:", error);
+  }
 
   return insert.rows[0];
 };
-
 CampaniasModel.estaInscripto = async function (campaniaId, usuarioId) {
   const { rows } = await pool.query(
     'SELECT 1 FROM campanias_donantes WHERE campania_id=$1 AND usuario_id=$2 LIMIT 1',
@@ -197,9 +223,35 @@ CampaniasModel.cancelarInscripcion = async function (campaniaId, usuarioId) {
     'DELETE FROM campanias_donantes WHERE campania_id=$1 AND usuario_id=$2 RETURNING *',
     [campaniaId, usuarioId]
   );
-  return rows[0] || null;
-};
+  const deleted = rows[0] || null;
 
+  if (deleted) {
+    try {
+      const camp = await CampaniasModel.obtenerPorId(campaniaId);
+      const centroUsuarioId = camp?.centro_usuario_id || null;
+
+      await Notificaciones.createForUsuario(usuarioId, {
+        tipo: DONANTE.INSCRIPCION_CANCELADA,
+        mensaje: `Cancelaste tu participación en "${camp?.nombre || "una campaña"}".`,
+        campania_id: campaniaId,
+        meta: { campania: { id: campaniaId, nombre: camp?.nombre } },
+      });
+
+      if (centroUsuarioId) {
+        await Notificaciones.crear(centroUsuarioId, {
+          tipo: CENTRO.DONANTE_CANCELA,
+          mensaje: `Un donante canceló su inscripción en "${camp?.nombre || "una campaña"}".`,
+          campania_id: campaniaId,
+          meta: { donante_id: usuarioId, campania: { id: campaniaId, nombre: camp?.nombre } },
+        });
+      }
+    } catch (error) {
+      console.error("Error notificando cancelación:", error);
+    }
+  }
+
+  return deleted;
+};
 CampaniasModel.listarInscriptosDeCampania = async function (campaniaId) {
   const { rows } = await pool.query(
     `SELECT 
@@ -220,3 +272,20 @@ CampaniasModel.listarInscriptosDeCampania = async function (campaniaId) {
 };
 
 
+
+
+CampaniasModel.listarUsuariosInscriptosIds = async function (campaniaId) {
+  const { rows } = await pool.query(
+    `SELECT usuario_id FROM campanias_donantes WHERE campania_id = $1`,
+    [campaniaId]
+  );
+  return rows.map((r) => r.usuario_id);
+};
+
+CampaniasModel.obtenerCentroUsuarioId = async function (centroId) {
+  const { rows } = await pool.query(
+    `SELECT usuario_id FROM centros_hemoterapia WHERE id = $1 LIMIT 1`,
+    [centroId]
+  );
+  return rows[0]?.usuario_id || null;
+};
