@@ -72,8 +72,6 @@ const CampaniasController = {
   async crearCampania(req, res) {
     try {
       const {
-        centro_id,
-        nombre,
         descripcion,
         imagen_url,
         localidad_id,
@@ -82,8 +80,14 @@ const CampaniasController = {
         fecha_fin,
       } = req.body || {};
 
+      const nombre = req.body?.nombre;
+      const centroTokenId = req.user?.id;
+      const tipoUsuario = req.user?.tipo_usuario;
+      const centroId =
+        tipoUsuario === "centro" ? centroTokenId : req.body?.centro_id;
+
       if (
-        !centro_id ||
+        !centroId ||
         !nombre ||
         !descripcion ||
         !localidad_id ||
@@ -95,7 +99,7 @@ const CampaniasController = {
       }
 
       const nueva = await CampaniasModel.crear({
-        centro_id,
+        centro_id: centroId,
         nombre,
         descripcion,
         imagen_url,
@@ -127,7 +131,11 @@ const CampaniasController = {
   async actualizarCampania(req, res) {
     try {
       const { id } = req.params;
-      const actualizada = await CampaniasModel.actualizar(id, req.body || {});
+      const payload = { ...req.body };
+      if (req.user?.tipo_usuario === "centro") {
+        payload.centro_id = req.user.id;
+      }
+      const actualizada = await CampaniasModel.actualizar(id, payload);
       res.json(actualizada);
     } catch (error) {
       console.error("Error al actualizar campaña:", error);

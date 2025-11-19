@@ -107,14 +107,14 @@ const NotificacionesModel = {
 
   async registrarLog(centroId, tipo, mensaje, cantidad, meta) {
     const q = `
-      INSERT INTO notificaciones_log (centro_id, tipo, mensaje, cantidad_enviados, meta)
+      INSERT INTO notificaciones_log (centro_id, tipo, mensaje, enviados, filtro)
       VALUES ($1, $2, $3, $4, $5);
     `;
     await pool.query(q, [centroId, tipo, mensaje, cantidad, meta]);
   },
 
   async getLogCentro(centroId, limit = 50) {
-    const q = `SELECT * FROM notificaciones_log WHERE centro_id = $1 ORDER BY fecha DESC LIMIT $2;`;
+    const q = `SELECT * FROM notificaciones_log WHERE centro_id = $1 ORDER BY created_at DESC LIMIT $2;`;
     const { rows } = await pool.query(q, [centroId, limit]);
     return rows;
   },

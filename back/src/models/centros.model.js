@@ -1,5 +1,6 @@
 // En este archivo administro las consultas de centros
 const pool = require('../config/database');
+const { calcularAptoYRestante } = require('../utils/donanteUtils');
 
 const CentrosModel = {
 
@@ -66,36 +67,120 @@ const CentrosModel = {
     const centro = await this.obtenerPorUsuarioId(usuarioId);
     if (!centro) return null;
 
-    const q1 = `
-      select count(*) as total_donantes
-      from donantes
-      where localidad_id = $1;
-    `;
+    const hoy = new Date();
 
-    const q2 = `
-      select count(*) as proximas_campanias
-      from campanias
-      where localidad_id = $1
-        and fecha_inicio >= now();
-    `;
-
-    const q3 = `
-      select count(*) as notificaciones_enviadas
-      from notificaciones_log
-      where centro_id = $1;
-    `;
-
-    const [{ rows: r1 }, { rows: r2 }, { rows: r3 }] = await Promise.all([
-      pool.query(q1, [centro.localidad_id]),
-      pool.query(q2, [centro.localidad_id]),
-      pool.query(q3, [centro.id])
+    const [donantesRes, campaniasRes, notificacionesRes] = await Promise.all([
+      pool.query(
+        `
+          SELECT grupo_sanguineo, fecha_ultima_donacion, sexo
+          FROM donantes
+        `
+      ),
+      pool.query(
+        `
+          SELECT id, nombre, fecha_inicio, fecha_fin, estado
+          FROM campanias
+        `
+      ),
+      pool.query(
+        `
+          SELECT COALESCE(SUM(enviados), 0) AS total
+          FROM notificaciones_log
+          WHERE centro_id = $1
+        `,
+        [centro.id]
+      ),
     ]);
+
+    const donantes = donantesRes.rows || [];
+    const campanias = campaniasRes.rows || [];
+    const notificaciones_enviadas = Number(
+      notificacionesRes.rows?.[0]?.total || 0
+    );
+
+    let donantes_aptos_hoy = 0;
+    const aptos_por_grupo = {};
+
+    donantes.forEach((d) => {
+      const sexo = d.sexo || "M";
+      const { apto } = calcularAptoYRestante(
+        d.fecha_ultima_donacion,
+        sexo,
+        hoy
+      );
+      if (apto) {
+        donantes_aptos_hoy += 1;
+        const grupo = d.grupo_sanguineo || "Sin grupo";
+        aptos_por_grupo[grupo] = (aptos_por_grupo[grupo] || 0) + 1;
+      }
+    });
+
+    const donantes_totales = donantes.length;
+
+    let campanias_activas = 0;
+    let campanias_finalizadas = 0;
+    let proximas_14_dias = 0;
+    let siguiente_campania = null;
+
+    const normalizarFecha = (fecha) => {
+      if (!fecha) return null;
+      const f = new Date(fecha);
+      return new Date(f.getFullYear(), f.getMonth(), f.getDate());
+    };
+
+    const hoyPlano = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+
+    campanias.forEach((campania) => {
+      const fi = normalizarFecha(campania.fecha_inicio);
+      const ff = normalizarFecha(campania.fecha_fin);
+      let estado = "desconocido";
+
+      if (fi && ff) {
+        if (fi <= hoyPlano && hoyPlano <= ff) estado = "activa";
+        else if (ff < hoyPlano) estado = "finalizada";
+        else if (fi > hoyPlano) estado = "futura";
+      } else if (fi && !ff) {
+        estado = fi <= hoyPlano ? "activa" : "futura";
+      } else if (!fi && ff) {
+        estado = hoyPlano <= ff ? "activa" : "finalizada";
+      } else {
+        const est = (campania.estado || "").toLowerCase();
+        if (est.includes("cancel")) estado = "cancelada";
+        else if (est.includes("final")) estado = "finalizada";
+        else if (est.includes("act")) estado = "activa";
+        else if (est.includes("fut")) estado = "futura";
+      }
+
+      if (estado === "activa") campanias_activas += 1;
+      if (estado === "finalizada") campanias_finalizadas += 1;
+
+      if (estado === "futura" && fi) {
+        const diffDias = Math.floor((fi - hoyPlano) / (1000 * 60 * 60 * 24));
+        if (diffDias <= 14) proximas_14_dias += 1;
+
+        if (
+          !siguiente_campania ||
+          fi < new Date(siguiente_campania.fecha_inicio)
+        ) {
+          siguiente_campania = {
+            id: campania.id,
+            nombre: campania.nombre,
+            fecha_inicio: fi.toISOString(),
+          };
+        }
+      }
+    });
 
     return {
       centro: centro.nombre,
-      total_donantes: Number(r1[0].total_donantes),
-      proximas_campanias: Number(r2[0].proximas_campanias),
-      notificaciones_enviadas: Number(r3[0].notificaciones_enviadas)
+      donantes_totales,
+      donantes_aptos_hoy,
+      campanias_activas,
+      campanias_finalizadas,
+      proximas_14_dias,
+      siguiente_campania,
+      aptos_por_grupo,
+      notificaciones_enviadas,
     };
   },
 

@@ -298,7 +298,14 @@ async function cargarBarrios(localidadId) {
 
 /* === OBTENER CAMPAÑA POR ID === */
 async function obtenerCampaniaPorId(id) {
-  const res = await fetch(`${API_BASE_URL}/api/campanias/${id}`);
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE_URL}/api/campanias/${id}`, {
+    headers: token
+      ? {
+          Authorization: `Bearer ${token}`,
+        }
+      : undefined,
+  });
   if (!res.ok) return null;
   return await res.json();
 }
@@ -317,7 +324,6 @@ async function guardarOCrearCampania(metodo, id = null) {
   const hoy = new Date().toISOString().split("T")[0];
 
   const datos = {
-    centro_id: 1,
     nombre: form.nombre.value.trim(),
     descripcion: form.descripcion.value.trim(),
     imagen_url: form.imagen_url.value.trim(),

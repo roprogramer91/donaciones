@@ -19,13 +19,10 @@ import { API_BASE_URL } from "../../utils/config.js";
 export async function cargarResumen() {
   try {
     const token = localStorage.getItem("token");
-    const centroId = localStorage.getItem("centroId") || 1; // 👈 según cómo lo guardes
-
     const res = await fetch(`${API_BASE_URL}/api/centro/summary`, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
-        "X-Centro-Id": centroId,
       },
     });
 
