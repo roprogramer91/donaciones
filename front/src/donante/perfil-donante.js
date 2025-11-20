@@ -39,15 +39,21 @@ function setSelectValor(select, value) {
 // =======================
 async function cargarProvincias() {
   if (!provinciaSelect) return;
-  const res = await fetch(`${API_BASE_URL}/api/provincias`);
-  const provincias = await res.json();
-  provinciaSelect.innerHTML = '<option value="">Provincia</option>';
-  provincias.forEach((p) => {
-    const opt = document.createElement("option");
-    opt.value = p.id;
-    opt.textContent = p.nombre;
-    provinciaSelect.appendChild(opt);
-  });
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/provincias`);
+    if (!res.ok) throw new Error("No se pudo cargar provincias");
+    const provincias = await res.json();
+    provinciaSelect.innerHTML = '<option value="">Provincia</option>';
+    provincias.forEach((p) => {
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = p.nombre;
+      provinciaSelect.appendChild(opt);
+    });
+  } catch (e) {
+    appLogger.error("Error cargando provincias:", e);
+    provinciaSelect.innerHTML = '<option value="">Sin provincias</option>';
+  }
 }
 
 async function cargarLocalidades(provinciaId) {
@@ -60,17 +66,24 @@ async function cargarLocalidades(provinciaId) {
     return;
   }
 
-  const res = await fetch(
-    `${API_BASE_URL}/api/localidades?provincia_id=${provinciaId}`
-  );
-  const localidades = await res.json();
-  localidades.forEach((l) => {
-    const opt = document.createElement("option");
-    opt.value = l.id;
-    opt.textContent = l.nombre;
-    localidadSelect.appendChild(opt);
-  });
-  localidadSelect.disabled = false;
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/api/localidades?provincia_id=${provinciaId}`
+    );
+    if (!res.ok) throw new Error("No se pudo cargar localidades");
+    const localidades = await res.json();
+    localidades.forEach((l) => {
+      const opt = document.createElement("option");
+      opt.value = l.id;
+      opt.textContent = l.nombre;
+      localidadSelect.appendChild(opt);
+    });
+    localidadSelect.disabled = false;
+  } catch (e) {
+    appLogger.error("Error cargando localidades:", e);
+    localidadSelect.innerHTML = '<option value="">Sin localidades</option>';
+    localidadSelect.disabled = true;
+  }
 }
 
 async function cargarBarrios(localidadId) {
@@ -80,17 +93,24 @@ async function cargarBarrios(localidadId) {
     barrioSelect.disabled = true;
     return;
   }
-  const res = await fetch(
-    `${API_BASE_URL}/api/barrios?localidad_id=${localidadId}`
-  );
-  const barrios = await res.json();
-  barrios.forEach((b) => {
-    const opt = document.createElement("option");
-    opt.value = b.id;
-    opt.textContent = b.nombre;
-    barrioSelect.appendChild(opt);
-  });
-  barrioSelect.disabled = false;
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/api/barrios?localidad_id=${localidadId}`
+    );
+    if (!res.ok) throw new Error("No se pudo cargar barrios");
+    const barrios = await res.json();
+    barrios.forEach((b) => {
+      const opt = document.createElement("option");
+      opt.value = b.id;
+      opt.textContent = b.nombre;
+      barrioSelect.appendChild(opt);
+    });
+    barrioSelect.disabled = false;
+  } catch (e) {
+    appLogger.error("Error cargando barrios:", e);
+    barrioSelect.innerHTML = '<option value="">Sin barrios</option>';
+    barrioSelect.disabled = true;
+  }
 }
 
 provinciaSelect?.addEventListener("change", async (e) => {
