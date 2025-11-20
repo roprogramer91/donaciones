@@ -1,4 +1,5 @@
 const FLAG = "sesion_expirada";
+const ENV_OVERRIDE_KEY = "DONACIONES_ENV";
 
 export function esTokenExpirado(payload = {}) {
   const mensaje = (payload.message || payload.error || "").toLowerCase();
@@ -15,7 +16,9 @@ export function manejarExpiracionSesion() {
   sessionStorage.setItem(FLAG, "1");
 
   mostrarToastSesion("Tu sesión expiró. Por favor, vuelve a iniciar sesión.");
+  const envOverride = localStorage.getItem(ENV_OVERRIDE_KEY);
   localStorage.clear();
+  if (envOverride) localStorage.setItem(ENV_OVERRIDE_KEY, envOverride);
   sessionStorage.clear();
 
   const path = window.location.pathname.includes("/src/")
