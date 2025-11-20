@@ -132,8 +132,12 @@ async function cargarPerfil() {
     const res = await fetch(`${API_BASE_URL}/api/donantes/perfil`, {
       headers: { Authorization: "Bearer " + token },
     });
-    if (!res.ok) throw new Error("No se pudo traer el perfil");
-    const perfil = await res.json();
+    if (!res.ok) {
+      const txt = await res.text().catch(() => "");
+      throw new Error(`No se pudo traer el perfil (HTTP ${res.status}) ${txt}`);
+    }
+    const payload = await res.json().catch(() => ({}));
+    const perfil = payload?.perfil || payload;
 
     form.nombre.value = perfil.nombre || "";
     form.apellido.value = perfil.apellido || "";
@@ -157,7 +161,7 @@ async function cargarPerfil() {
 
     setMensaje("");
   } catch (err) {
-    setMensaje("Error al cargar perfil", "red");
+    setMensaje(err?.message || "Error al cargar perfil", "red");
     appLogger.error("Error cargando perfil:", err);
   }
 }
