@@ -23,9 +23,6 @@ const filtroProvincia = document.getElementById("filtro-provincia");
 const filtroLocalidad = document.getElementById("filtro-localidad");
 const filtroBarrio = document.getElementById("filtro-barrio");
 const filtroApto = document.getElementById("filtro-apto");
-const filtroEdadMin = document.getElementById("filtro-edad-min");
-const filtroEdadMax = document.getElementById("filtro-edad-max");
-const filtroDiasRestMax = document.getElementById("filtro-dias-rest-max");
 
 const btnFiltro = document.getElementById("btn-aplicar-filtro");
 const btnLimpiarFiltro = document.getElementById("btn-limpiar-filtro");
@@ -111,13 +108,6 @@ function construirParametros() {
     }
   }
   if (filtroApto?.checked) addParam("apto", "true");
-
-  const eMin = parseInt(filtroEdadMin?.value || "");
-  const eMax = parseInt(filtroEdadMax?.value || "");
-  const drm = parseInt(filtroDiasRestMax?.value || "");
-  if (!isNaN(eMin)) addParam("edad_min", eMin);
-  if (!isNaN(eMax)) addParam("edad_max", eMax);
-  if (!isNaN(drm)) addParam("dias_restantes_max", drm);
 
   return params;
 }
@@ -234,9 +224,6 @@ async function limpiarFiltros() {
   }
   resetFiltroBarrio("Selecciona una localidad");
   if (filtroApto) filtroApto.checked = false;
-  if (filtroEdadMin) filtroEdadMin.value = "";
-  if (filtroEdadMax) filtroEdadMax.value = "";
-  if (filtroDiasRestMax) filtroDiasRestMax.value = "";
 
   await cargarDonantes();
 }
