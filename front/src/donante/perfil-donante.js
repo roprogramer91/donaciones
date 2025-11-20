@@ -139,9 +139,9 @@ async function cargarPerfil() {
     const payload = await res.json().catch(() => ({}));
     const perfil = payload?.perfil || payload;
 
-    form.nombre.value = perfil.nombre || "";
-    form.apellido.value = perfil.apellido || "";
-    form.dni.value = perfil.dni || "";
+    form.nombre.value = perfil.nombre || perfil.nombres || perfil.user_nombre || "";
+    form.apellido.value = perfil.apellido || perfil.apellidos || perfil.user_apellido || "";
+    form.dni.value = perfil.dni || perfil.documento || "";
     form.email.value = perfil.email || "";
     form.grupo_sanguineo.value = perfil.grupo_sanguineo || "";
     form.fecha_nacimiento.value = perfil.fecha_nacimiento
