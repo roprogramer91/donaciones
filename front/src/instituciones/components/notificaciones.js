@@ -15,6 +15,7 @@ const MAPA_TIPOS = {
 };
 
 let historialNotificaciones = [];
+let historialFiltrado = [];
 
 export function inicializarNotificaciones() {
   const tipo = document.getElementById("tipo-notif");
@@ -35,6 +36,12 @@ export function inicializarNotificaciones() {
   const metricSemana = document.getElementById("metric-notif-semana");
   const metricAuto = document.getElementById("metric-notif-auto");
   const metricReciente = document.getElementById("metric-notif-reciente");
+  const filtroHistDesde = document.getElementById("filtro-notif-desde");
+  const filtroHistHasta = document.getElementById("filtro-notif-hasta");
+  const filtroHistTipo = document.getElementById("filtro-notif-tipo");
+  const filtroHistBuscar = document.getElementById("filtro-notif-buscar");
+  const btnLimpiarNotifs = document.getElementById("btn-limpiar-notifs");
+  const btnExportarNotifs = document.getElementById("btn-exportar-notifs");
 
   const token = localStorage.getItem("token");
 
@@ -71,6 +78,21 @@ export function inicializarNotificaciones() {
     }
   });
 
+  [filtroHistDesde, filtroHistHasta, filtroHistTipo].forEach((ctrl) =>
+    ctrl?.addEventListener("change", () => aplicarFiltrosHistorial())
+  );
+  filtroHistBuscar?.addEventListener("input", () =>
+    aplicarFiltrosHistorial()
+  );
+  btnLimpiarNotifs?.addEventListener("click", (e) => {
+    e.preventDefault();
+    limpiarFiltrosHistorial();
+  });
+  btnExportarNotifs?.addEventListener("click", (e) => {
+    e.preventDefault();
+    exportarHistorialCsv();
+  });
+
   async function cargarHistorial() {
     if (!token) return;
     try {
@@ -81,11 +103,11 @@ export function inicializarNotificaciones() {
       });
       const data = await res.json();
       historialNotificaciones = Array.isArray(data) ? data : [];
-      renderTablaCompacta(historialNotificaciones, tablaLog);
-      renderTablaPrincipal(historialNotificaciones, tablaHistorialPrincipal);
+      aplicarFiltrosHistorial();
       actualizarMetricas(historialNotificaciones);
     } catch (err) {
       appLogger.error("Error al cargar historial:", err);
+      historialFiltrado = [];
       if (tablaLog) {
         tablaLog.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#999;">Error al cargar historial</td></tr>`;
       }
@@ -134,6 +156,130 @@ export function inicializarNotificaciones() {
       `;
       tabla.appendChild(tr);
     });
+  }
+
+  function aplicarFiltrosHistorial() {
+    historialFiltrado = filtrarHistorial(historialNotificaciones);
+    renderTablaCompacta(historialFiltrado, tablaLog);
+    renderTablaPrincipal(historialFiltrado, tablaHistorialPrincipal);
+  }
+
+  function filtrarHistorial(data = []) {
+    const desdeValor = filtroHistDesde?.value
+      ? new Date(`${filtroHistDesde.value}T00:00:00`)
+      : null;
+    const hastaValor = filtroHistHasta?.value
+      ? new Date(`${filtroHistHasta.value}T23:59:59`)
+      : null;
+    const categoria = filtroHistTipo?.value || "";
+    const texto = (filtroHistBuscar?.value || "").toLowerCase().trim();
+
+    return data.filter((item) => {
+      const fecha = item.created_at ? new Date(item.created_at) : null;
+      if (desdeValor && (!fecha || fecha < desdeValor)) return false;
+      if (hastaValor && (!fecha || fecha > hastaValor)) return false;
+      if (categoria && !coincideCategoria(item.tipo, categoria)) return false;
+
+      if (texto) {
+        const meta = normalizarMeta(item.meta);
+        const campos = [
+          item.mensaje,
+          formatearTipo(item.tipo),
+          formatearOrigen(meta?.origen, item.tipo),
+          formatearCampania(item, meta),
+        ]
+          .filter(Boolean)
+          .map((c) => c.toLowerCase());
+        if (!campos.some((campo) => campo.includes(texto))) return false;
+      }
+
+      return true;
+    });
+  }
+
+  function limpiarFiltrosHistorial() {
+    if (filtroHistDesde) filtroHistDesde.value = "";
+    if (filtroHistHasta) filtroHistHasta.value = "";
+    if (filtroHistTipo) filtroHistTipo.value = "";
+    if (filtroHistBuscar) filtroHistBuscar.value = "";
+    aplicarFiltrosHistorial();
+  }
+
+  function exportarHistorialCsv() {
+    const dataset = (historialFiltrado.length
+      ? historialFiltrado
+      : historialNotificaciones) || [];
+
+    if (!dataset.length) {
+      mostrarAviso("No hay registros para exportar.", "advertencia");
+      return;
+    }
+
+    const headers = [
+      "Fecha",
+      "Tipo",
+      "Origen",
+      "Destinatarios",
+      "Campaña",
+      "Mensaje",
+    ];
+
+    const rows = dataset.map((n) => {
+      const meta = normalizarMeta(n.meta);
+      return [
+        formatearFecha(n.created_at),
+        formatearTipo(n.tipo),
+        formatearOrigen(meta?.origen, n.tipo),
+        n.enviados || 0,
+        formatearCampania(n, meta),
+        n.mensaje || "",
+      ];
+    });
+
+    const escape = (val) => {
+      const str = String(val ?? "");
+      return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+    };
+
+    const csv = [headers, ...rows]
+      .map((row) => row.map(escape).join(","))
+      .join("\n");
+
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const fecha = new Date().toISOString().split("T")[0];
+    link.href = url;
+    link.download = `notificaciones_${fecha}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  function coincideCategoria(tipo = "", filtro = "") {
+    if (!filtro) return true;
+    const limpio = tipo || "";
+    if (!limpio) return false;
+
+    if (filtro === "manual") {
+      return (
+        limpio === "centro_manual_directo" || limpio === "centro_manual_filtro"
+      );
+    }
+    if (filtro === "automatica") {
+      return (
+        limpio.startsWith("donante_") ||
+        limpio.startsWith("campania_")
+      );
+    }
+    if (filtro === "felicitacion") {
+      return (
+        limpio === "centro_felicitacion" ||
+        limpio === "cumpleanios"
+      );
+    }
+    return true;
   }
 
   function actualizarMetricas(data) {
@@ -199,7 +345,7 @@ export function inicializarNotificaciones() {
 
   btnEnviar?.addEventListener("click", async () => {
     if (!mensaje?.value?.trim()) {
-      alert("Debe escribir un mensaje antes de enviar.");
+      mostrarAviso("Debes escribir un mensaje antes de enviar.", "error");
       return;
     }
 
@@ -228,13 +374,16 @@ export function inicializarNotificaciones() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al enviar");
 
-      alert(`Notificacion registrada. Enviados: ${data.enviados || 0}`);
+      mostrarAviso(
+        `Notificaci\u00f3n registrada. Enviados: ${data.enviados || 0}`,
+        "success"
+      );
       if (mensaje) mensaje.value = "";
       previewContenedor?.classList.add("preview-oculto");
       cargarHistorial();
     } catch (err) {
       appLogger.error("Error al enviar notificacion:", err);
-      alert("Error al enviar notificacion.");
+      mostrarAviso("Error al enviar notificaci\u00f3n.", "error");
     }
   });
 
@@ -257,7 +406,17 @@ export function inicializarNotificaciones() {
 function formatearFecha(valor) {
   if (!valor) return "-";
   try {
-    return new Date(valor).toLocaleString();
+    let iso = valor.trim();
+    if (iso.includes(" ") && !iso.includes("T")) {
+      iso = iso.replace(" ", "T");
+    }
+    if (!/[zZ]$/.test(iso) && !/[+\-]\d\d:\d\d$/.test(iso)) {
+      iso += "Z";
+    }
+    return new Date(iso).toLocaleString("es-AR", {
+      timeZone: "America/Argentina/Buenos_Aires",
+      hour12: false,
+    });
   } catch {
     return valor;
   }
@@ -306,4 +465,20 @@ function formatearMensaje(msg = "") {
   if (!msg) return "";
   const limpio = msg.trim();
   return limpio.length > 60 ? `${limpio.slice(0, 60)}...` : limpio;
+}
+
+function mostrarAviso(texto, tipo = "info") {
+  const popupWrapper = document.createElement("div");
+  popupWrapper.className = `alerta-toaster alerta-${tipo}`;
+  popupWrapper.textContent = texto;
+  document.body.appendChild(popupWrapper);
+
+  requestAnimationFrame(() => {
+    popupWrapper.classList.add("visible");
+  });
+
+  setTimeout(() => {
+    popupWrapper.classList.remove("visible");
+    setTimeout(() => popupWrapper.remove(), 300);
+  }, 3000);
 }

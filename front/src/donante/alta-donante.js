@@ -2,6 +2,7 @@ import { API_BASE_URL } from "../utils/config.js";
 
 const provinciaSelect = document.getElementById("provincia_id");
 const localidadSelect = document.getElementById("localidad_id");
+const barrioSelect = document.getElementById("barrio_id");
 const form = document.getElementById("altaDonanteForm");
 const mensajeExito = document.getElementById("mensajeExito");
 const fechaNacimientoInput = document.getElementById("fecha_nacimiento");
@@ -23,7 +24,10 @@ fechaUltimaDonacionInput.setAttribute("max", today);
 // ----------------------------
 // 2) Cargar provincias
 // ----------------------------
-document.addEventListener("DOMContentLoaded", cargarProvincias);
+document.addEventListener("DOMContentLoaded", () => {
+  cargarProvincias();
+  resetBarrios();
+});
 
 async function cargarProvincias() {
   provinciaSelect.innerHTML = `<option value="">Seleccioná...</option>`;
@@ -44,6 +48,7 @@ async function cargarProvincias() {
 provinciaSelect.addEventListener("change", async function () {
   const provinciaId = this.value;
   localidadSelect.innerHTML = `<option value="">Seleccioná...</option>`;
+  resetBarrios();
   if (!provinciaId) return;
 
   try {
@@ -58,6 +63,45 @@ provinciaSelect.addEventListener("change", async function () {
     localidadSelect.innerHTML = `<option value="">Error al cargar</option>`;
   }
 });
+
+localidadSelect.addEventListener("change", async function () {
+  const localidadId = this.value;
+  if (!localidadId) {
+    resetBarrios();
+    return;
+  }
+  await cargarBarrios(localidadId);
+});
+
+function resetBarrios(mensaje = "Seleccion? una localidad primero...") {
+  if (!barrioSelect) return;
+  barrioSelect.innerHTML = `<option value="">${mensaje}</option>`;
+  barrioSelect.disabled = true;
+}
+
+async function cargarBarrios(localidadId) {
+  if (!barrioSelect) return;
+  barrioSelect.disabled = true;
+  barrioSelect.innerHTML = `<option value="">Cargando barrios...</option>`;
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/api/barrios?localidad_id=${localidadId}`
+    );
+    const barrios = await res.json();
+    if (!Array.isArray(barrios) || barrios.length === 0) {
+      resetBarrios("No hay barrios registrados para esta localidad");
+      return;
+    }
+    barrioSelect.innerHTML = `<option value="">Seleccion?...</option>`;
+    barrios.forEach((b) => {
+      barrioSelect.innerHTML += `<option value="${b.id}">${b.nombre}</option>`;
+    });
+    barrioSelect.disabled = false;
+  } catch (error) {
+    console.error("Error al cargar barrios:", error);
+    resetBarrios("Error al cargar barrios");
+  }
+}
 
 // ----------------------------
 // 5) Checkbox “Nunca doné”
@@ -93,6 +137,8 @@ form.addEventListener("submit", async function (e) {
     return alert("Debés ser mayor de 18 años.");
   }
 
+  const requiereBarrio = !(barrioSelect && barrioSelect.disabled);
+
   const fechaUltimaDonacion = fechaUltimaDonacionInput.value;
   if (!nuncaDoneCheck.checked && fechaUltimaDonacion) {
     const fechaUlt = new Date(fechaUltimaDonacion);
@@ -107,7 +153,8 @@ form.addEventListener("submit", async function (e) {
     !fechaNacimiento ||
     !form.sexo.value ||
     !form.provincia_id.value ||
-    !form.localidad_id.value
+    !form.localidad_id.value ||
+    (requiereBarrio && !form.barrio_id.value)
   ) {
     return alert("Completá todos los campos correctamente.");
   }

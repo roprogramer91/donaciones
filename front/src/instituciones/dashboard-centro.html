@@ -267,61 +267,116 @@
                  SECCIONES DINÁMICAS RESTANTES
             =========================================================== -->
             <section id="seccion-campanias" class="dashboard-centro-seccion oculto"></section>
-            <section id="seccion-notifs" class="dashboard-centro-seccion oculto">
-              <div class="notifs-section-header">
-                <div>
-                  <h2>Notificaciones a donantes</h2>
-                  <p>
-                    Consulta los env?os autom?ticos y manuales realizados por tu centro y
-                    accede r?pidamente al panel para programar nuevos avisos.
-                  </p>
-                </div>
-                <div class="notifs-section-actions">
-                  <button id="btn-refrescar-notifs" class="btn-secundario">
-                    Actualizar historial
-                  </button>
-                  <button id="btn-ir-panel-notifs" class="btn-accion-centro">
-                    Nueva notificaci?n
-                  </button>
-                </div>
-              </div>
-
-              <div class="notifs-metrics-grid">
-                <article class="notif-metric-card">
-                  <span>Enviadas ?ltimos 7 d?as</span>
-                  <strong id="metric-notif-semana">--</strong>
-                </article>
-                <article class="notif-metric-card">
-                  <span>Autom?ticas activas</span>
-                  <strong id="metric-notif-auto">--</strong>
-                </article>
-                <article class="notif-metric-card">
-                  <span>Manual m?s reciente</span>
-                  <strong id="metric-notif-reciente">--</strong>
-                </article>
-              </div>
-
-              <div class="tabla-notif-container tabla-notif-principal">
-                <table id="tabla-notifs-historial">
-                  <thead>
-                    <tr>
-                      <th>Fecha</th>
-                      <th>Tipo</th>
-                      <th>Destinatarios</th>
-                      <th>Origen</th>
-                      <th>Campa?a</th>
-                      <th>Mensaje</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td colspan="6" style="text-align:center;color:#7e8695;">
-                        A?n no hay registros para mostrar.
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+            <section id="seccion-notifs" class="dashboard-centro-seccion oculto">
+
+              <div class="notifs-section-header">
+
+                <div>
+
+                  <h2>Notificaciones a donantes</h2>
+
+                  <p>
+
+                    Consulta los env&iacute;os autom&aacute;ticos y manuales realizados por tu centro y
+
+                    accede r&aacute;pidamente al panel para programar nuevos avisos.
+
+                  </p>
+
+                </div>
+
+                <div class="notifs-section-actions">
+
+                  <button id="btn-refrescar-notifs" class="btn-secundario">
+
+                    Actualizar historial
+
+                  </button>
+
+                  <button id="btn-ir-panel-notifs" class="btn-accion-centro">
+
+                    Nueva notificaci&oacute;n
+
+                  </button>
+
+                </div>
+
+              </div>
+
+
+
+              <div class="notifs-metrics-grid">
+
+                <article class="notif-metric-card">
+
+                  <span>Enviadas &uacute;ltimos 7 d&iacute;as</span>
+
+                  <strong id="metric-notif-semana">--</strong>
+
+                </article>
+
+                <article class="notif-metric-card">
+
+                  <span>Autom&aacute;ticas activas</span>
+
+                  <strong id="metric-notif-auto">--</strong>
+
+                </article>
+
+                <article class="notif-metric-card">
+
+                  <span>Manual m&aacute;s reciente</span>
+
+                  <strong id="metric-notif-reciente">--</strong>
+
+                </article>
+
+              </div>
+
+
+
+              <div class="tabla-notif-container tabla-notif-principal">
+
+                <table id="tabla-notifs-historial">
+
+                  <thead>
+
+                    <tr>
+
+                      <th>Fecha</th>
+
+                      <th>Tipo</th>
+
+                      <th>Destinatarios</th>
+
+                      <th>Origen</th>
+
+                      <th>Campaña</th>
+
+                      <th>Mensaje</th>
+
+                    </tr>
+
+                  </thead>
+
+                  <tbody>
+
+                    <tr>
+
+                      <td colspan="6" style="text-align:center;color:#7e8695;">
+
+                        A&uacute;n no hay registros para mostrar.
+
+                      </td>
+
+                    </tr>
+
+                  </tbody>
+
+                </table>
+
+              </div>
+
             </section>
           </main>
         </div>
@@ -337,7 +392,7 @@
              MODAL INSCRIPCIONES (overlay simple manejado vía JS)
         =========================================================== -->
         <div id="modal-inscripciones" class="modal-overlay" style="display: none;">
-          <div class="modal-content">
+          <div class="modal-content wide-modal">
             <header class="modal-header">
               <h3 id="titulo-modal-inscripciones">Inscripciones</h3>
               <button id="cerrarModalInscripciones" class="btn-secundario">
@@ -345,7 +400,7 @@
               </button>
             </header>
             <div class="modal-body">
-              <table id="tabla-inscripciones" class="tabla-datos">
+              <table id="tabla-inscripciones" class="tabla-datos responsive-table">
                 <thead>
                   <tr>
                     <th>Campaña</th>

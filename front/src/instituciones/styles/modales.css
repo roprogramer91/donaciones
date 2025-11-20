@@ -53,8 +53,8 @@ dialog::backdrop {
 
   /* proporciones y scroll */
   max-height: 80vh;        /* no ocupa toda la pantalla */
-  overflow-y: auto;        /* scroll interno si es largo */
-  overflow-x: hidden;
+  overflow-y: auto;        /* scroll vertical interno si es largo */
+  overflow-x: auto;        /* permite scroll horizontal si el contenido lo necesita */
 }
 
 /* === VARIANTES DE TAMAÑO === */
@@ -70,6 +70,49 @@ dialog::backdrop {
 .modal-content.large {
   width: 800px !important;        /* ancho real */
   max-width: 90vw !important;     /* adaptable a pantallas chicas */
+}
+
+.modal-content.wide-modal {
+  width: clamp(520px, 65vw, 900px);
+  max-width: 95vw;
+}
+
+.modal-content.wide-modal .modal-body {
+  overflow-x: auto;
+}
+
+.responsive-table {
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .responsive-table thead {
+    display: none;
+  }
+
+  .responsive-table tr {
+    display: block;
+    margin-bottom: 12px;
+    border: 1px solid var(--color-gris-borde);
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .responsive-table td {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    border: none;
+    padding: 6px 0;
+    font-size: 0.95rem;
+  }
+
+  .responsive-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #555;
+  }
 }
 
 /* === ANIMACIÓN DE ENTRADA === */

@@ -263,6 +263,55 @@
 .tabla-notif-principal {
   margin-top: 1rem;
 }
+
+.notifs-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.04);
+  margin-bottom: 1rem;
+}
+
+.notifs-filtros .filtro-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 180px;
+  flex: 1 1 180px;
+}
+
+.notifs-filtros label {
+  font-size: 0.85rem;
+  color: #4b5563;
+  font-weight: 600;
+}
+
+.notifs-filtros input,
+.notifs-filtros select {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.9rem;
+}
+
+.filtro-item-buscar {
+  flex: 2 1 260px;
+}
+
+.filtros-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-left: auto;
+}
+
+.btn-accion-centro.btn-compacto {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.9rem;
+}
 /* Notificaciones del header */
 .dropdown-notif-centro {
   position: absolute;
@@ -325,8 +374,47 @@
   text-decoration: underline;
 }
 
+.notif-entry-label {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #4b5563;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 .notif-empty {
   text-align: center;
   padding: 20px;
   color: #6b7280;
+}
+
+.alerta-toaster {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 0.85rem 1.4rem;
+  border-radius: 10px;
+  background: #1d4ed8;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 5000;
+}
+
+.alerta-toaster.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.alerta-toaster.alerta-error {
+  background: #dc2626;
+}
+
+.alerta-toaster.alerta-success {
+  background: #059669;
 }

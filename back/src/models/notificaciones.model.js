@@ -145,6 +145,17 @@ const NotificacionesModel = {
     const { rows } = await pool.query(q, [centroId, limit]);
     return rows;
   },
+
+  async marcarLogCentroLeido(logId, centroId) {
+    const q = `
+      UPDATE notificaciones_log
+      SET leida = TRUE, leida_at = NOW()
+      WHERE id = $1 AND centro_id = $2
+      RETURNING *;
+    `;
+    const { rows } = await pool.query(q, [logId, centroId]);
+    return rows[0];
+  },
 };
 
 module.exports = NotificacionesModel;

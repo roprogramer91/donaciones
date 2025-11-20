@@ -1,4 +1,8 @@
 import { API_BASE_URL } from "./config.js";
+import {
+  esTokenExpirado,
+  manejarExpiracionSesion,
+} from "./sessionManager.js";
 
 export async function apiFetch(endpoint, method = "GET", body = null) {
   const token = localStorage.getItem("token");
@@ -8,7 +12,7 @@ export async function apiFetch(endpoint, method = "GET", body = null) {
     headers: {
       "Content-Type": "application/json",
     },
-    credentials: 'include',
+    credentials: "include",
   };
 
   if (token) {
@@ -21,10 +25,23 @@ export async function apiFetch(endpoint, method = "GET", body = null) {
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
 
-  const data = await response.json();
+  let data = null;
+  try {
+    data = await response.json();
+  } catch (error) {
+    // Ignorar si no hay body
+  }
 
   if (!response.ok) {
-    throw new Error(data.message || "Error en la petición a la API");
+    if (response.status === 401 && esTokenExpirado(data)) {
+      manejarExpiracionSesion();
+    }
+
+    const mensaje =
+      data?.message ||
+      data?.error ||
+      "Error en la petición a la API";
+    throw new Error(mensaje);
   }
 
   return data;

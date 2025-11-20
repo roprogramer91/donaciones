@@ -73,19 +73,25 @@ function renderNotificacionesCentro() {
   }
 
   notificacionesCentro.forEach((notif) => {
+    const leida = Boolean(notif.leida);
     const item = document.createElement("div");
-    item.className = `notif-entry ${notif.leida ? "" : "unread"}`;
+    item.className = `notif-entry ${leida ? "" : "unread"}`;
+
+    const actionHtml = leida
+      ? '<span class="notif-entry-label">Leida</span>'
+      : `<button class="notif-entry-action" data-id="${notif.id}">Marcar leida</button>`;
+
     item.innerHTML = `
       <div class="notif-entry-text">${notif.mensaje}</div>
       <div class="notif-entry-meta">${formatearFecha(notif.created_at)}</div>
-      <button class="notif-entry-action" data-id="${notif.id}">
-        ${notif.leida ? "Ver" : "Marcar leída"}
-      </button>
+      ${actionHtml}
     `;
 
-    item
-      .querySelector(".notif-entry-action")
-      ?.addEventListener("click", () => marcarNotifCentro(notif.id));
+    if (!leida) {
+      item
+        .querySelector(".notif-entry-action")
+        ?.addEventListener("click", () => marcarNotifCentro(notif.id));
+    }
 
     listaNotifCentro.appendChild(item);
   });

@@ -76,7 +76,7 @@ module.exports.enviarNotificaciones = async function (req, res) {
       return res.status(400).json({ error: "Debe especificar un mensaje" });
     }
 
-    // Envío directo a usuarios seleccionados
+    // Envo directo a usuarios seleccionados
     if (Array.isArray(usuarios) && usuarios.length > 0) {
       const donantes = await DonantesModel.obtenerPorUsuariosIds(usuarios);
       const ids = donantes.map((d) => d.id);
@@ -95,11 +95,11 @@ module.exports.enviarNotificaciones = async function (req, res) {
       return res.json({ ok: true, enviados: creadas.length });
     }
 
-    // Envío por filtros
+    // Envo por filtros
     const donantes = await DonantesModel.filtrar(filtros);
     const ids = donantes.map((d) => d.id);
     if (!ids.length) {
-      return res.status(400).json({ error: "No se encontraron donantes para enviar notificación" });
+      return res.status(400).json({ error: "No se encontraron donantes para enviar notificacin" });
     }
 
     const creadas = await Notificaciones.crearBatch(ids, MANUAL_FILTRO_TYPE, mensaje, {
@@ -232,7 +232,16 @@ module.exports.getNotificacionesLog = async function (req, res) {
 
 module.exports.marcarNotificacionCentroLeida = async function (req, res) {
   try {
-    return res.json({ mensaje: 'OK (pendiente de implementar logica de leido para centro)' });
+    const centroId = req.user?.id;
+    if (!centroId) return res.status(401).json({ mensaje: 'Token no proporcionado' });
+
+    const logId = parseInt(req.params.id, 10);
+    if (!logId) return res.status(400).json({ error: 'ID invalido' });
+
+    const actualizado = await Notificaciones.marcarLogCentroLeido(logId, centroId);
+    if (!actualizado) return res.status(404).json({ error: 'Notificacion no encontrada' });
+
+    res.json({ ok: true, notificacion: actualizado });
   } catch (e) {
     console.error("Error en marcarNotificacionCentroLeida:", e);
     res.status(500).json({ error: "Error al marcar notificacion" });

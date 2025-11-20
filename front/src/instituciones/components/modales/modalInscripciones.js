@@ -83,15 +83,15 @@ function renderInscripciones(lista) {
     const estado = formatearEstado(item.estado);
 
     tr.innerHTML = `
-      <td>
+      <td data-label="Campa??a">
         <a href="#" class="link-campania" data-id="${item.id}">
-          ${item.nombre || "Campaña"}
+          ${item.nombre || "Campa??a"}
         </a>
       </td>
-      <td>${fechaInicio}</td>
-      <td>${fechaFin}</td>
-      <td><span class="estado ${estado.clase}">${estado.texto}</span></td>
-      <td>${item.localidad_nombre || "--"}</td>
+      <td data-label="Inicio">${fechaInicio}</td>
+      <td data-label="Fin">${fechaFin}</td>
+      <td data-label="Estado"><span class="estado ${estado.clase}">${estado.texto}</span></td>
+      <td data-label="Localidad">${item.localidad_nombre || "--"}</td>
     `;
 
     tr.querySelector(".link-campania")?.addEventListener("click", (e) => {

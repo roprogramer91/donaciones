@@ -28,8 +28,14 @@ const crearDonante = async (req, res) => {
     return res.status(400).json({ error: 'Fecha de nacimiento invalida o menor de 18 años.' });
   }
 
+  const barrioId = parseInt(nuevoDonante.barrio_id, 10);
+  if (!barrioId) {
+    return res.status(400).json({ error: 'barrio_id requerido' });
+  }
+
   try {
     nuevoDonante.usuario_id = usuarioId;
+    nuevoDonante.barrio_id = barrioId;
     if (!nuevoDonante.estado) nuevoDonante.estado = 'activo';
 
     const donanteCreado = await Donante.guardar(nuevoDonante);
@@ -157,13 +163,27 @@ const getDonanteByEmail = async (req, res) => {
 // Aca aplico los filtros que usa el dashboard del centro
 const filtrarDonantes = async (req, res) => {
   try {
-    const filtros = {
-      localidad: req.query.localidad,
-      barrio: req.query.barrio,
-      provincia: req.query.provincia,
-      grupo: req.query.grupo,
-      estado: req.query.estado
-    };
+  const filtros = {
+    localidad: req.query.localidad,
+    barrio: req.query.barrio,
+    provincia: req.query.provincia,
+    grupo: req.query.grupo,
+    estado: req.query.estado
+  };
+
+  if (Array.isArray(filtros.barrio)) {
+    filtros.barrio = filtros.barrio
+      .map((b) => parseInt(b, 10))
+      .filter((n) => !isNaN(n));
+  } else if (typeof filtros.barrio === "string" && filtros.barrio.includes(",")) {
+    filtros.barrio = filtros.barrio
+      .split(",")
+      .map((b) => parseInt(b.trim(), 10))
+      .filter((n) => !isNaN(n));
+  } else if (typeof filtros.barrio === "string" && filtros.barrio !== "") {
+    const n = parseInt(filtros.barrio, 10);
+    filtros.barrio = isNaN(n) ? null : n;
+  }
 
     const donantes = await Donante.filtrar(filtros);
     const hoy = new Date();

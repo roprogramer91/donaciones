@@ -98,7 +98,18 @@ function construirParametros() {
   addParam("grupo", filtroGrupo?.value);
   addParam("provincia", filtroProvincia?.value);
   addParam("localidad", filtroLocalidad?.value);
-  addParam("barrio", filtroBarrio?.value);
+  if (filtroBarrio?.value) {
+    const barrioVal = filtroBarrio.value;
+    if (barrioVal.includes(",")) {
+      barrioVal
+        .split(",")
+        .map((v) => v.trim())
+        .filter(Boolean)
+        .forEach((id) => params.append("barrio", id));
+    } else {
+      addParam("barrio", barrioVal);
+    }
+  }
   if (filtroApto?.checked) addParam("apto", "true");
 
   const eMin = parseInt(filtroEdadMin?.value || "");
@@ -131,29 +142,14 @@ async function inicializarFiltrosDonantes() {
       });
     }
 
-    // --- Barrios ---
-    if (filtroBarrio && filtroBarrio.options.length <= 1) {
-      const resB = await fetch(`${API_BASE_URL}/api/barrios`);
-      const barrios = await resB.json();
-      filtroBarrio.innerHTML = '<option value="">Todos los barrios</option>';
-      const vistos = new Set();
-      barrios.forEach((b) => {
-        const nombre = (b.nombre || "").toLowerCase();
-        if (vistos.has(nombre)) return;
-        vistos.add(nombre);
-        const opt = document.createElement("option");
-        opt.value = b.id;
-        opt.textContent = b.nombre;
-        filtroBarrio.appendChild(opt);
-      });
-    }
-
+    resetFiltroBarrio("Selecciona una localidad");
     // --- Localidades dependientes de provincia ---
     filtroProvincia?.addEventListener("change", async () => {
       const provId = filtroProvincia.value;
       filtroLocalidad.innerHTML =
         '<option value="">Todas las localidades</option>';
       filtroLocalidad.disabled = true;
+      resetFiltroBarrio("Selecciona una localidad");
       if (!provId) return;
       const resL = await fetch(
         `${API_BASE_URL}/api/localidades?provincia_id=${provId}`
@@ -167,8 +163,60 @@ async function inicializarFiltrosDonantes() {
       });
       filtroLocalidad.disabled = false;
     });
+
+    filtroLocalidad?.addEventListener("change", async () => {
+      const locId = filtroLocalidad.value;
+      if (!locId) {
+        resetFiltroBarrio("Selecciona una localidad");
+        return;
+      }
+      await cargarBarriosFiltro(locId);
+    });
   } catch (e) {
     appLogger.error("Error inicializando filtros de donantes:", e);
+  }
+}
+
+function resetFiltroBarrio(mensaje = "Selecciona una localidad") {
+  if (!filtroBarrio) return;
+  filtroBarrio.innerHTML = `<option value="">${mensaje}</option>`;
+  filtroBarrio.disabled = true;
+}
+
+async function cargarBarriosFiltro(localidadId) {
+  if (!filtroBarrio) return;
+  filtroBarrio.disabled = true;
+  filtroBarrio.innerHTML = '<option value="">Cargando barrios...</option>';
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/api/barrios?localidad_id=${localidadId}`
+    );
+    const barrios = await res.json();
+    if (!Array.isArray(barrios) || barrios.length === 0) {
+      resetFiltroBarrio("Sin barrios para esta localidad");
+      return;
+    }
+    filtroBarrio.innerHTML = '<option value="">Todos los barrios</option>';
+    const grupos = new Map();
+    barrios.forEach((b) => {
+      const clave = (b.nombre || "").toLowerCase().trim();
+      if (!grupos.has(clave)) {
+        grupos.set(clave, { nombre: b.nombre, ids: [] });
+      }
+      grupos.get(clave).ids.push(b.id);
+    });
+
+    grupos.forEach(({ nombre, ids }) => {
+      const opt = document.createElement("option");
+      opt.value = ids.join(",");
+      opt.textContent =
+        ids.length > 1 ? `${nombre} (${ids.length})` : nombre;
+      filtroBarrio.appendChild(opt);
+    });
+    filtroBarrio.disabled = false;
+  } catch (error) {
+    appLogger.error("Error cargando barrios para filtro:", error);
+    resetFiltroBarrio("Error al cargar barrios");
   }
 }
 
@@ -184,7 +232,7 @@ async function limpiarFiltros() {
       '<option value="">Todas las localidades</option>';
     filtroLocalidad.disabled = true;
   }
-  if (filtroBarrio) filtroBarrio.value = "";
+  resetFiltroBarrio("Selecciona una localidad");
   if (filtroApto) filtroApto.checked = false;
   if (filtroEdadMin) filtroEdadMin.value = "";
   if (filtroEdadMax) filtroEdadMax.value = "";

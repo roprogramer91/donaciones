@@ -109,11 +109,14 @@ const filtrar = async (filtros) => {
     valores.push(filtros.provincia);
   }
   if (filtros?.localidad) {
-    condiciones.push(`d.localidad_id = $${condiciones.length + 1}`);
+    condiciones.push(`d.localidad_id = $${valores.length + 1}`);
     valores.push(filtros.localidad);
   }
-  if (filtros?.barrio) {
-    condiciones.push(`d.barrio_id = $${condiciones.length + 1}`);
+  if (Array.isArray(filtros?.barrio) && filtros.barrio.length) {
+    condiciones.push(`d.barrio_id = ANY($${valores.length + 1})`);
+    valores.push(filtros.barrio);
+  } else if (filtros?.barrio) {
+    condiciones.push(`d.barrio_id = $${valores.length + 1}`);
     valores.push(filtros.barrio);
   }
   if (filtros?.grupo) {
