@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../config.js";
+import { appLogger } from "../utils/logger.js";
 
 const token = localStorage.getItem("token");
 if (!token) window.location.href = "../../index.html";
@@ -14,40 +15,148 @@ const btnConfirmBaja = document.getElementById("btnConfirmBaja");
 const btnCancelarBaja = document.getElementById("btnCancelarBaja");
 const bajaMensaje = document.getElementById("bajaMensaje");
 
-// 1. Cargar datos
+// Selects geográficos
+const provinciaSelect = document.getElementById("provincia");
+const localidadSelect = document.getElementById("localidad");
+const barrioSelect = document.getElementById("barrio");
+
+function setMensaje(texto, color = "inherit") {
+  if (!mensaje) return;
+  mensaje.textContent = texto;
+  mensaje.style.color = color;
+}
+
+function setSelectValor(select, value) {
+  if (!select || value === undefined || value === null || value === "") return;
+  const opt = Array.from(select.options).find(
+    (o) => String(o.value) === String(value)
+  );
+  if (opt) select.value = opt.value;
+}
+
+// =======================
+// Carga de combos
+// =======================
+async function cargarProvincias() {
+  if (!provinciaSelect) return;
+  const res = await fetch(`${API_BASE_URL}/api/provincias`);
+  const provincias = await res.json();
+  provinciaSelect.innerHTML = '<option value="">Provincia</option>';
+  provincias.forEach((p) => {
+    const opt = document.createElement("option");
+    opt.value = p.id;
+    opt.textContent = p.nombre;
+    provinciaSelect.appendChild(opt);
+  });
+}
+
+async function cargarLocalidades(provinciaId) {
+  if (!localidadSelect) return;
+  localidadSelect.innerHTML = '<option value="">Localidad</option>';
+  barrioSelect && (barrioSelect.innerHTML = '<option value="">Barrio</option>');
+  if (!provinciaId) {
+    localidadSelect.disabled = true;
+    barrioSelect && (barrioSelect.disabled = true);
+    return;
+  }
+
+  const res = await fetch(
+    `${API_BASE_URL}/api/localidades?provincia_id=${provinciaId}`
+  );
+  const localidades = await res.json();
+  localidades.forEach((l) => {
+    const opt = document.createElement("option");
+    opt.value = l.id;
+    opt.textContent = l.nombre;
+    localidadSelect.appendChild(opt);
+  });
+  localidadSelect.disabled = false;
+}
+
+async function cargarBarrios(localidadId) {
+  if (!barrioSelect) return;
+  barrioSelect.innerHTML = '<option value="">Barrio</option>';
+  if (!localidadId) {
+    barrioSelect.disabled = true;
+    return;
+  }
+  const res = await fetch(
+    `${API_BASE_URL}/api/barrios?localidad_id=${localidadId}`
+  );
+  const barrios = await res.json();
+  barrios.forEach((b) => {
+    const opt = document.createElement("option");
+    opt.value = b.id;
+    opt.textContent = b.nombre;
+    barrioSelect.appendChild(opt);
+  });
+  barrioSelect.disabled = false;
+}
+
+provinciaSelect?.addEventListener("change", async (e) => {
+  await cargarLocalidades(e.target.value);
+});
+
+localidadSelect?.addEventListener("change", async (e) => {
+  await cargarBarrios(e.target.value);
+});
+
+// =======================
+// Cargar perfil
+// =======================
 async function cargarPerfil() {
   try {
+    setMensaje("Cargando perfil...");
+    await cargarProvincias();
+
     const res = await fetch(`${API_BASE_URL}/api/donantes/perfil`, {
       headers: { Authorization: "Bearer " + token },
     });
     if (!res.ok) throw new Error("No se pudo traer el perfil");
     const perfil = await res.json();
-    // Llenar campos
+
     form.nombre.value = perfil.nombre || "";
     form.apellido.value = perfil.apellido || "";
     form.dni.value = perfil.dni || "";
     form.email.value = perfil.email || "";
     form.grupo_sanguineo.value = perfil.grupo_sanguineo || "";
     form.fecha_nacimiento.value = perfil.fecha_nacimiento
-      ? perfil.fecha_nacimiento.substr(0, 10)
+      ? perfil.fecha_nacimiento.substring(0, 10)
       : "";
     form.telefono.value = perfil.telefono || "";
-    // ...agregá más si sumás provincia/localidad/barrio
+
+    if (perfil.provincia_id) {
+      setSelectValor(provinciaSelect, perfil.provincia_id);
+      await cargarLocalidades(perfil.provincia_id);
+      setSelectValor(localidadSelect, perfil.localidad_id);
+      if (perfil.localidad_id) {
+        await cargarBarrios(perfil.localidad_id);
+        setSelectValor(barrioSelect, perfil.barrio_id);
+      }
+    }
+
+    setMensaje("");
   } catch (err) {
-    mensaje.textContent = "Error al cargar perfil";
+    setMensaje("Error al cargar perfil", "red");
+    appLogger.error("Error cargando perfil:", err);
   }
 }
 
-// 2. Guardar cambios
+// =======================
+// Guardar perfil
+// =======================
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  mensaje.textContent = "Guardando...";
+  setMensaje("Guardando...");
+
   const datos = {
-    grupo_sanguineo: form.grupo_sanguineo.value,
-    fecha_nacimiento: form.fecha_nacimiento.value,
-    telefono: form.telefono.value,
-    // ...agregá los que sean editables
+    grupo_sanguineo: form.grupo_sanguineo.value?.trim() || undefined,
+    fecha_nacimiento: form.fecha_nacimiento.value || undefined,
+    provincia_id: provinciaSelect?.value || undefined,
+    localidad_id: localidadSelect?.value || undefined,
+    barrio_id: barrioSelect?.value || undefined,
   };
+
   try {
     const res = await fetch(`${API_BASE_URL}/api/donantes/perfil`, {
       method: "PUT",
@@ -57,10 +166,12 @@ form.addEventListener("submit", async (e) => {
       },
       body: JSON.stringify(datos),
     });
-    if (!res.ok) throw new Error("Error al guardar cambios");
-    mensaje.textContent = "¡Datos actualizados!";
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(payload?.error || "Error al guardar cambios");
+    setMensaje("Datos actualizados", "green");
   } catch (err) {
-    mensaje.textContent = "Error al guardar cambios";
+    appLogger.error("Error guardando perfil:", err);
+    setMensaje(err?.message || "Error al guardar cambios", "red");
   }
 });
 
@@ -75,7 +186,9 @@ btnDashboard.addEventListener("click", () => {
 
 cargarPerfil();
 
+// =======================
 // Zona de baja
+// =======================
 btnMostrarBaja?.addEventListener("click", () => {
   bajaForm.style.display = "block";
 });
@@ -110,7 +223,6 @@ btnConfirmBaja?.addEventListener("click", async (e) => {
     });
     const txt = await res.text();
     if (!res.ok) throw new Error(txt || "No se pudo realizar la baja");
-    // Baja exitosa: cerrar sesión y volver al inicio
     localStorage.removeItem("token");
     alert("Baja realizada. Gracias por participar.");
     window.location.href = "../../index.html";
@@ -120,4 +232,3 @@ btnConfirmBaja?.addEventListener("click", async (e) => {
       "Error: " + (err.message || "No se pudo realizar la baja");
   }
 });
-import { appLogger } from "../utils/logger.js";

@@ -51,7 +51,24 @@
           <label>Teléfono</label>
           <input type="tel" id="telefono" name="telefono" placeholder="Teléfono" title="Teléfono" />
         </div>
-        <!-- Podés sumar dropdowns para provincia, localidad, barrio, preferencias -->
+        <div class="form-row">
+          <label>Provincia</label>
+          <select id="provincia" name="provincia">
+            <option value="">Provincia</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Localidad</label>
+          <select id="localidad" name="localidad" disabled>
+            <option value="">Localidad</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Barrio</label>
+          <select id="barrio" name="barrio" disabled>
+            <option value="">Barrio</option>
+          </select>
+        </div>
         <button type="submit" class="btn-accion">Guardar cambios</button>
       </form>
       <div id="perfil-mensaje"></div>
