@@ -42,16 +42,22 @@
           </div>
           <div class="form-row small-grid">
             <div>
-              <label>Provincia ID</label>
-              <input type="number" id="provincia_id" min="1" />
+              <label>Provincia</label>
+              <select id="provincia_id">
+                <option value="">Seleccioná...</option>
+              </select>
             </div>
             <div>
-              <label>Localidad ID</label>
-              <input type="number" id="localidad_id" min="1" />
+              <label>Localidad</label>
+              <select id="localidad_id" disabled>
+                <option value="">Elegí una provincia</option>
+              </select>
             </div>
             <div>
-              <label>Barrio ID</label>
-              <input type="number" id="barrio_id" min="1" />
+              <label>Barrio</label>
+              <select id="barrio_id" disabled>
+                <option value="">Elegí una localidad</option>
+              </select>
             </div>
           </div>
           <div class="form-row" id="passwordRow">

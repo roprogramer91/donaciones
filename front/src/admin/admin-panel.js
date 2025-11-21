@@ -9,6 +9,9 @@ const formSubtitle = document.getElementById("formSubtitle");
 const cancelEditBtn = document.getElementById("cancelEdit");
 const passwordRow = document.getElementById("passwordRow");
 const logoutBtn = document.getElementById("logoutBtn");
+const provinciaSelect = document.getElementById("provincia_id");
+const localidadSelect = document.getElementById("localidad_id");
+const barrioSelect = document.getElementById("barrio_id");
 
 let editId = null;
 
@@ -25,9 +28,9 @@ function leerForm() {
   const email = document.getElementById("email").value.trim();
   const telefono = document.getElementById("telefono").value.trim();
   const direccion = document.getElementById("direccion").value.trim();
-  const provincia_id = document.getElementById("provincia_id").value;
-  const localidad_id = document.getElementById("localidad_id").value;
-  const barrio_id = document.getElementById("barrio_id").value;
+  const provincia_id = provinciaSelect.value;
+  const localidad_id = localidadSelect.value;
+  const barrio_id = barrioSelect.value;
   const password = document.getElementById("password").value;
   const activo = document.getElementById("activo").value === "true";
 
@@ -49,6 +52,75 @@ function leerForm() {
   return base;
 }
 
+function resetLocalidades(mensaje = "Elegí una provincia") {
+  localidadSelect.innerHTML = `<option value="">${mensaje}</option>`;
+  localidadSelect.disabled = true;
+}
+
+function resetBarrios(mensaje = "Elegí una localidad") {
+  barrioSelect.innerHTML = `<option value="">${mensaje}</option>`;
+  barrioSelect.disabled = true;
+}
+
+async function cargarProvincias(preselect = null) {
+  provinciaSelect.disabled = true;
+  provinciaSelect.innerHTML = `<option value="">Cargando provincias...</option>`;
+  try {
+    const data = await apiFetch("/api/provincias");
+    provinciaSelect.innerHTML = `<option value="">Seleccioná...</option>`;
+    data.forEach((p) => {
+      provinciaSelect.innerHTML += `<option value="${p.id}">${p.nombre}</option>`;
+    });
+    if (preselect) {
+      provinciaSelect.value = String(preselect);
+    }
+  } catch (err) {
+    console.error("Error cargando provincias", err);
+    provinciaSelect.innerHTML = `<option value="">Error al cargar</option>`;
+  } finally {
+    provinciaSelect.disabled = false;
+  }
+}
+
+async function cargarLocalidades(provinciaId, preselect = null) {
+  resetLocalidades("Cargando localidades...");
+  resetBarrios();
+  if (!provinciaId) return;
+  try {
+    const data = await apiFetch(`/api/localidades?provincia_id=${provinciaId}`);
+    localidadSelect.innerHTML = `<option value="">Seleccioná...</option>`;
+    data.forEach((l) => {
+      localidadSelect.innerHTML += `<option value="${l.id}">${l.nombre}</option>`;
+    });
+    localidadSelect.disabled = false;
+    if (preselect) localidadSelect.value = String(preselect);
+  } catch (err) {
+    console.error("Error cargando localidades", err);
+    resetLocalidades("Error al cargar");
+  }
+}
+
+async function cargarBarrios(localidadId, preselect = null) {
+  resetBarrios("Cargando barrios...");
+  if (!localidadId) return;
+  try {
+    const data = await apiFetch(`/api/barrios?localidad_id=${localidadId}`);
+    if (!Array.isArray(data) || data.length === 0) {
+      resetBarrios("No hay barrios para esta localidad");
+      return;
+    }
+    barrioSelect.innerHTML = `<option value="">Seleccioná...</option>`;
+    data.forEach((b) => {
+      barrioSelect.innerHTML += `<option value="${b.id}">${b.nombre}</option>`;
+    });
+    barrioSelect.disabled = false;
+    if (preselect) barrioSelect.value = String(preselect);
+  } catch (err) {
+    console.error("Error cargando barrios", err);
+    resetBarrios("Error al cargar");
+  }
+}
+
 function limpiarForm() {
   form.reset();
   document.getElementById("activo").value = "true";
@@ -58,17 +130,30 @@ function limpiarForm() {
   cancelEditBtn.hidden = true;
   passwordRow.hidden = false;
   document.getElementById("password").required = true;
+  document.getElementById("password").value = "";
+  provinciaSelect.value = "";
+  resetLocalidades();
+  resetBarrios();
 }
 
-function llenarForm(centro) {
+async function llenarForm(centro) {
   document.getElementById("nombre").value = centro.nombre || "";
   document.getElementById("email").value = centro.email || "";
   document.getElementById("telefono").value = centro.telefono || "";
   document.getElementById("direccion").value = centro.direccion || "";
-  document.getElementById("provincia_id").value = centro.provincia_id || "";
-  document.getElementById("localidad_id").value = centro.localidad_id || "";
-  document.getElementById("barrio_id").value = centro.barrio_id || "";
   document.getElementById("activo").value = centro.activo ? "true" : "false";
+
+  await cargarProvincias(centro.provincia_id || null);
+  if (centro.provincia_id) {
+    await cargarLocalidades(centro.provincia_id, centro.localidad_id || null);
+  } else {
+    resetLocalidades();
+  }
+  if (centro.localidad_id) {
+    await cargarBarrios(centro.localidad_id, centro.barrio_id || null);
+  } else {
+    resetBarrios();
+  }
 
   passwordRow.hidden = true;
   document.getElementById("password").required = false;
@@ -158,7 +243,7 @@ centrosBody.addEventListener("click", async (e) => {
     const rows = await apiFetch("/api/admin/centros");
     const centro = rows.find((c) => String(c.id) === editIdAttr);
     if (centro) {
-      llenarForm(centro);
+      await llenarForm(centro);
       formMessage.textContent = "";
     }
   }
@@ -180,6 +265,20 @@ cancelEditBtn.addEventListener("click", () => {
   formMessage.textContent = "";
 });
 
+localidadSelect.addEventListener("change", async (e) => {
+  const locId = e.target.value;
+  if (!locId) {
+    resetBarrios();
+    return;
+  }
+  await cargarBarrios(locId);
+});
+
+provinciaSelect.addEventListener("change", async (e) => {
+  const provId = e.target.value;
+  await cargarLocalidades(provId || null);
+});
+
 logoutBtn.addEventListener("click", () => {
   localStorage.removeItem("token");
   localStorage.removeItem("tipo_usuario");
@@ -187,4 +286,6 @@ logoutBtn.addEventListener("click", () => {
 });
 
 requireAdmin();
-cargarCentros();
+Promise.all([cargarProvincias(), cargarCentros()]).catch((err) =>
+  console.error(err)
+);
