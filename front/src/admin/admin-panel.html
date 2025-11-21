@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Admin - Centros de Hemoterapia</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="./admin.css" />
+</head>
+<body class="landing admin-landing">
+  <main class="admin-shell">
+    <header class="admin-header">
+      <div>
+        <p class="eyebrow">Panel administrador</p>
+        <h1>Centros de hemoterapia</h1>
+      </div>
+      <button id="logoutBtn" class="btn btn-ghost">Salir</button>
+    </header>
+
+    <section class="panel-grid">
+      <div class="card form-card">
+        <div class="card-title">
+          <h2 id="formTitle">Crear centro</h2>
+          <p id="formSubtitle">Alta rápida de un centro + usuario</p>
+        </div>
+        <form id="centroForm" class="form">
+          <div class="form-row">
+            <label>Nombre</label>
+            <input type="text" id="nombre" required />
+          </div>
+          <div class="form-row">
+            <label>Nombre de referencia</label>
+            <input type="text" id="referente" required />
+          </div>
+          <div class="form-row">
+            <label>Email</label>
+            <input type="email" id="email" required />
+          </div>
+          <div class="form-row">
+            <label>Teléfono</label>
+            <input type="text" id="telefono" />
+          </div>
+          <div class="form-row">
+            <label>Dirección</label>
+            <input type="text" id="direccion" />
+          </div>
+          <div class="form-row small-grid">
+            <div>
+              <label>Provincia</label>
+              <select id="provincia_id">
+                <option value="">Seleccioná...</option>
+              </select>
+            </div>
+            <div>
+              <label>Localidad</label>
+              <select id="localidad_id" disabled>
+                <option value="">Elegí una provincia</option>
+              </select>
+            </div>
+            <div>
+              <label>Barrio</label>
+              <select id="barrio_id" disabled>
+                <option value="">Elegí una localidad</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" id="passwordRow">
+            <label>Password</label>
+            <input type="password" id="password" autocomplete="new-password" required />
+          </div>
+          <div class="form-row inline">
+            <label>Activo</label>
+            <select id="activo">
+              <option value="true">Activo</option>
+              <option value="false">Inactivo</option>
+            </select>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn">Guardar</button>
+            <button type="button" id="cancelEdit" class="btn btn-ghost" hidden>Cancelar</button>
+          </div>
+          <p id="formMessage" class="msg"></p>
+        </form>
+      </div>
+
+      <div class="card table-card">
+        <div class="card-title">
+          <h2>Listado</h2>
+          <p>Centros existentes con estado y contacto</p>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Activo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="centrosBody">
+              <tr><td colspan="6" class="loading">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p id="tableMessage" class="msg"></p>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./admin-panel.js"></script>
+</body>
+</html>

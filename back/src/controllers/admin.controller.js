@@ -1,5 +1,6 @@
 // back/src/controllers/admin.controller.js
 
+const bcrypt = require("bcrypt");
 const AdminModel = require("../models/admin.model");
 
 // =====================================================
@@ -55,14 +56,36 @@ async function cambiarEstadoUsuario(req, res) {
 // POST /admin/centros
 async function crearCentro(req, res) {
   try {
-    const { nombre, direccion, telefono, email, password_hash } = req.body;
+    const {
+      nombre,
+      apellido,
+      direccion,
+      telefono,
+      email,
+      password,
+      provincia_id,
+      localidad_id,
+      barrio_id,
+    } = req.body;
+
+    if (!nombre || !apellido || !email || !password) {
+      return res
+        .status(400)
+        .json({ error: "Nombre, apellido, email y password son obligatorios" });
+    }
+
+    const password_hash = await bcrypt.hash(password, 10);
 
     const nuevoCentro = await AdminModel.crearCentro({
       nombre,
+      apellido,
       direccion,
       telefono,
       email,
       password_hash,
+      provincia_id,
+      localidad_id,
+      barrio_id,
     });
 
     return res.status(201).json({

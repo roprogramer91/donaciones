@@ -6,7 +6,7 @@ const message = document.getElementById("message");
 const REDIRECT_BY_ROLE = {
   donante: "../donante/dashboard-donante.html",
   centro: "../instituciones/dashboard-centro.html",
-  admin: "../admin-panel.html",
+  admin: "../admin/admin-panel.html",
 };
 
 form.addEventListener("submit", async (e) => {
