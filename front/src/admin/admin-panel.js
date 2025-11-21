@@ -25,6 +25,7 @@ function requireAdmin() {
 
 function leerForm() {
   const nombre = document.getElementById("nombre").value.trim();
+  const referente = document.getElementById("referente").value.trim();
   const email = document.getElementById("email").value.trim();
   const telefono = document.getElementById("telefono").value.trim();
   const direccion = document.getElementById("direccion").value.trim();
@@ -39,6 +40,7 @@ function leerForm() {
     email,
     telefono,
     direccion,
+    apellido: referente,
     provincia_id: provincia_id ? Number(provincia_id) : null,
     localidad_id: localidad_id ? Number(localidad_id) : null,
     barrio_id: barrio_id ? Number(barrio_id) : null,
@@ -138,6 +140,7 @@ function limpiarForm() {
 
 async function llenarForm(centro) {
   document.getElementById("nombre").value = centro.nombre || "";
+  document.getElementById("referente").value = centro.apellido || "";
   document.getElementById("email").value = centro.email || "";
   document.getElementById("telefono").value = centro.telefono || "";
   document.getElementById("direccion").value = centro.direccion || "";

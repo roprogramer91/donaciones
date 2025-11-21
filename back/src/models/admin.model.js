@@ -42,6 +42,7 @@ async function cambiarEstadoUsuario(id, estado) {
 // Crear un nuevo centro (usuario + registro de centro)
 async function crearCentro({
   nombre,
+  apellido,
   direccion,
   telefono,
   email,
@@ -52,11 +53,16 @@ async function crearCentro({
 }) {
   // 1) Creo el usuario base (rol centro)
   const userQuery = `
-    INSERT INTO usuarios (email, password_hash, nombre, tipo_usuario, activo)
-    VALUES ($1, $2, $3, 'centro', true)
+    INSERT INTO usuarios (email, password_hash, nombre, apellido, tipo_usuario, activo)
+    VALUES ($1, $2, $3, $4, 'centro', true)
     RETURNING id
   `;
-  const userRes = await pool.query(userQuery, [email, password_hash, nombre]);
+  const userRes = await pool.query(userQuery, [
+    email,
+    password_hash,
+    nombre,
+    apellido,
+  ]);
   const usuarioId = userRes.rows[0].id;
 
   // 2) Creo el centro referenciando usuario_id

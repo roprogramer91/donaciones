@@ -58,6 +58,7 @@ async function crearCentro(req, res) {
   try {
     const {
       nombre,
+      apellido,
       direccion,
       telefono,
       email,
@@ -67,16 +68,17 @@ async function crearCentro(req, res) {
       barrio_id,
     } = req.body;
 
-    if (!nombre || !email || !password) {
+    if (!nombre || !apellido || !email || !password) {
       return res
         .status(400)
-        .json({ error: "Nombre, email y password son obligatorios" });
+        .json({ error: "Nombre, apellido, email y password son obligatorios" });
     }
 
     const password_hash = await bcrypt.hash(password, 10);
 
     const nuevoCentro = await AdminModel.crearCentro({
       nombre,
+      apellido,
       direccion,
       telefono,
       email,
