@@ -14,7 +14,7 @@
         <button class="icon-btn" id="btn-dashboard" title="Volver al dashboard">
           <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/home.svg" alt="Dashboard"/>
         </button>
-        <button class="icon-btn" id="logoutBtn" title="Cerrar sesión">
+        <button class="icon-btn" id="logoutBtn" title="Cerrar sesiÃ³n">
           <img src="https://cdn.jsdelivr.net/gh/lucide-icons/lucide/icons/log-out.svg" alt="Salir" />
         </button>
       </div>
@@ -37,19 +37,19 @@
         </div>
         <div class="form-row">
           <label>Email</label>
-          <input type="email" id="email" name="email" disabled placeholder="Correo electrónico" title="Correo electrónico" />
+          <input type="email" id="email" name="email" disabled placeholder="Correo electrÃ³nico" title="Correo electrÃ³nico" />
         </div>
         <div class="form-row">
-          <label>Grupo sanguíneo</label>
-          <input type="text" id="grupo_sanguineo" name="grupo_sanguineo" maxlength="5" required placeholder="Grupo sanguíneo" title="Grupo sanguíneo" />
+          <label>Grupo sanguÃ­neo</label>
+          <input type="text" id="grupo_sanguineo" name="grupo_sanguineo" maxlength="5" required placeholder="Grupo sanguÃ­neo" title="Grupo sanguÃ­neo" />
         </div>
         <div class="form-row">
           <label>Fecha de nacimiento</label>
           <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" placeholder="Fecha de nacimiento" title="Fecha de nacimiento" />
         </div>
         <div class="form-row">
-          <label>Teléfono</label>
-          <input type="tel" id="telefono" name="telefono" placeholder="Teléfono" title="Teléfono" />
+          <label>TelÃ©fono</label>
+          <input type="tel" id="telefono" name="telefono" placeholder="TelÃ©fono" title="TelÃ©fono" />
         </div>
         <div class="form-row">
           <label>Provincia</label>
@@ -74,22 +74,7 @@
       <div id="perfil-mensaje"></div>
       <a href="dashboard-donante.html" class="volver-dashboard">&lt; Volver al Dashboard</a>
       
-      <hr>
-      <section id="danger-zone" style="margin-top:1rem; background:#fff0f0; border:1px solid #f3c2c2; padding:1rem; border-radius:0.8rem;">
-        <h3 style="margin-top:0; color:#b00020;">Sección Peligro</h3>
-        <p style="color:#643;">
-          Si das de baja tu cuenta de donante: se eliminarán tus datos, se cancelarán tus inscripciones y se cerrará tu sesión.
-          Para volver a participar, tendrás que registrarte nuevamente y aprobar el test inicial.
-        </p>
-        <button id="btnMostrarBaja" class="btn-accion" style="background:#b00020;">Dar de baja mi cuenta</button>
-        <div id="bajaForm" style="display:none; margin-top:0.8rem;">
-          <label for="dniConfirm">Escribí tu DNI para confirmar:</label>
-          <input id="dniConfirm" type="text" placeholder="Tu DNI" style="margin:0 0.5rem;">
-          <button id="btnConfirmBaja" class="btn-accion" style="background:#b00020;">Confirmar baja</button>
-          <button id="btnCancelarBaja" class="btn-secundario">Cancelar</button>
-          <div id="bajaMensaje" style="margin-top:0.5rem; color:#b00020;"></div>
-        </div>
-      </section>
+      
     </main>
   </div>
   <script type="module" src="perfil-donante.js"></script>
