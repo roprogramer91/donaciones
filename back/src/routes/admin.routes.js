@@ -8,6 +8,15 @@ const roleMiddleware = require("../services/auth/middleware/roleMiddleware");
 
 const AdminController = require("../controllers/admin.controller");
 
+// Valido mínimos para creación de centro
+function validarCentroRequeridos(req, res, next) {
+  const { nombre, email, password } = req.body || {};
+  if (!nombre || !email || !password) {
+    return res.status(400).json({ error: "Nombre, email y password son obligatorios" });
+  }
+  next();
+}
+
 // Middleware: solo admin técnico
 const soloAdmin = [authMiddleware, roleMiddleware(["admin"])];
 
@@ -23,7 +32,7 @@ router.patch("/usuarios/:id/estado", soloAdmin, AdminController.cambiarEstadoUsu
 // =====================================================
 router.get("/centros", soloAdmin, AdminController.obtenerCentros);
 router.get("/centros/:id", soloAdmin, AdminController.obtenerCentroPorId);
-router.post("/centros", soloAdmin, AdminController.crearCentro);
+router.post("/centros", soloAdmin, validarCentroRequeridos, AdminController.crearCentro);
 router.put("/centros/:id", soloAdmin, AdminController.actualizarCentro);
 router.delete("/centros/:id", soloAdmin, AdminController.eliminarCentro);
 
