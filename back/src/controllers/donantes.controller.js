@@ -87,6 +87,14 @@ const getPerfilDonanteCompleto = async (req, res) => {
     const perfil = await Donante.getPerfilCompletoByUsuarioId(usuarioId);
     if (!perfil) return res.status(404).json({ error: 'No sos donante registrado' });
 
+    // Si por alguna raz��n el DNI no vino en el perfil extendido, lo busco puntual
+    if (!perfil.dni) {
+      const soloDonante = await Donante.findByUsuarioId(usuarioId);
+      if (soloDonante?.dni) {
+        perfil.dni = soloDonante.dni;
+      }
+    }
+
     const { apto, dias_restantes } = calcularAptoYRestante(perfil.fecha_ultima_donacion, perfil.sexo);
     perfil.apto_para_donar = apto;
     perfil.dias_restantes = dias_restantes;
