@@ -40,7 +40,16 @@ async function cambiarEstadoUsuario(id, estado) {
 }
 
 // Crear un nuevo centro (usuario + registro de centro)
-async function crearCentro({ nombre, direccion, telefono, email, password_hash }) {
+async function crearCentro({
+  nombre,
+  direccion,
+  telefono,
+  email,
+  password_hash,
+  provincia_id,
+  localidad_id,
+  barrio_id,
+}) {
   // 1) Creo el usuario base (rol centro)
   const userQuery = `
     INSERT INTO usuarios (email, password_hash, nombre, tipo_usuario, activo)
@@ -52,8 +61,8 @@ async function crearCentro({ nombre, direccion, telefono, email, password_hash }
 
   // 2) Creo el centro referenciando usuario_id
   const centroQuery = `
-    INSERT INTO centros_hemoterapia (usuario_id, nombre, direccion, telefono, email, activo)
-    VALUES ($1, $2, $3, $4, $5, true)
+    INSERT INTO centros_hemoterapia (usuario_id, nombre, direccion, telefono, email, provincia_id, localidad_id, barrio_id, activo)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true)
     RETURNING *
   `;
   const { rows } = await pool.query(centroQuery, [
@@ -61,7 +70,10 @@ async function crearCentro({ nombre, direccion, telefono, email, password_hash }
     nombre,
     direccion,
     telefono,
-    email
+    email,
+    provincia_id || null,
+    localidad_id || null,
+    barrio_id || null
   ]);
 
   return rows[0];
@@ -106,21 +118,41 @@ async function obtenerCentroPorId(id) {
 }
 
 async function actualizarCentro(id, datos) {
-  const { nombre, direccion, telefono, email } = datos;
+  const permitidos = [
+    "nombre",
+    "direccion",
+    "telefono",
+    "email",
+    "provincia_id",
+    "localidad_id",
+    "barrio_id",
+    "activo",
+  ];
+
+  const sets = [];
+  const values = [];
+  let i = 1;
+
+  for (const campo of permitidos) {
+    if (Object.prototype.hasOwnProperty.call(datos, campo)) {
+      sets.push(`${campo} = $${i++}`);
+      values.push(datos[campo]);
+    }
+  }
+
+  if (!sets.length) {
+    return obtenerCentroPorId(id);
+  }
 
   const query = `
     UPDATE centros_hemoterapia
-    SET nombre = $1, direccion = $2, telefono = $3, email = $4
-    WHERE id = $5
+    SET ${sets.join(", ")}
+    WHERE id = $${i}
     RETURNING *
   `;
-  const { rows } = await pool.query(query, [
-    nombre,
-    direccion,
-    telefono,
-    email,
-    id
-  ]);
+  values.push(id);
+
+  const { rows } = await pool.query(query, values);
   return rows[0];
 }
 
