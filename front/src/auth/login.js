@@ -4,9 +4,9 @@ const form = document.getElementById("loginForm");
 const message = document.getElementById("message");
 
 const REDIRECT_BY_ROLE = {
-  donante: "../donante/dashboard-donante.html",
-  centro: "../instituciones/dashboard-centro.html",
-  admin: "../admin/admin-panel.html",
+  donante: "/src/donante/dashboard-donante.html",
+  centro: "/src/instituciones/dashboard-centro.html",
+  admin: "/src/admin/admin-panel.html",
 };
 
 form.addEventListener("submit", async (e) => {
