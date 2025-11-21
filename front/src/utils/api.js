@@ -12,7 +12,8 @@ export async function apiFetch(endpoint, method = "GET", body = null) {
     headers: {
       "Content-Type": "application/json",
     },
-    credentials: "include",
+    // ❌ ELIMINA esta línea - no la necesitas con localStorage
+    // credentials: "include",
   };
 
   if (token) {
