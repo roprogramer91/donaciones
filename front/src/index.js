@@ -23,13 +23,13 @@ import { API_BASE_URL } from "./utils/config.js";
 
     switch (tipo) {
       case "donante":
-        window.location.href = "dashboard-donante.html";
+        window.location.href = "src/donante/dashboard-donante.html";
         break;
       case "centro":
-        window.location.href = "dashboard-centro.html";
+        window.location.href = "src/instituciones/dashboard-centro.html";
         break;
       case "admin":
-        window.location.href = "admin-panel.html";
+        window.location.href = "src/admin/admin-panel.html";
         break;
       default:
         // sin tipo guardado, nos quedamos en la portada
