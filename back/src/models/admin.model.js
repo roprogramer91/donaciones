@@ -39,22 +39,21 @@ async function cambiarEstadoUsuario(id, estado) {
   return rows[0];
 }
 
-// Crear un nuevo centro (y su usuario asociado)
+// Crear un nuevo centro (usuario + registro de centro)
 async function crearCentro({ nombre, direccion, telefono, email, password_hash }) {
-  // 1) Creo el usuario
+  // 1) Creo el usuario base (rol centro)
   const userQuery = `
     INSERT INTO usuarios (email, password_hash, nombre, tipo_usuario, activo)
     VALUES ($1, $2, $3, 'centro', true)
     RETURNING id
   `;
   const userRes = await pool.query(userQuery, [email, password_hash, nombre]);
-
   const usuarioId = userRes.rows[0].id;
 
-  // 2) Creo el centro en centros_hemoterapia
+  // 2) Creo el centro referenciando usuario_id
   const centroQuery = `
-    INSERT INTO centros_hemoterapia (id, nombre, direccion, telefono, email, password)
-    VALUES ($1, $2, $3, $4, $5, $6)
+    INSERT INTO centros_hemoterapia (usuario_id, nombre, direccion, telefono, email, activo)
+    VALUES ($1, $2, $3, $4, $5, true)
     RETURNING *
   `;
   const { rows } = await pool.query(centroQuery, [
@@ -62,8 +61,7 @@ async function crearCentro({ nombre, direccion, telefono, email, password_hash }
     nombre,
     direccion,
     telefono,
-    email,
-    password_hash
+    email
   ]);
 
   return rows[0];
@@ -89,7 +87,7 @@ async function obtenerCentros() {
   const query = `
     SELECT c.*, u.activo
     FROM centros_hemoterapia c
-    LEFT JOIN usuarios u ON c.id = u.id
+    LEFT JOIN usuarios u ON c.usuario_id = u.id
     ORDER BY c.id DESC
   `;
   const { rows } = await pool.query(query);
@@ -100,7 +98,7 @@ async function obtenerCentroPorId(id) {
   const query = `
     SELECT c.*, u.activo
     FROM centros_hemoterapia c
-    LEFT JOIN usuarios u ON c.id = u.id
+    LEFT JOIN usuarios u ON c.usuario_id = u.id
     WHERE c.id = $1
   `;
   const { rows } = await pool.query(query, [id]);
@@ -127,13 +125,22 @@ async function actualizarCentro(id, datos) {
 }
 
 async function eliminarCentro(id) {
+  // Busco el usuario asociado
+  const { rows } = await pool.query(
+    `SELECT usuario_id FROM centros_hemoterapia WHERE id = $1`,
+    [id]
+  );
+  const usuarioId = rows[0]?.usuario_id;
+
   // Borramos el centro primero
   await pool.query(`DELETE FROM centros_hemoterapia WHERE id = $1`, [id]);
 
-  // Luego el usuario asociado
-  await pool.query(`DELETE FROM usuarios WHERE id = $1`, [id]);
+  // Luego el usuario asociado (si existe)
+  if (usuarioId) {
+    await pool.query(`DELETE FROM usuarios WHERE id = $1`, [usuarioId]);
+  }
 
-  return { mensaje: `Centro y usuario ${id} eliminados` };
+  return { mensaje: `Centro ${id} y usuario ${usuarioId || "N/A"} eliminados` };
 }
 
 
