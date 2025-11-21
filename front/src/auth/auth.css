@@ -68,7 +68,7 @@ body {
 
 .input-icon input {
   width: 100%;
-  padding: 0.85rem 0.95rem 0.85rem 2.4rem;
+  padding: 0.85rem 0.95rem 0.85rem 2.6rem;
   border-radius: 16px;
   border: 1px solid #e1e1e1;
   background: #f2f2f2;
@@ -86,7 +86,7 @@ body {
 
 .input-icon svg {
   position: absolute;
-  left: 12px;
+  left: 14px;
   top: 50%;
   width: 16px;
   height: 16px;
