@@ -86,6 +86,7 @@ const getPerfilCompletoByUsuarioId = async (usuarioId) => {
     select 
       d.*,
       u.nombre,
+      u.apellido,
       u.email,
       u.tipo_usuario,
       u.activo
