@@ -19,13 +19,30 @@ const usuariosRoutes = require("./services/auth/routes/usuarios.routes");
 const adminRoutes = require("./routes/admin.routes");
 const testDbRoutes = require("./routes/testdb.routes");
 
+// Lista de orígenes permitidos (se puede sobreescribir con la env CORS_ORIGINS separada por comas)
+const allowedOrigins =
+  (process.env.CORS_ORIGINS &&
+    process.env.CORS_ORIGINS.split(",").map((o) => o.trim()).filter(Boolean)) || [
+    "http://127.0.0.1:5500",
+    "http://localhost:5500",
+    "http://localhost:3000",
+    "https://donaciones.roprogrammer.online",
+    "https://donaciones-production.up.railway.app",
+  ];
+
 // aca configuro los middlewares base
 app.use(morgan("dev"));
 app.use(express.json());
-app.use(cors({
-  origin: 'http://127.0.0.1:5500 ',
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true); // permite herramientas locales sin header Origin
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
+    credentials: true,
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser()); // Lo uso como middleware para que el servidor entienda las cookies
 
