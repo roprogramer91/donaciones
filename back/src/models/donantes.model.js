@@ -85,6 +85,7 @@ const getPerfilCompletoByUsuarioId = async (usuarioId) => {
   const q = `
     select 
       d.*,
+      coalesce(d.dni, u.dni) as dni,
       u.nombre,
       u.apellido,
       u.email,
