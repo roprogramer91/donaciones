@@ -141,7 +141,7 @@ async function cargarPerfil() {
 
     form.nombre.value = perfil.nombre || perfil.nombres || perfil.user_nombre || "";
     form.apellido.value = perfil.apellido || perfil.apellidos || perfil.user_apellido || "";
-    form.dni.value = perfil.dni || perfil.documento || "";
+    form.dni.value = perfil.dni || perfil.documento || perfil.dni_usuario || "";
     form.email.value = perfil.email || "";
     form.grupo_sanguineo.value = perfil.grupo_sanguineo || "";
     form.fecha_nacimiento.value = perfil.fecha_nacimiento
