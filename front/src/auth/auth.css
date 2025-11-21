@@ -1,13 +1,17 @@
+:root {
+  --bg: #f6f7fb;
+}
+
 body {
   font-family: "Segoe UI", sans-serif;
-  background: linear-gradient(180deg, #f6cfd7 0%, #f4d3c0 50%, #f0e5d9 100%);
+  background: radial-gradient(circle at 20% 20%, #f9f6f9 0, #f7f8fc 32%, var(--bg) 60%);
   color: #333;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0;
-  padding: 1rem;
+  padding: 1.4rem;
 }
 
 .auth-shell {
@@ -68,7 +72,7 @@ body {
   width: 100%;
 }
 .input-icon input {
-  width: 100%;
+  width: 80%;
   padding: 0.85rem 0.95rem 0.85rem 2.6rem;
   border-radius: 16px;
   border: 1px solid #e1e1e1;

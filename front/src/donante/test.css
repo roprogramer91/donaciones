@@ -40,6 +40,29 @@ body {
   background: #c5b9e6;
 }
 
+.btn-primary {
+  background: linear-gradient(90deg, #f8003c, #e4002d);
+  color: white;
+  border: none;
+  padding: 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-top: 0.3rem;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 25px rgba(245, 0, 61, 0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
 @keyframes fadeIn {
   from { opacity: 0;}
   to { opacity: 1;}

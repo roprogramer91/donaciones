@@ -40,3 +40,19 @@
   font-size: 15px;
   color: #333;
 }
+
+.btn-primary {
+  width: 100%;
+  background: #a62424;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 9px;
+  padding: 13px;
+  font-size: 1.14rem;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 10px #edc8c821;
+}
